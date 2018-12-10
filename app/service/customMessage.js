@@ -1,0 +1,211 @@
+module.exports = {
+
+    "COMMON_MESSAGE": {
+        "WELCOME": {
+            success: true,
+            message: "Welcome to Nazara CMS!",
+            messageCode: "WELCOME",
+            statusCode: 200
+        },
+        "ERROR": {
+            success: false,
+            message: "Something went wrong! Please try again.",
+            messageCode: "ERROR",
+            statusCode: 500
+        },
+        "DB_ERROR": {
+            success: false,
+            message: "Something went wrong! Please try again.",
+            messageCode: "DB_ERROR",
+            statusCode: 500
+        },
+        "VALIDATION_FAILED": {
+            success: false,
+            message: "Validation failed! Please provide the valid input details.",
+            messageCode: "VALIDATION_FAILED",
+            statusCode: 412
+        },
+        "INVALID_APP_SECRET_KEY":{
+            success: false,
+            message: "Invalid App Secret Key!",
+            messageCode: "INVALID_APP_SECRET_KEY",
+            statusCode: 401
+        },
+        "INVALID_ACCESS_TOKEN":{
+            success: false,
+            message: "Invalid Access Token!",
+            messageCode: "INVALID_ACCESS_TOKEN",
+            statusCode: 401
+        }
+    },
+    
+    //LOGIN/REGISTER MODULES
+    "LOGIN_MESSAGE": {
+
+        "USER_ALREADY_REGISTERD": {
+            success: false,
+            message: "Email Id already exists. Please provide another Email Id!",
+            messageCode: "ALREADY_REGISTERD",
+            statusCode: 401
+        },
+        "USER_REGISTERED_SUCCESS": {
+            success: false,
+            message: "Registered Successfully. Please verify your Email Id to complete the registration. Verification link sent on your Email Id!",
+            messageCode: "REGISTERED_SUCCESS",
+            statusCode: 401
+        },
+        "USER_DEACTIVE": {
+            success: false,
+            message: "Your account is De-Active! Please contact to your Admin to activate it.",
+            messageCode: "USER_DEACTIVE",
+            statusCode: 401
+        },
+        "USER_PENDING": {
+            success: false,
+            message: "Your account is not verified. Please verify your account using verification link sent on your Email Id!",
+            messageCode: "USER_PENDING",
+            statusCode: 401
+        },
+        "USER_VERIFIED": {
+            success: false,
+            message: "Your account is not activated by Admin. Please contact to your Admin to activate it.",
+            messageCode: "USER_PENDING",
+            statusCode: 401
+        },
+        "EMAIL_VERIFIED_SUCCESS": {
+            success: true,
+            message: "Email verified succefully. Admin will Approve your account shortly.",
+            messageCode: "USER_PENDING",
+            statusCode: 200
+        },
+        "USER_REJECTED": {
+            success: false,
+            message: "Your account is rejected by Admin. Please contact to your Admin for more details.",
+            messageCode: "USER_PENDING",
+            statusCode: 401
+        },
+        "EMAIL_ALREADY_VERIFIED": {
+            success: false,
+            message: "Email Id already verified. Admin will Approve your account shortly!",
+            messageCode: "EMAIL_ALREADY_VERIFIED",
+            statusCode: 401
+        },
+        "USER_ALREADY_ACTIVE": {
+            success: false,
+            message: "Email Id already verified. Please login with your credentials!",
+            messageCode: "USER_ALREADY_ACTIVE",
+            statusCode: 401
+        },
+        "LOGIN_SUCCESS": {
+            success: true,
+            message: "Logged in successfully!",
+            messageCode: "LOGIN_SUCCESS",
+            statusCode: 200
+        },
+        "LOGIN_FAILED": {
+            success: false,
+            message: "Invalid Email Id or Password!",
+            messageCode: "LOGIN_FAILED",
+            statusCode: 401
+        },
+        "PASSWORD_LINK_SENT": {
+            success: true,
+            message: "Password reset link sent on your Email Id!",
+            messageCode: "PASSWORD_LINK_SENT",
+            statusCode: 200
+        },
+        "PASSWORD_LINK_FAILED":{
+            success: false,
+            message: "Password reset link failed! Please try again.",
+            messageCode: "PASSWORD_LINK_FAILED",
+            statusCode: 401
+        },
+        "INVALID_EMAIL": {
+            success: false,
+            message: "Invalid Email Id! Please provide valid Email Id.",
+            messageCode: "INVALID_EMAIL",
+            statusCode: 401
+        },
+        "EMAIL_VERIFICATION_FAILED": {
+            success: false,
+            message: "Email verification failed!. Please try again.",
+            messageCode: "EMAIL_VERIFICATION_FAILED",
+            statusCode: 401
+        },
+        "INVALID_VERIFICATION_CODE": {
+            success: false,
+            message: "Invalid verification code!",
+            messageCode: "INVALID_VERIFICATION_CODE",
+            statusCode: 401
+        },
+        "ACCOUNT_NOT_ACTIVE":{
+            success: false,
+            message: "Your account not active to reset password!",
+            messageCode: "ACCOUNT_NOT_ACTIVE",
+            statusCode: 401
+        },
+        "PWD_RESET_SUCCESS": {
+            success: true,
+            message: "Password changed successfully! Please login with your credentials.",
+            messageCode: "PWD_RESET_SUCCESS",
+            statusCode: 200
+        },
+        "PWD_RESET_FAILED": {
+            success: false,
+            message: "Failed to reset password! Please try again.",
+            messageCode: "PWD_RESET_FAILED",
+            statusCode: 401
+        },
+        "INVALID_CONFIRMATION_CODE": {
+            success: false,
+            message: "Invalid confirmation code!",
+            messageCode: "INVALID_CONFIRMATION_CODE",
+            statusCode: 401
+        },
+    },
+
+    "MASTER_MESSAGE": {
+        "REGISTERED_SUCCESS": {
+            success: true,
+            message: "Added successfully!",
+            messageCode: "REGISTERED_SUCCESS",
+            statusCode: 200
+        }, 
+        "ALREADY_REGISTERED": {
+            success: false,
+            message: "Already exists!",
+            messageCode: "ALREADY_REGISTERED",
+            statusCode: 401
+        }, 
+        "FAILED_REGISTERED": {
+            success: false,
+            message: "Failed to add!",
+            messageCode: "FAILED_REGISTERED",
+            statusCode: 401
+        }, 
+        "UPADTE_SUCCESS": {
+            success: true,
+            message: "Updated successfully!",
+            messageCode: "UPDATED_SUCCESS",
+            statusCode: 200
+        },
+        "UPADTE_FAILED": {
+            success: false,
+            message: "Failed to update!",
+            messageCode: "UPADTE_FAILED",
+            statusCode: 401
+        },
+        "GET_SUCCESS": {
+            success: true,
+            message: "Details found!",
+            messageCode: "GET_SUCCESS",
+            statusCode: 200
+        },
+        "GET_FAILED": {
+            success: false,
+            message: "Failed to find details!",
+            messageCode: "GET_FAILED",
+            statusCode: 401
+        }
+    }
+}

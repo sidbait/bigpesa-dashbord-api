@@ -1,0 +1,29 @@
+{
+    "app": {
+      "host": "0.0.0.0",
+      "port": "3000",
+      "app_key": "yXzLPeD4f3FXHsK33aExnuKyBHAFr8AmxYyWMAvaH2jaMhMTap"
+    },       
+    "logger": {
+      "level": "info",
+      "filename": "bigpesa-dash.log"
+    },
+    "debug_db_result": true,
+    "db_connectionString": {
+      "pg": {
+        "cms": {
+          "user": "root",
+          "database": "rmg_dev_db",
+          "host": "13.126.241.0",
+          "port": 26257,
+          "max": 50
+        }      
+      }
+    },
+    "jwt_sessions": {
+      "private_key": "MKMKMXBJ",
+      "expires_in": 300,
+      "refresh_time": 300
+    }
+  }
+  
