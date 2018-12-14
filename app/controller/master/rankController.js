@@ -9,7 +9,7 @@ module.exports = {
 
     getAll: async function (req, res) {
 
-        let _selectQuery = "Select * From tbl_app"
+        let _selectQuery = "Select * From tbl_contest_rank_master"
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
@@ -27,49 +27,32 @@ module.exports = {
     add: async function (req, res) {
 
         let rules = {
-            "appname": 'required',
-            "appsecret": 'required',
-            "appcode": 'required',
-            "status": 'required'
+            "contestmasterid": 'required',
+            "rankname": 'required',
+            "lowerrank": 'required',
+            "upperrank": 'required',
+            "prizeamount": 'required',
+            "status": 'required',
+            "credittype": 'required'
         };
 
-        var custom_message = {
-            "required.appname": "App name is mandatory!",
-            "required.appsecret": "App secret is mandatory!",
-            "required.appcode": "App code is mandatory!",
-            "required.status": "Status is mandatory!",
-        };
-
-        let validation = new services.validator(req.body, rules, custom_message);
+        let validation = new services.validator(req.body, rules);
 
         if (validation.passes()) {
 
-            let _appid = req.body.appid ? req.body.appid : null;
-            let _appname = req.body.appname ? req.body.appname : null;
-            let _appsecret = req.body.appsecret ? req.body.appsecret : null;
-            let _appcode = req.body.appcode ? req.body.appcode : null;
-            let _privacypolicy = req.body.privacypolicy ? req.body.privacypolicy : null;
-            let _termscondition = req.body.termscondition ? req.body.termscondition : null;
-            let _appicon = req.body.appicon ? req.body.appicon : null;
+            let _contestrankmasterid = req.body.contestrankmasterid ? req.body.contestrankmasterid : null;
+            let _contestmasterid = req.body.contestmasterid ? req.body.contestmasterid : null;
+            let _rankname = req.body.rankname ? req.body.rankname : null;
+            let _rankdesc = req.body.rankdesc ? req.body.rankdesc : null;
+            let _lowerrank = req.body.lowerrank ? req.body.lowerrank : null;
+            let _upperrank = req.body.upperrank ? req.body.upperrank : null;
+            let _prizeamount = req.body.prizeamount ? req.body.prizeamount : null;
             let _status = req.body.status ? req.body.status : null;
             let _createdby = null;
             let _createdat = 'now()'
             let _updatedby = null;
             let _updatedat = 'now()'
-            let _callbackurl = req.body.callbackurl ? req.body.callbackurl : null;
-            let _iosappurl = req.body.iosappurl ? req.body.iosappurl : null;
-            let _androidappurl = req.body.androidappurl ? req.body.androidappurl : null;
-            let _deeplink = req.body.deeplink ? req.body.deeplink : null;
-            let _weburl = req.body.weburl ? req.body.weburl : null;
-            let _apppriority = req.body.apppriority ? req.body.apppriority : null;
-            let _apptype = req.body.apptype ? req.body.apptype : null;
-            let _packagename = req.body.packagename ? req.body.packagename : null;
-            let _filename = req.body.filename ? req.body.filename : null;
-            let _sendparams = req.body.sendparams ? req.body.sendparams : false;
-
-            /* let _userid = req.body.userid ? req.body.userid : null;
-            let _apiChecksum = req.body.checksum;
-            let _userToken = req.body.checksum; */
+            let _credittype = req.body.credittype ? req.body.credittype : null;
 
             let queryText, valuesArr;
             let errMsgType = _appid ? 'UPDATE_FAILED' : 'FAILED_REGISTERED'
@@ -77,14 +60,14 @@ module.exports = {
 
             if (!_appid) {
 
-                queryText = "INSERT INTO tbl_app (app_name,app_secret,app_code,privacy_policy,term_condition,app_icon,status,created_by,created_at,updated_by,updated_at,callback_url,ios_app_url,android_app_url,deep_link,web_url,app_priority,app_type,package_name,filename,send_params) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),$9, NOW(),$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *";
+                queryText = "INSERT INTO tbl_contest_rank_master (app_name,app_secret,app_code,privacy_policy,term_condition,app_icon,status,created_by,created_at,updated_by,updated_at,callback_url,ios_app_url,android_app_url,deep_link,web_url,app_priority,app_type,package_name,filename,send_params) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),$9, NOW(),$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *";
 
                 valuesArr = [_appname, _appsecret, _appcode, _privacypolicy, _termscondition, _appicon, _status, _createdby, _updatedby, _callbackurl, _iosappurl, _androidappurl, _deeplink, _weburl, _apppriority, _apptype, _packagename, _filename, _sendparams]
 
             }
             else {
 
-                queryText = `UPDATE tbl_app
+                queryText = `UPDATE tbl_contest_rank_master
                             SET
                             app_name=$1,
                             app_secret=$2,
@@ -124,7 +107,7 @@ module.exports = {
                 let result = await pgConnection.executeQuery('rmg_dev_db', _query)
 
                 console.log(result);
-                
+
 
                 if (result.length > 0) {
 
@@ -153,7 +136,7 @@ module.exports = {
                          services.sendResponse.sendWithCode(req, res, response, customMsgType, "FAILED_REGISTERED");
                      } */
                 } else {
-                    console.log('len',result.length)
+                    console.log('len', result.length)
                     services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
                 }
 
@@ -177,10 +160,10 @@ module.exports = {
         let _status = req.body.status ? req.body.status : null;
         let _apptype = req.body.apptype ? req.body.apptype : null;
 
-        let _selectQuery = 'Select * From tbl_app'
+        let _selectQuery = 'Select * From tbl_contest_rank_master'
 
         if (_appid) {
-            _selectQuery += " where app_id = " + _appid 
+            _selectQuery += " where app_id = " + _appid
         }
 
         if (_appname) {

@@ -3,6 +3,7 @@ const apiRoutes = express.Router();
 //master routes
 
 apiRoutes.use(require('./appRoute'));
+apiRoutes.use(require('./rankRoute'));
 
 apiRoutes.use(require('./countryRoute'));
 apiRoutes.use(require('./operatorRoute'));

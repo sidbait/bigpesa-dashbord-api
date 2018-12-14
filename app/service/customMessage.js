@@ -183,13 +183,13 @@ module.exports = {
             messageCode: "FAILED_REGISTERED",
             statusCode: 401
         }, 
-        "UPADTE_SUCCESS": {
+        "UPDATE_SUCCESS": {
             success: true,
             message: "Updated successfully!",
             messageCode: "UPDATED_SUCCESS",
             statusCode: 200
         },
-        "UPADTE_FAILED": {
+        "UPDATE_FAILED": {
             success: false,
             message: "Failed to update!",
             messageCode: "UPADTE_FAILED",

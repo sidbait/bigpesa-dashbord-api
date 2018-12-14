@@ -2,24 +2,24 @@ var appRoutes = express.Router();
 
 var validate = require('../../auth/validate');
 
-var appController = require('../../controller/master/appController');
+var appController = require('../../controller/master/rankController');
 
-appRoutes.get('/app', function(req, res)
+appRoutes.get('/rank', function(req, res)
 {
     appController.getAll(req, res);
 });
 
-appRoutes.post('/app/add', function(req, res)
+appRoutes.post('/rank/add', function(req, res)
 { 
     appController.add(req, res);
 });
 
-appRoutes.post('/app/update', function(req, res)
+appRoutes.post('/rank/update', function(req, res)
 {
     appController.add(req, res);
 });
 
-appRoutes.post('/app/search', function(req, res)
+appRoutes.post('/rank/search', function(req, res)
 {
     appController.search(req, res);
 });

@@ -36,7 +36,7 @@ module.exports = {
     
     sendWithCode: function (req, res, customJSON, customMsgType, customMsgCode) {
 
-        var response = {};
+        var response = {}; 
 
         if (customMessage[customMsgType] && customMessage[customMsgType][customMsgCode]) {
             response.success = customMessage[customMsgType][customMsgCode].success;
