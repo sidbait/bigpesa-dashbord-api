@@ -14,7 +14,7 @@
       "cms": {
         "user": "root",
         "database": "rmg_db",
-        "host": "13.232.101.230",
+        "host": "localhost",
         "port": 26257,
         "max": 50
       }      
