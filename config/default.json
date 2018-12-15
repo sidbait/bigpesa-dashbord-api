@@ -13,8 +13,8 @@
       "pg": {
         "cms": {
           "user": "root",
-          "database": "rmg_dev_db",
-          "host": "13.126.241.0",
+          "database": "rmg_db",
+          "host": "13.232.101.230",
           "port": 26257,
           "max": 50
         }      
