@@ -2,42 +2,65 @@ const config = require('config');
 const logger = require('tracer').colorConsole();
 const jwt = require('jsonwebtoken');
 
-var sendResp = require('../service/sendResponse');
+const services = require('../service/service.js');
 
 module.exports = {
 
     validateAccessToken: function (req, res, next) {
 
-        var accessToken = req.headers["access-token"];
-        return next();
-        // if (accessToken == null || accessToken == undefined || accessToken == '') {
-        //     sendResp.sendCustomJSON(null, req, res, false, [], "Please provide access-token!", 400)
-        // }
-        // else {
+        let rules = {
+            "access-token": 'required',
+        };
 
-        //     jwt.verify(accessToken, config.jwt_sessions.private_key, 
-        //         function (err, decoded) {
-        //         if (err) {
-        //             sendResp.sendCustomJSON(null, req, res, false, [], "Access token expired. Please login again!", 402)
-        //         } else {
-        //             req.userDetails = decoded;
-        //             return next();
-        //         }
-        //     });            
-        // }
+        let custom_message = {
+            "required.access-token": "Please provide the Access Token!",
+        }
+
+        let validation = new services.validator(req.headers, rules, custom_message);
+
+        if (validation.passes()) {
+
+            var accessToken = req.headers["access-token"] ? req.headers["access-token"] : {};
+
+            jwt.verify(accessToken, config.jwt_sessions.private_key,
+                function (err, decoded) {
+                    if (err) {
+                        services.sendResponse.sendWithCode(req, res, null, "COMMON_MESSAGE", "INVALID_ACCESS_TOKEN");
+                    } else {
+                        req.userDetails = decoded;
+                        return next();
+                    }
+                });
+        }
+        else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, "COMMON_MESSAGE", "VALIDATION_FAILED");
+        }
     },
 
     validateAppSecret: function (req, res, next) {
 
-        var appSecretKey = req.headers["app-secret-key"];
-        return next();
-        // if (appSecretKey == null || appSecretKey == undefined || appSecretKey == '') {
-        //     sendResp.sendCustomJSON(null, req, res, false, [], "Please provide app-secret-key!", 400)
-        // }
-        // else if (config.app.app_key !== appSecretKey) {
-        //     sendResp.sendCustomJSON(null, req, res, false, [], "Invalid app-secret-key!", 401)
-        // } else {
-        //     return next();
-        // }
+        let rules = {
+            "app-secret-key": 'required',
+        };
+
+        let custom_message = {
+            "required.app-secret-key": "Please provide the App Secret Key!",
+        }
+
+        let validation = new services.validator(req.headers, rules, custom_message);
+
+        if (validation.passes()) {
+
+            var appSecretKey = req.headers["app-secret-key"]?req.headers["app-secret-key"]:'';
+
+            if (config.app.app_key !== appSecretKey) {
+                services.sendResponse.sendWithCode(req, res, null, "COMMON_MESSAGE", "INVALID_APP_SECRET_KEY");
+            } else {
+                return next();
+            }
+        }
+        else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, "COMMON_MESSAGE", "VALIDATION_FAILED");
+        }
     }
 }

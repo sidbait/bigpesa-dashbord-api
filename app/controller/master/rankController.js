@@ -55,43 +55,34 @@ module.exports = {
             let _credittype = req.body.credittype ? req.body.credittype : null;
 
             let queryText, valuesArr;
-            let errMsgType = _appid ? 'UPDATE_FAILED' : 'FAILED_REGISTERED'
-            let successMsgType = _appid ? 'UPDATE_SUCCESS' : 'REGISTERED_SUCCESS'
+            let errMsgType = _contestrankmasterid ? 'UPDATE_FAILED' : 'FAILED_REGISTERED'
+            let successMsgType = _contestrankmasterid ? 'UPDATE_SUCCESS' : 'REGISTERED_SUCCESS'
 
-            if (!_appid) {
+            if (!_contestrankmasterid) {
 
-                queryText = "INSERT INTO tbl_contest_rank_master (app_name,app_secret,app_code,privacy_policy,term_condition,app_icon,status,created_by,created_at,updated_by,updated_at,callback_url,ios_app_url,android_app_url,deep_link,web_url,app_priority,app_type,package_name,filename,send_params) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),$9, NOW(),$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *";
+                queryText = "INSERT INTO tbl_contest_rank_master (contest_master_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,status,created_by,created_at,updated_by,updated_at,credit_type) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),$9, NOW(),$10) RETURNING *";
 
-                valuesArr = [_appname, _appsecret, _appcode, _privacypolicy, _termscondition, _appicon, _status, _createdby, _updatedby, _callbackurl, _iosappurl, _androidappurl, _deeplink, _weburl, _apppriority, _apptype, _packagename, _filename, _sendparams]
+                valuesArr = [_contestmasterid, _rankname, _rankdesc, _lowerrank, _upperrank, _prizeamount, _status, _createdby, _updatedby, _credittype]
 
             }
             else {
 
                 queryText = `UPDATE tbl_contest_rank_master
                             SET
-                            app_name=$1,
-                            app_secret=$2,
-                            app_code=$3,
-                            privacy_policy=$4,
-                            term_condition=$5,
-                            app_icon=$6,
+                            contest_master_id=$1,
+                            rank_name=$2,
+                            rank_desc=$3,
+                            lower_rank=$4,
+                            upper_rank=$5,
+                            prize_amount=$6,
                             status=$7,
                             updated_by=$8,
                             updated_at=NOW(),
-                            callback_url=$9,
-                            ios_app_url=$10,
-                            android_app_url=$11,
-                            deep_link=$12,
-                            web_url=$13,
-                            app_priority=$14,
-                            app_type=$15,
-                            package_name=$16,
-                            filename=$17,
-                            send_params=$18
-                            WHERE app_id=$19
+                            credit_type=$9
+                            WHERE contest_rank_master_id=$10
                             RETURNING *`;
 
-                valuesArr = [_appname, _appsecret, _appcode, _privacypolicy, _termscondition, _appicon, _status, _updatedby, _callbackurl, _iosappurl, _androidappurl, _deeplink, _weburl, _apppriority, _apptype, _packagename, _filename, _sendparams, _appid]
+                valuesArr = [_contestmasterid, _rankname, _rankdesc, _lowerrank, _upperrank, _prizeamount, _status, _updatedby, _credittype, _contestrankmasterid]
 
             }
 
@@ -113,30 +104,8 @@ module.exports = {
 
                     services.sendResponse.sendWithCode(req, res, result[0], customMsgType, successMsgType);
 
-                    /*  if (result[0][Object.keys(result[0])[0]] == 'Insert') {
- 
-                         response = {
-                             appid : result[0]
-                         }
-                         services.sendResponse.sendWithCode(req, res, response, customMsgType, "REGISTERED_SUCCESS");       
-                     }
-                     if (result[0].fn_master_addupdatecountry == undefined || result[0].fn_master_addupdatecountry == null) {
-                         services.sendResponse.sendWithCode(req, res, response, customMsgType, "ALREADY_REGISTERED");
-                     }
-                     else if (result[0].fn_master_addupdatecountry > 0) {
-                         response = {
-                             countryid: result[0].fn_master_addupdatecountry,
-                             country: _country,
-                             countrycode: _countrycode,
-                             status: _status
-                         }
-                         services.sendResponse.sendWithCode(req, res, response, customMsgType, "REGISTERED_SUCCESS");
-                     }
-                     else {
-                         services.sendResponse.sendWithCode(req, res, response, customMsgType, "FAILED_REGISTERED");
-                     } */
                 } else {
-                    console.log('len', result.length)
+
                     services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
                 }
 
@@ -155,44 +124,52 @@ module.exports = {
 
     search: async function (req, res) {
 
-        let _appid = req.body.appid ? req.body.appid : null;
-        let _appname = req.body.appname ? req.body.appname : null;
-        let _status = req.body.status ? req.body.status : null;
-        let _apptype = req.body.apptype ? req.body.apptype : null;
-
-        let _selectQuery = 'Select * From tbl_contest_rank_master'
-
-        if (_appid) {
-            _selectQuery += " where app_id = " + _appid
+        let rules = {
+            "contestmasterid": 'required'
         }
 
-        if (_appname) {
-            _selectQuery += _appid ? ' and ' : ' where '
-            _selectQuery += " app_name = '" + _appname + "'"
-        }
+        let validation = new services.validator(req.body, rules);
 
-        if (_status) {
-            _selectQuery += (_appid || _appname) ? ' and ' : ' where '
-            _selectQuery += " status = '" + _status + "'"
-        }
+        if (validation.passes()) {
 
-        if (_apptype) {
-            _selectQuery += (_appid || _appname || _status) ? ' and ' : ' where '
-            _selectQuery += " app_type = '" + _apptype + "'"
-        }
+            let _contestrankmasterid = req.body.appid ? req.body.appid : null;
+            let _contestmasterid = req.body.contestmasterid ? req.body.contestmasterid : null;
+            let _status = req.body.status ? req.body.status : null;
 
+            let _selectQuery = 'Select * From tbl_contest_rank_master'
 
-        try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
-
-            if (dbResult && dbResult.length > 0) {
-                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            if (_contestrankmasterid) {
+                _selectQuery += " where contest_rank_master_id = " + _contestrankmasterid
             }
-            else
-                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
-        }
-        catch (error) {
-            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+
+            if (_contestmasterid) {
+                _selectQuery += _contestrankmasterid ? ' and ' : ' where '
+                _selectQuery += " contest_master_id = '" + _contestmasterid + "'"
+            }
+
+            if (_status) {
+                _selectQuery += (_contestrankmasterid || _contestmasterid) ? ' and ' : ' where '
+                _selectQuery += " status = '" + _status + "'"
+            }
+
+
+            try {
+                let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+                if (dbResult && dbResult.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+
+        } else {
+
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+
         }
     }
 
