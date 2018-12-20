@@ -1,7 +1,7 @@
 {
   "app": {
     "host": "0.0.0.0",
-    "port": "3000",
+    "port": "3005",
     "app_key": "yXzLPeD4f3FXHsK33aExnuKyBHAFr8AmxYyWMAvaH2jaMhMTap"
   },       
   "logger": {
@@ -12,11 +12,10 @@
   "db_connectionString": {
     "pg": {
       "cms": {
-        "user": "developer",
-        "database": "cms",
-        "password": "#GameOn",
-        "host": "13.232.246.241",
-        "port": 5432,
+        "user": "root",
+        "database": "rmg_db",
+        "host": "localhost",
+        "port": 26257,
         "max": 50
       }      
     }

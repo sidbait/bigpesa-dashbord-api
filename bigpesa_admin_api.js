@@ -72,7 +72,7 @@ app.use(function (req, res, next) {
 //     }
 // )
 
-app.use('/v1', router);
+app.use('/admin/v1', router);
 
 //Setting max listeners to infinite.
 process.setMaxListeners(0);
