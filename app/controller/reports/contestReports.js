@@ -192,5 +192,32 @@ module.exports = {
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
+    },
+    dashboardReport:async function(req,res){
+        let queryCashDetails = "select  " +
+        " coalesce( sum(case when nz_txn_type = 'DEBIT' then amount::decimal else 0 end),0) as debit," +
+        " coalesce( sum(case when nz_txn_type = 'CREDIT' then amount::decimal else 0 end ),0) as credit, " +
+        " coalesce( sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal else 0 end),0) as deposit, " +
+        " coalesce( sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal else 0 end),0) as withdraw , " +
+        " coalesce( sum(case when nz_txn_type = 'REFUND' then amount::decimal else 0 end),0) as refund " +
+        " from tbl_wallet_transaction " +
+        " where created_at::date = now()::date ";
+        let queryTotalPlayer = "select count(*) as count from tbl_player "
+        Promise.all([
+            pgConnection.executeQuery('rmg_dev_db', queryTotalPlayer),
+            pgConnection.executeQuery('rmg_dev_db', queryCashDetails)
+        ]).then(function(value){
+           
+            let output = {};
+            output.TotPlayer = value[0][0].count;
+            output.TotCredit = value[1][0].credit;
+            output.TotDebit = value[1][0].debit;
+            output.TotDeposit = value[1][0].deposit;
+            output.TotWithdraw = value[1][0].withdraw;
+            output.TotRefund = value[1][0].refund; 
+            services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
+        }).catch(function(err){
+            services.sendResponse.sendWithCode(req, res, err, customMsgTypeCM, "DB_ERROR");
+        })
     }
 }
