@@ -125,7 +125,7 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 
-                queryText = "select * from vw_admin_acquisition_details where register_date between $1 and $2 ORDER BY register_date,deposit_date";
+                queryText = "select * from vw_admin_acquisition_details where register_date::Date between $1 and $2 ORDER BY register_date,deposit_date";
                 valuesArr = [fromDate, toDate]
 
                 let query = {
