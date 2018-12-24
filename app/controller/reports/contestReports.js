@@ -87,7 +87,7 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                
-                queryText = "select * from vw_admin_acquisition_summary where report_date between $1 and $2";
+                queryText = "select * from vw_admin_acquisition_summary where report_date between $1 and $2 ORDER BY report_date, reg_source";
                 valuesArr = [fromDate, toDate]
 
                 let query = {
@@ -124,21 +124,14 @@ module.exports = {
                 console.log( req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let query = " select p.phone_number, p.source, p.phone_number_verified, " +
-                " p.created_at, sum(w.amount::DECIMAL) total_revenue, w3.created_at as recharge_on, " +
-                " w3.amount recharge_amount from tbl_player p " +
-                " LEFT join tbl_wallet_transaction w on p.player_id = w.player_id " +
-                " and w.nz_txn_type = 'DEPOSIT' and w.nz_txn_status = 'SUCCESS'  " +
-                " LEFT JOIN (select w2.player_id, w2.mobile_no, w2.created_at, " +
-                " w2.amount from tbl_wallet_transaction w2 " +
-                " join (select w1.mobile_no, min(w1.created_at) cr_at " +
-                " from tbl_wallet_transaction w1 " +
-                " where  w1.nz_txn_type = 'DEPOSIT' and w1.nz_txn_status = 'SUCCESS' " +
-                " group by w1.mobile_no) w1 on w2.mobile_no = w1.mobile_no and " +
-                " w2.created_at = w1.cr_at) w3 on w3.player_id = p.player_id " +
-                " where p.created_at between '"+ fromDate +"' and '"+ toDate +"' " +
-                " group by p.phone_number, p.source, p.phone_number_verified, " +
-                " p.created_at, w3.created_at, w3.amount order by total_revenue desc;";
+                
+                queryText = "select * from vw_admin_acquisition_details where register_date between $1 and $2 ORDER BY register_date,deposit_date";
+                valuesArr = [fromDate, toDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
