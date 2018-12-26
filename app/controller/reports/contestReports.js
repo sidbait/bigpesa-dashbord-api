@@ -200,8 +200,8 @@ module.exports = {
         " coalesce( sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal else 0 end),0) as deposit, " +
         " coalesce( sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal else 0 end),0) as withdraw , " +
         " coalesce( sum(case when nz_txn_type = 'REFUND' then amount::decimal else 0 end),0) as refund " +
-        " from tbl_wallet_transaction " +
-        " where created_at::date = now()::date ";
+        " from tbl_wallet_transaction  " +
+        " where created_at::date = now()::date  and  nz_txn_status = 'SUCCESS' ";
         let queryTotalPlayer = "select count(*) as count from tbl_player "
         Promise.all([
             pgConnection.executeQuery('rmg_dev_db', queryTotalPlayer),
