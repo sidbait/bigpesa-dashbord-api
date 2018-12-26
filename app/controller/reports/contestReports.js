@@ -53,10 +53,15 @@ module.exports = {
                 console.log( req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let query = "select created_at::DATE dt, source, count(*) total_user, " +
-                    " sum(case when phone_number_verified is true then 1 else 0 end) as verified_user " +
-                    " from tbl_player where created_at between '" + fromDate + "' and '" + toDate + "' " +
-                    " group by created_at::DATE, source,phone_number_verified order by dt desc;";
+               
+                queryText = "select * from vw_admin_register_summary where report_date between $1 and $2 ORDER BY report_date";
+                valuesArr = [fromDate, toDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
@@ -118,6 +123,7 @@ module.exports = {
             "required.frmdate": "From Date is mandatory!",
             "required.todate": "To Date is mandatory!"
         };
+        
         let validation = new services.validator(req.body, rules, custom_message);
         try {
             if (validation.passes()) {
@@ -125,7 +131,7 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 
-                queryText = "select * from vw_admin_acquisition_details where register_date::Date between $1 and $2 ORDER BY register_date,deposit_date";
+                queryText = "select * from vw_admin_acquisition_details where register_date::Date between $1 and $2 ORDER BY register_date desc ";
                 valuesArr = [fromDate, toDate]
 
                 let query = {
