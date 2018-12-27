@@ -12,11 +12,15 @@
   "db_connectionString": {
     "pg": {
       "cms": {
-        "user": "root",
-        "database": "rmg_db",
-        "host": "localhost",
-        "port": 26257,
-        "max": 50
+        "user": "nazara",
+      "password": "VXUdS7XfrbKhqHS57fsK",
+      "host": "cockroach-ef774991a31567cc.elb.ap-south-1.amazonaws.com",
+      "database": "rmg_db",
+      "port": 26257,
+      "ssl": true,
+      "max": 50,
+      "min": 10,
+      "idleTimeoutMillis": 5000
       }      
     }
   },
