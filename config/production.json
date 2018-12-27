@@ -14,7 +14,7 @@
       "cms": {
         "user": "nazara",
       "password": "VXUdS7XfrbKhqHS57fsK",
-      "host": "172.31.28.41",
+      "host": "cockroach-ef774991a31567cc.elb.ap-south-1.amazonaws.com",
       "database": "rmg_db",
       "port": 26257,
       "ssl": true,
