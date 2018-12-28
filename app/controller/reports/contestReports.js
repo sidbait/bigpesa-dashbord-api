@@ -21,9 +21,19 @@ module.exports = {
             let appid = req.body.appid;
             let date = req.body.date;
             try {
-                let query = "select * from vw_contest_report where app_id = " + appid + " " +
-                    " and contest_date = '" + date + "'";
+                //vw_contest_report
+               /*  let query = "select * from vw_admin_contest_report where app_id = " + appid + " " +
+                    " and start_date = '" + date + "'";
                 console.log(query)
+ */
+                queryText = "select * from vw_admin_contest_report where app_id = $1 and start_date::Date = $2";
+                valuesArr = [appid, date]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
