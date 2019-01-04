@@ -26,7 +26,7 @@ module.exports = {
                     " and start_date = '" + date + "'";
                 console.log(query)
  */
-                queryText = "select * from vw_conteset_report_appwise where app_id = $1 and contest_date::Date = $2";
+                queryText = "select * from vw_admin_contest_report where app_id = $1 and start_date::Date = $2";
                 valuesArr = [appid, date]
 
                 let query = {
