@@ -88,6 +88,53 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
+
+    downloadSummary: async function (req, res) {
+
+        let rules = {
+            "startdate": 'required',
+            "enddate": 'required'
+        };
+        var custom_message = {
+            "required.startdate": "Date is mandatory!",
+            "required.enddate": "Date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+            let startdate = req.body.startdate;
+            let enddate = req.body.enddate;
+            try {
+                queryText = "select app_download.download_date::DATE, app_download.agency_source," +
+                    " count(distinct app_download.download_id) as downloads," +
+                    " count(distinct player_device.device_id) as register," +
+                    " count(distinct CASE WHEN player.phone_number_verified = true THEN player_device.player_id END) AS otp_verified" +
+                    " from tbl_app_download app_download" +
+                    " left join tbl_player_device player_device on player_device.device_id = app_download.device_id" +
+                    " left join tbl_player player on player.player_id = player_device.player_id" +
+                    " where app_download.download_date::DATE between $1 and $2" +
+                    " group by app_download.agency_source, app_download.download_date::DATE" +
+                    " order by app_download.download_date::DATE desc";
+                valuesArr = [startdate, enddate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
     registered: async function (req, res) {
         let rules = {
             "frmdate": 'required',

@@ -9,5 +9,6 @@ appRoutes.post('/userAcquisitionDetail',contestReports.userAcquisitionDetail);
 appRoutes.post('/Summary',contestReports.summary);
 appRoutes.post('/dashboard',contestReports.dashboardReport);
 appRoutes.post('/userfunnelsummary',contestReports.userFunnelSummary);
+appRoutes.post('/downloadsummary',contestReports.downloadSummary);
 
 module.exports = appRoutes;
