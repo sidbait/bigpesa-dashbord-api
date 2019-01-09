@@ -17,6 +17,7 @@ const loginRoute = require('../routes/loginRoute');
 //Module Wise Routes
 const masterRoutes = require('../routes/master/masterRoutes.js');
 const contestReportRoute = require('../routes/reports/contestReportRoute');
+const playerReportRoute = require('../routes/reports/playerReportRoute');
 const contestRoutes = require('../routes/contest/contestRoute.js');
 
 apiRoutes.get('/', function (req, res) {
@@ -38,7 +39,7 @@ app.use(middleware.injectMiddleware(
        // validate.validateAccessToken
     ],
     [
-        apiRoutes_user.use('/reports', contestReportRoute)
+        apiRoutes_user.use('/reports', [contestReportRoute, playerReportRoute])
     ]
 ));
 
