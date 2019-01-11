@@ -16,13 +16,13 @@ module.exports = {
             (phone_number != "" && phone_number != null && phone_number != undefined)) {
             try {
                 if (player_id) {
-                    queryText = "select * from tbl_player where player_id = $1 limit 1";
+                    queryText = "select * from vw_admin_user_summary_report where player_id = $1 limit 1";
                     valuesArr = [player_id];
                 } else if (email_id) {
-                    queryText = "select * from tbl_player where email_id = $1 limit 1";
+                    queryText = "select * from vw_admin_user_summary_report where email_id = $1 limit 1";
                     valuesArr = [email_id];
                 } else if (phone_number) {
-                    queryText = "select * from tbl_player where phone_number = $1 limit 1";
+                    queryText = "select * from vw_admin_user_summary_report where phone_number = $1 limit 1";
                     valuesArr = [phone_number];
                 }
 

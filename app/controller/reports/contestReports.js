@@ -329,6 +329,53 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+    cashReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required'
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                let queryText = " select created_at::date::string," +
+                    " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
+                    " COALESCE(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),0) as DEBIT," +
+                " COALESCE(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),0) as CREDIT," +
+                    " COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW," +
+                    " sum(amount::decimal) as total" +
+                    " from tbl_wallet_transaction " +
+                    " where nz_txn_status = 'SUCCESS'" +
+                    " and created_at::date between $1 and $2" +
+                    " group by created_at::date::string" +
+                    " order by 1";
+
+                let valuesArr = [fromDate, toDate]
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
     dashboardReport: async function (req, res) {
         let queryCashDetails = "select  " +
             " coalesce( sum(case when nz_txn_type = 'DEBIT' then amount::decimal else 0 end),0) as debit," +
