@@ -22,12 +22,99 @@ module.exports = {
             let date = req.body.date;
             try {
                 //vw_contest_report
-               /*  let query = "select * from vw_admin_contest_report where app_id = " + appid + " " +
-                    " and start_date = '" + date + "'";
-                console.log(query)
- */
+                /*  let query = "select * from vw_admin_contest_report where app_id = " + appid + " " +
+                     " and start_date = '" + date + "'";
+                 console.log(query)
+  */
                 queryText = "select * from vw_admin_contest_report where app_id = $1 and start_date::Date = $2";
                 valuesArr = [appid, date]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+    contestSummaryReport: async function (req, res) {
+
+        let rules = {
+            "appid": 'required',
+            "startdate": 'required',
+            "enddate": 'required'
+        };
+        var custom_message = {
+            "required.appid": "App Id is mandatory!",
+            "required.startdate": "Date is mandatory!",
+            "required.enddate": "Date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+            let appid = req.body.appid;
+            let startdate = req.body.startdate;
+            let enddate = req.body.enddate;
+            try {
+                queryText = "select * from vw_admin_contest_summary_report where app_id = $1 and start_date::Date between $2 and $3 order by start_date::Date";
+                valuesArr = [appid, startdate, enddate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+
+    downloadSummary: async function (req, res) {
+
+        let rules = {
+            "startdate": 'required',
+            "enddate": 'required'
+        };
+        var custom_message = {
+            "required.startdate": "Date is mandatory!",
+            "required.enddate": "Date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+            let startdate = req.body.startdate;
+            let enddate = req.body.enddate;
+            try {
+                queryText = "select app_download.download_date::DATE, app_download.agency_source," +
+                    " count(distinct app_download.download_id) as downloads," +
+                    " count(distinct player_device.device_id) as register," +
+                    " count(distinct CASE WHEN player.phone_number_verified = true THEN player_device.player_id END) AS otp_verified" +
+                    " from tbl_app_download app_download" +
+                    " left join tbl_player_device player_device on player_device.device_id = app_download.device_id" +
+                    " left join tbl_player player on player.player_id = player_device.player_id" +
+                    " where app_download.download_date::DATE between $1 and $2" +
+                    " group by app_download.agency_source, app_download.download_date::DATE" +
+                    " order by app_download.download_date::DATE desc";
+                valuesArr = [startdate, enddate]
 
                 let query = {
                     text: queryText,
@@ -215,18 +302,65 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 let query = " select  * from tbl_summary_report " +
-                " where dt between '"+ fromDate +"' and '"+ toDate +"'  " +
-                " order by dt asc;";
+                    " where dt between '" + fromDate + "' and '" + toDate + "'  " +
+                    " order by dt asc;";
 
 
-               /*  queryText = "select * from vw_admin_user_funnel where reg_date::Date between $1 and $2 ORDER BY trans_date asc ";
-                valuesArr = [fromDate, toDate]
+                /*  queryText = "select * from vw_admin_user_funnel where reg_date::Date between $1 and $2 ORDER BY trans_date asc ";
+                 valuesArr = [fromDate, toDate]
+ 
+                 let query = {
+                     text: queryText,
+                     values: valuesArr
+                 }; */
 
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+    cashReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required'
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                let queryText = " select created_at::date::string," +
+                    " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
+                    " COALESCE(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),0) as DEBIT," +
+                " COALESCE(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),0) as CREDIT," +
+                    " COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW," +
+                    " sum(amount::decimal) as total" +
+                    " from tbl_wallet_transaction " +
+                    " where nz_txn_status = 'SUCCESS'" +
+                    " and created_at::date between $1 and $2" +
+                    " group by created_at::date::string" +
+                    " order by 1";
+
+                let valuesArr = [fromDate, toDate]
                 let query = {
                     text: queryText,
                     values: valuesArr
-                }; */
-
+                };
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {

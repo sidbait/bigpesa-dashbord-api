@@ -19,6 +19,7 @@ const masterRoutes = require('../routes/master/masterRoutes.js');
 const contestReportRoute = require('../routes/reports/contestReportRoute');
 const contestRoutes = require('../routes/contest/contestRoute');
 const rankRoutes = require('../routes/rank/rankRoute');
+const playerReportRoute = require('../routes/reports/playerReportRoute');
 
 apiRoutes.get('/', function (req, res) {
     sendResponse.sendWithCode(req, res, null, "COMMON_MESSAGE", "WELCOME");
@@ -40,7 +41,7 @@ app.use(middleware.injectMiddleware(
        // validate.validateAccessToken
     ],
     [
-        apiRoutes_user.use('/reports', contestReportRoute)
+        apiRoutes_user.use('/reports', [contestReportRoute, playerReportRoute])
     ]
 ));
 
