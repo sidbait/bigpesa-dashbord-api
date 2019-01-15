@@ -17,7 +17,8 @@ const loginRoute = require('../routes/loginRoute');
 //Module Wise Routes
 const masterRoutes = require('../routes/master/masterRoutes.js');
 const contestReportRoute = require('../routes/reports/contestReportRoute');
-const contestRoutes = require('../routes/contest/contestRoute.js');
+const contestRoutes = require('../routes/contest/contestRoute');
+const rankRoutes = require('../routes/rank/rankRoute');
 
 apiRoutes.get('/', function (req, res) {
     sendResponse.sendWithCode(req, res, null, "COMMON_MESSAGE", "WELCOME");
@@ -30,7 +31,8 @@ app.use(middleware.injectMiddleware(
     ],
     [
         apiRoutes_user.use('/master', masterRoutes),
-        apiRoutes_user.use('/contest', contestRoutes)
+        apiRoutes_user.use('/contest', contestRoutes),
+        apiRoutes_user.use('/rank', rankRoutes)
     ]
 ));
 app.use(middleware.injectMiddleware(
@@ -44,7 +46,7 @@ app.use(middleware.injectMiddleware(
 
 app.use(middleware.injectMiddleware(
     [
-        validate.validateAppSecret
+        // validate.validateAppSecret
     ],
     [
         apiRoutes_login.use(loginRoute)

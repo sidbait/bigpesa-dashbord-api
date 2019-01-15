@@ -27,88 +27,68 @@ module.exports = {
     add: async function (req, res) {
 
         let rules = {
-            "contestmasterid": 'required',
-            "rankname": 'required',
-            "lowerrank": 'required',
-            "upperrank": 'required',
-            "prizeamount": 'required',
+            // "contest_rank_master_id": 'required|numeric',
+            "contest_master_id": 'required|numeric',
+            "rank_name": 'required',
+            "rank_desc": 'required',
+            "lower_rank": 'required',
+            "upper_rank": 'required',
+            "prize_amount": 'required',
+            "credit_type": 'required',
             "status": 'required',
-            "credittype": 'required'
         };
 
         let validation = new services.validator(req.body, rules);
 
         if (validation.passes()) {
 
-            let _contestrankmasterid = req.body.contestrankmasterid ? req.body.contestrankmasterid : null;
-            let _contestmasterid = req.body.contestmasterid ? req.body.contestmasterid : null;
-            let _rankname = req.body.rankname ? req.body.rankname : null;
-            let _rankdesc = req.body.rankdesc ? req.body.rankdesc : null;
-            let _lowerrank = req.body.lowerrank ? req.body.lowerrank : null;
-            let _upperrank = req.body.upperrank ? req.body.upperrank : null;
-            let _prizeamount = req.body.prizeamount ? req.body.prizeamount : null;
+            let _contest_rank_master_id = req.body.contest_rank_master_id ? req.body.contest_rank_master_id : null;
+            let _contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+            let _rank_name = req.body.rank_name ? req.body.rank_name : null;
+            let _rank_desc = req.body.rank_desc ? req.body.rank_desc : null;
+            let _lower_rank = req.body.lower_rank ? req.body.lower_rank : null;
+            let _upper_rank = req.body.upper_rank ? req.body.upper_rank : null;
+            let _prize_amount = req.body.prize_amount ? req.body.prize_amount : null;
+            let _credit_type = req.body.credit_type ? req.body.credit_type : null;
             let _status = req.body.status ? req.body.status : null;
-            let _createdby = null;
-            let _createdat = 'now()'
-            let _updatedby = null;
-            let _updatedat = 'now()'
-            let _credittype = req.body.credittype ? req.body.credittype : null;
+            let _created_by = req.body.userid ? req.body.userid : null;
+            let _updated_by = req.body.userid ? req.body.userid : null;
 
-            let queryText, valuesArr;
-            let errMsgType = _contestrankmasterid ? 'UPDATE_FAILED' : 'FAILED_REGISTERED'
-            let successMsgType = _contestrankmasterid ? 'UPDATE_SUCCESS' : 'REGISTERED_SUCCESS'
+            let _query;
+            let errMsgType = _contest_master_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
+            let successMsgType = _contest_master_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
 
-            if (!_contestrankmasterid) {
+            if (!_contest_rank_master_id) {
 
-                queryText = "INSERT INTO tbl_contest_rank_master (contest_master_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,status,created_by,created_at,updated_by,updated_at,credit_type) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),$9, NOW(),$10) RETURNING *";
-
-                valuesArr = [_contestmasterid, _rankname, _rankdesc, _lowerrank, _upperrank, _prizeamount, _status, _createdby, _updatedby, _credittype]
-
+                _query = {
+                    text: "INSERT INTO tbl_contest_rank_master(contest_master_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *",
+                    values: [
+                        _contest_master_id, _rank_name, _rank_desc, _lower_rank, _upper_rank, _prize_amount, _credit_type, _status
+                    ]
+                }
             }
             else {
 
-                queryText = `UPDATE tbl_contest_rank_master
-                            SET
-                            contest_master_id=$1,
-                            rank_name=$2,
-                            rank_desc=$3,
-                            lower_rank=$4,
-                            upper_rank=$5,
-                            prize_amount=$6,
-                            status=$7,
-                            updated_by=$8,
-                            updated_at=NOW(),
-                            credit_type=$9
-                            WHERE contest_rank_master_id=$10
-                            RETURNING *`;
-
-                valuesArr = [_contestmasterid, _rankname, _rankdesc, _lowerrank, _upperrank, _prizeamount, _status, _updatedby, _credittype, _contestrankmasterid]
+                _query = {
+                    text: "UPDATE tbl_contest_rank_master SET contest_rank_master_id=$1,contest_master_id=$2,rank_name=$3,rank_desc=$4,lower_rank=$5,upper_rank=$6,prize_amount=$7,credit_type=$8,status=$9 WHERE contest_rank_master_id=$10 RETURNING *",
+                    values: [
+                        _contest_rank_master_id, _contest_master_id, _rank_name, _rank_desc, _lower_rank, _upper_rank, _prize_amount, _credit_type, _status, _contest_rank_master_id
+                    ]
+                }
 
             }
 
             try {
 
-                let _query = {
-                    text: queryText,
-                    values: valuesArr
-                };
-
-                let response = {}
-
                 let result = await pgConnection.executeQuery('rmg_dev_db', _query)
 
-                console.log(result);
-
+                // console.log(result);
 
                 if (result.length > 0) {
-
                     services.sendResponse.sendWithCode(req, res, result[0], customMsgType, successMsgType);
-
                 } else {
-
                     services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
                 }
-
             }
             catch (error) {
 
@@ -125,33 +105,26 @@ module.exports = {
     search: async function (req, res) {
 
         let rules = {
-            "contestmasterid": 'required'
+            "contest_master_id": 'required'
         }
 
         let validation = new services.validator(req.body, rules);
 
         if (validation.passes()) {
 
-            let _contestrankmasterid = req.body.appid ? req.body.appid : null;
-            let _contestmasterid = req.body.contestmasterid ? req.body.contestmasterid : null;
+            let _contest_rank_master_id = req.body.contest_rank_master_id ? req.body.contest_rank_master_id : null;
+            let _contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
             let _status = req.body.status ? req.body.status : null;
 
-            let _selectQuery = 'Select * From tbl_contest_rank_master'
+            let _selectQuery = 'Select * From tbl_contest_rank_master where 1=1 '
 
-            if (_contestrankmasterid) {
-                _selectQuery += " where contest_rank_master_id = " + _contestrankmasterid
+            if (_contest_rank_master_id) {
+                _selectQuery += " AND contest_rank_master_id = '" + _contest_rank_master_id + "'"
             }
 
-            if (_contestmasterid) {
-                _selectQuery += _contestrankmasterid ? ' and ' : ' where '
-                _selectQuery += " contest_master_id = '" + _contestmasterid + "'"
+            if (_contest_master_id) {
+                _selectQuery += " AND contest_master_id = '" + _contest_master_id + "'"
             }
-
-            if (_status) {
-                _selectQuery += (_contestrankmasterid || _contestmasterid) ? ' and ' : ' where '
-                _selectQuery += " status = '" + _status + "'"
-            }
-
 
             try {
                 let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)

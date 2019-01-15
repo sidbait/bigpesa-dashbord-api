@@ -183,6 +183,24 @@ module.exports = {
             messageCode: "FAILED_REGISTERED",
             statusCode: 401
         }, 
+        "ADD_SUCCESS": {
+            success: true,
+            message: "Added successfully!",
+            messageCode: "ADD_SUCCESS",
+            statusCode: 200
+        }, 
+        "ALREADY_ADDED": {
+            success: false,
+            message: "Already exists!",
+            messageCode: "ALREADY_ADDED",
+            statusCode: 401
+        },
+        "ADD_FAILED": {
+            success: false,
+            message: "Failed to Add!",
+            messageCode: "ADD_FAILED",
+            statusCode: 401
+        },
         "UPDATE_SUCCESS": {
             success: true,
             message: "Updated successfully!",
