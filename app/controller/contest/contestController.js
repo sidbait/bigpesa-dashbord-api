@@ -252,7 +252,7 @@ module.exports = {
             _selectQuery += ` AND start_date >= '${_fromDate[0]}' AND end_date <= '${_toDate[0]}' AND from_time >= '${_fromDate[1]}' AND to_time <= '${_toDate[1]}'`
         }
 
-        _selectQuery += ' LIMIT 50'
+        // _selectQuery += ' LIMIT 50'
 
 
         try {

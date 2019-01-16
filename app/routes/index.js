@@ -15,7 +15,7 @@ const apiRoutes_login = express.Router();
 const loginRoute = require('../routes/loginRoute');
 
 //Module Wise Routes
-const masterRoutes = require('../routes/master/masterRoutes.js');
+const masterRoutes = require('../routes/master/masterRoutes');
 const contestReportRoute = require('../routes/reports/contestReportRoute');
 const contestRoutes = require('../routes/contest/contestRoute');
 const rankRoutes = require('../routes/rank/rankRoute');
