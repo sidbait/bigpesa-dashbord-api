@@ -1,6 +1,8 @@
 const pgConnection = require('../../model/pgConnection');
 
 const mv = require('mv');
+const excelToJson = require('convert-excel-to-json');
+const moment = require('moment')
 
 const services = require('../../service/service');
 
@@ -152,6 +154,67 @@ module.exports = {
         }
     },
 
+    addBulk: async function (req, res) {
+
+        let rules = {
+            "app_id": 'required|numeric'
+        };
+
+        let validation = new services.validator(req.body, rules);
+
+        if (validation.passes()) {
+
+            let _app_id = req.body.app_id ? req.body.app_id : null;
+            let uploadFilepath = `./public/bulk/contest/${_app_id}/`;
+
+            if (req.files != null && req.files.length > 0) {
+                let from_path = req.files[0].destination + req.files[0].filename;
+                let splt = req.files[0].originalname.split('.');
+                let ext = splt[splt.length - 1];
+
+                if (ext.toLowerCase() == "xlsx") {
+                    let dest_path = Date.now() + '_' + req.files[0].originalname;
+                    let moveto = uploadFilepath + dest_path;
+                    moveto = moveto.toLowerCase();
+
+                    try {
+                        const xlsxFilePath = await moveFile(from_path, moveto)
+                        console.log(xlsxFilePath);
+
+                        const sheetData = await readSheet(xlsxFilePath)
+                        console.log(sheetData);
+
+                        const queries = await getQueries(sheetData, _app_id)
+                        console.log(queries);
+                        Promise.all(queries.map(async (query) => {
+                            return await pgConnection.executeQuery('rmg_dev_db', query);
+                        })).then((results) => {
+                            console.log(results);
+                            services.sendResponse.sendWithCode(req, res, results, customMsgType, "ADD_SUCCESS");
+                        })
+
+                    } catch (error) {
+                        console.log(error);
+                        services.sendResponse.sendWithCode(req, res, error, customMsgType, "ADD_FAILED");
+                    }
+
+                } else {
+                    console.log('Validation failed! Please provide proper xlsx file.');
+                    services.sendResponse.sendWithCode(req, res, 'Validation failed! Please provide proper xlsx file.', customMsgType, "ADD_FAILED");
+
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+
+            }
+        }
+
+        else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+
+        }
+    },
+
     search: async function (req, res) {
 
         let _contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
@@ -207,7 +270,7 @@ module.exports = {
             _fromDate = _fromDate.split(' ');
             _toDate = _toDate.split(' ');
 
-            _selectQuery += ` AND start_date >= '${_fromDate[0]}' AND end_date <= '${_toDate[0]}' AND from_time >= '${_fromDate[1]}' AND to_time <= '${_toDate[1]}'`
+            _selectQuery += ` AND start_date::date >= '${_fromDate[0]}' AND end_date::date <= '${_toDate[0]}' AND from_time >= '${_fromDate[1]}' AND to_time <= '${_toDate[1]}'`
         }
 
         // _selectQuery += ' LIMIT 5'
@@ -274,4 +337,109 @@ async function uploadBanner(req, contest_master_id) {
                 reject("error - hasOwnProperty error")
         }
     });
+}
+
+function readSheet(xlsxFilePath) {
+    return new Promise((resolve, reject) => {
+        const result = excelToJson({
+            sourceFile: xlsxFilePath,
+            header: {
+                rows: 1 // 2, 3, 4, etc.
+            },
+            columnToKey: {
+                A: 'contest_name',
+                B: 'contest_type',
+                C: 'contest_desc',
+                D: 'is_repeat',
+                E: 'start_date',
+                F: 'end_date',
+                G: 'from_time',
+                H: 'to_time',
+                I: 'max_players',
+                J: 'winners',
+                K: 'entry_fee',
+                L: 'currency',
+                M: 'profit_margin',
+                N: 'next_start_date',
+                O: 'status',
+                P: 'debit_type',
+                Q: 'credit_type',
+                R: 'win_amount',
+                S: 'css_class',
+                T: 'contest_priority',
+                U: 'game_conf',
+                V: 'contest_icon',
+                W: 'publish_type',
+                X: 'channel'
+            }
+        });
+        resolve(result)
+    });
+}
+
+function getQueries(sheetData, _app_id) {
+
+    return new Promise((resolve, reject) => {
+        if (sheetData && sheetData.Sheet1) {
+            let queries = sheetData.Sheet1.map(object => {
+
+                object['app_id'] = _app_id
+                object['from_time'] = getFormattedTime(object['from_time'])
+                object['to_time'] = getFormattedTime(object['to_time'])
+                let count = 0;
+                let cols = [];
+                let values = [];
+                let dollcount = []
+
+                for (const key in object) {
+                    if (object.hasOwnProperty(key)) {
+
+                        const element = object[key];
+
+                        cols.push(key)
+
+                        values.push(element)
+                        count = count + 1;
+
+                        dollcount.push(`$${count}`)
+
+                    }
+                }
+
+                query = {
+                    text: `INSERT INTO tbl_contest_master(${cols.toString()}) VALUES (${dollcount}) RETURNING contest_master_id`,
+                    values: values
+                }
+
+                return query;
+            })
+            resolve(queries)
+        } else {
+            reject('wrong sheetData or sheet name please set Sheet1')
+        }
+    });
+}
+
+function moveFile(from_path, moveto) {
+    return new Promise((resolve, reject) => {
+        mv(from_path, moveto, { mkdirp: true }, function (err) {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve(moveto)
+            }
+        });
+    });
+}
+
+function getFormattedTime(date) {
+
+    let momentDate = moment(date)
+
+    let hr = momentDate.hours();
+    let min = momentDate.minutes();
+    let sec = momentDate.seconds();
+
+    return hr + ':' + min + ':' + sec;
 }

@@ -132,6 +132,8 @@ module.exports = {
 
         let _app_id = req.body.app_id ? req.body.app_id : null;
         let _app_name = req.body.app_name ? req.body.app_name : null;
+        let _app_type = req.body.app_type ? req.body.app_type : null;
+        let _islive = req.body.islive ? req.body.islive : null;
 
         let _selectQuery = 'Select * From tbl_app where 1=1'
 
@@ -140,7 +142,15 @@ module.exports = {
         }
 
         if (_app_name) {
-            _selectQuery += " and app_name = '" + _app_name + "'"
+            _selectQuery += " and app_name LIKE '%" + _app_name + "%'"
+        }
+
+        if (_app_type) {
+            _selectQuery += " and app_type = '" + _app_type + "'"
+        }
+
+        if (_islive) {
+            _selectQuery += " and islive = " + _islive
         }
 
 
