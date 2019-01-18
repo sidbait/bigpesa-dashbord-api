@@ -11,5 +11,6 @@ appRoutes.post('/dashboard',contestReports.dashboardReport);
 appRoutes.post('/userfunnelsummary',contestReports.userFunnelSummary);
 appRoutes.post('/downloadsummary',contestReports.downloadSummary);
 appRoutes.post('/cashreport',contestReports.cashReport);
+appRoutes.post('/paymentgatewayreport',contestReports.paymentgatewayReport);
 
 module.exports = appRoutes;
