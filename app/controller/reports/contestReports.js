@@ -66,7 +66,7 @@ module.exports = {
             let startdate = req.body.startdate;
             let enddate = req.body.enddate;
             try {
-                queryText = "select * from vw_admin_contest_summary_report where app_id = $1 and start_date::Date between $2 and $3 order by start_date::Date";
+                queryText = "select * from vw_admin_contest_summary_report where app_id = $1 and start_date::Date between $2 and $3";
                 valuesArr = [appid, startdate, enddate]
 
                 let query = {
@@ -355,6 +355,49 @@ module.exports = {
                     " and created_at::date between $1 and $2" +
                     " group by created_at::date::string" +
                     " order by 1";
+
+                let valuesArr = [fromDate, toDate]
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+    paymentgatewayReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required'
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                let queryText = "select created_at::date::string, pg_source, nz_txn_status, count(1) as pcount, sum(amount::decimal) as total" +
+                " from tbl_wallet_transaction" +
+                " where nz_txn_type = 'DEPOSIT'" +
+                " and amount ~ '^[0-9\.]+$' = true" +
+                " and created_at::date between $1 and $2" +
+                " group by created_at::date::string, pg_source, nz_txn_status" +
+                " order by 1";
 
                 let valuesArr = [fromDate, toDate]
                 let query = {
