@@ -12,6 +12,11 @@ rankRoutes.post('/add', function(req, res)
     rankController.add(req, res);
 });
 
+rankRoutes.post('/bulkInsert', function(req, res)
+{ 
+    rankController.bulkInsert(req, res);
+});
+
 rankRoutes.post('/update', function(req, res)
 {
     rankController.add(req, res);

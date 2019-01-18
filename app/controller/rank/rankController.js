@@ -24,6 +24,34 @@ module.exports = {
         }
     },
 
+    bulkInsert: async function (req, res) {
+        // console.log(req.body.rankFormArray);
+        let rankFormArray = req.body.rankFormArray.rankFormArray ? req.body.rankFormArray.rankFormArray : null;
+        let contest_id = req.body.contest_id ? req.body.contest_id : null;
+        let userid = req.body.userid ? req.body.userid : null;
+        // console.log(rankFormArray);
+
+        Promise.all(rankFormArray.map(async (iterator) => {
+            try {
+                let query = await bulkInsert(iterator, res, contest_id, userid)
+                // console.log(query);
+                let dbResult = await pgConnection.executeQuery('rmg_dev_db', query);
+
+                let contest_rank_id = dbResult[0].contest_rank_id
+                return contest_rank_id
+            } catch (error) {
+                console.log('bulkInsert error =>');
+                console.log(error);
+            }
+        })).then((results) => {
+            console.log(results);
+            services.sendResponse.sendWithCode(req, res, results, customMsgType, 'ADD_SUCCESS');
+        }).catch((error) => {
+            console.log(error);
+            services.sendResponse.sendWithCode(req, res, error, customMsgType, 'ADD_FAILED');
+        })
+    },
+
     add: async function (req, res) {
 
         let rules = {
@@ -63,7 +91,7 @@ module.exports = {
                 _query = {
                     text: "INSERT INTO tbl_contest_rank(contest_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *",
                     values: [
-                        _contest_id, _rank_name, _rank_desc, _lower_rank, _upper_rank, _prize_amount, _credit_type, _status,_created_by 
+                        _contest_id, _rank_name, _rank_desc, _lower_rank, _upper_rank, _prize_amount, _credit_type, _status, _created_by
                     ]
                 }
             }
@@ -146,4 +174,54 @@ module.exports = {
         }
     }
 
+}
+
+function bulkInsert(xxx, res, contest_id, userid) {
+    return new Promise((resolve, reject) => {
+        let rules = {
+            // "contest_rank_id": 'required|numeric',
+            // "contest_id": 'required|numeric',
+            "rank_name": 'required',
+            "rank_desc": 'required',
+            "lower_rank": 'required',
+            "upper_rank": 'required',
+            "prize_amount": 'required',
+            "credit_type": 'required',
+            "status": 'required',
+        };
+
+        let validation = new services.validator(xxx, rules);
+
+        if (validation.passes()) {
+
+            let _contest_id = contest_id ? contest_id : null;
+            let _rank_name = xxx.rank_name ? xxx.rank_name : null;
+            let _rank_desc = xxx.rank_desc ? xxx.rank_desc : null;
+            let _lower_rank = xxx.lower_rank ? xxx.lower_rank : null;
+            let _upper_rank = xxx.upper_rank ? xxx.upper_rank : null;
+            let _prize_amount = xxx.prize_amount ? xxx.prize_amount : null;
+            let _credit_type = xxx.credit_type ? xxx.credit_type : null;
+            let _status = xxx.status ? xxx.status : null;
+            let _created_by = userid ? userid : null;
+
+            let _query;
+            let errMsgType = 'ADD_FAILED'
+            let successMsgType = 'ADD_SUCCESS'
+
+            _query = {
+                text: "INSERT INTO tbl_contest_rank(contest_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING contest_rank_id",
+                values: [
+                    _contest_id, _rank_name, _rank_desc, _lower_rank, _upper_rank, _prize_amount, _credit_type, _status, _created_by
+                ]
+            }
+
+            // console.log(_query);
+            resolve(_query)
+        }
+
+        else {
+            // console.log(validation.errors.errors);
+            reject(validation.errors.errors)
+        }
+    });
 }
