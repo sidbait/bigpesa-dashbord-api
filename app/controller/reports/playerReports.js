@@ -212,4 +212,26 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
+
+    verfiedPlayerData: async function (req, res) {
+
+        try {
+            queryText = "select phone_number from tbl_player" +
+                " where phone_number_verified = true";
+
+            let query = {
+                text: queryText
+            };
+
+            let result = await pgConnection.executeQuery('rmg_dev_db', query)
+            if (result.length > 0) {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
 }
