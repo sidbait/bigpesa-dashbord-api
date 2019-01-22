@@ -14,6 +14,11 @@ contestRoutes.post('/contest/add', function(req, res)
     contestController.add(req, res);
 });
 
+contestRoutes.post('/contest/addbulk', function(req, res)
+{ 
+    contestController.addBulk(req, res);
+});
+
 contestRoutes.post('/contest/update', function(req, res)
 {
     contestController.add(req, res);

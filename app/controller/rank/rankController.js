@@ -9,7 +9,7 @@ module.exports = {
 
     getAll: async function (req, res) {
 
-        let _selectQuery = "Select * From tbl_contest_rank_master"
+        let _selectQuery = "Select * From tbl_contest_rank"
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
@@ -27,8 +27,8 @@ module.exports = {
     add: async function (req, res) {
 
         let rules = {
-            // "contest_rank_master_id": 'required|numeric',
-            "contest_master_id": 'required|numeric',
+            // "contest_rank_id": 'required|numeric',
+            "contest_id": 'required|numeric',
             "rank_name": 'required',
             "rank_desc": 'required',
             "lower_rank": 'required',
@@ -42,8 +42,8 @@ module.exports = {
 
         if (validation.passes()) {
 
-            let _contest_rank_master_id = req.body.contest_rank_master_id ? req.body.contest_rank_master_id : null;
-            let _contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+            let _contest_rank_id = req.body.contest_rank_id ? req.body.contest_rank_id : null;
+            let _contest_id = req.body.contest_id ? req.body.contest_id : null;
             let _rank_name = req.body.rank_name ? req.body.rank_name : null;
             let _rank_desc = req.body.rank_desc ? req.body.rank_desc : null;
             let _lower_rank = req.body.lower_rank ? req.body.lower_rank : null;
@@ -55,24 +55,24 @@ module.exports = {
             let _updated_by = req.body.userid ? req.body.userid : null;
 
             let _query;
-            let errMsgType = _contest_master_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
-            let successMsgType = _contest_master_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
+            let errMsgType = _contest_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
+            let successMsgType = _contest_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
 
-            if (!_contest_rank_master_id) {
+            if (!_contest_rank_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_contest_rank_master(contest_master_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *",
+                    text: "INSERT INTO tbl_contest_rank(contest_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *",
                     values: [
-                        _contest_master_id, _rank_name, _rank_desc, _lower_rank, _upper_rank, _prize_amount, _credit_type, _status
+                        _contest_id, _rank_name, _rank_desc, _lower_rank, _upper_rank, _prize_amount, _credit_type, _status,_created_by 
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_contest_rank_master SET contest_rank_master_id=$1,contest_master_id=$2,rank_name=$3,rank_desc=$4,lower_rank=$5,upper_rank=$6,prize_amount=$7,credit_type=$8,status=$9 WHERE contest_rank_master_id=$10 RETURNING *",
+                    text: "UPDATE tbl_contest_rank SET contest_rank_id=$1,contest_id=$2,rank_name=$3,rank_desc=$4,lower_rank=$5,upper_rank=$6,prize_amount=$7,credit_type=$8,status=$9,updated_by=$11 WHERE contest_rank_id=$10 RETURNING *",
                     values: [
-                        _contest_rank_master_id, _contest_master_id, _rank_name, _rank_desc, _lower_rank, _upper_rank, _prize_amount, _credit_type, _status, _contest_rank_master_id
+                        _contest_rank_id, _contest_id, _rank_name, _rank_desc, _lower_rank, _upper_rank, _prize_amount, _credit_type, _status, _contest_rank_id, _updated_by
                     ]
                 }
 
@@ -105,25 +105,25 @@ module.exports = {
     search: async function (req, res) {
 
         let rules = {
-            "contest_master_id": 'required'
+            "contest_id": 'required'
         }
 
         let validation = new services.validator(req.body, rules);
 
         if (validation.passes()) {
 
-            let _contest_rank_master_id = req.body.contest_rank_master_id ? req.body.contest_rank_master_id : null;
-            let _contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+            let _contest_rank_id = req.body.contest_rank_id ? req.body.contest_rank_id : null;
+            let _contest_id = req.body.contest_id ? req.body.contest_id : null;
             let _status = req.body.status ? req.body.status : null;
 
-            let _selectQuery = 'Select * From tbl_contest_rank_master where 1=1 '
+            let _selectQuery = 'Select * From tbl_contest_rank where 1=1 '
 
-            if (_contest_rank_master_id) {
-                _selectQuery += " AND contest_rank_master_id = '" + _contest_rank_master_id + "'"
+            if (_contest_rank_id) {
+                _selectQuery += " AND contest_rank_id = '" + _contest_rank_id + "'"
             }
 
-            if (_contest_master_id) {
-                _selectQuery += " AND contest_master_id = '" + _contest_master_id + "'"
+            if (_contest_id) {
+                _selectQuery += " AND contest_id = '" + _contest_id + "'"
             }
 
             try {
