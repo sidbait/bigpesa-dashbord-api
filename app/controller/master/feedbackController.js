@@ -9,9 +9,10 @@ module.exports = {
 
     getAll: async function (req, res) {
 
-        let _selectQuery = "select *,feedback.created_at as feedback_date,feedback.player_id as pid,feedback.\"status\" as feedback_status" +
+        let _selectQuery = "select feedback_id,full_name,phone_number,email_id,topic,details,comments, resolved_date, resolved_mode,  feedback.created_at as feedback_date,feedback.player_id as pid,username as resolved_by,feedback.\"status\" as feedback_status" +
             " from tbl_feedback feedback" +
-            " inner join tbl_player player on player.player_id = feedback.player_id" +
+            " left join tbl_user on tbl_user.user_id = feedback.user_id" +
+            " inner join tbl_player on tbl_player.player_id = feedback.player_id" +
             " order by feedback_date desc";
 
         try {
@@ -47,6 +48,8 @@ module.exports = {
             let _feedback_id = req.body.feedback_id ? req.body.feedback_id : null;
             let _comments = req.body.comments ? req.body.comments : null;
             let _status = req.body.feedback_status ? req.body.feedback_status : null;
+            //let _user_id = req.body.user_id ? req.body.user_id : 386813768023638017;
+            let _resolved_mode = req.body.resolved_mode ? req.body.resolved_mode : null;
 
             /* let _userid = req.body.userid ? req.body.userid : null;
             let _apiChecksum = req.body.checksum;
@@ -56,14 +59,27 @@ module.exports = {
             let errMsgType = _feedback_id ? 'UPDATE_FAILED' : 'FAILED_REGISTERED'
             let successMsgType = _feedback_id ? 'UPDATE_SUCCESS' : 'REGISTERED_SUCCESS'
 
-            queryText = `UPDATE tbl_feedback
+            if (_status == "RESOLVED") {
+                queryText = `UPDATE tbl_feedback
+                            SET
+                            comments=$1,
+                            status=$2,
+                            user_id=386813768023638017,
+                            resolved_date=now(),
+                            resolved_mode=$3
+                            WHERE feedback_id=$4
+                            RETURNING *`;
+                valuesArr = [_comments, _status, _resolved_mode, _feedback_id]
+            } else {
+                queryText = `UPDATE tbl_feedback
                             SET
                             comments=$1,
                             status=$2
                             WHERE feedback_id=$3
                             RETURNING *`;
+                valuesArr = [_comments, _status, _feedback_id]
 
-            valuesArr = [_comments, _status, _feedback_id]
+            }
 
             try {
 
@@ -119,8 +135,9 @@ module.exports = {
 
         let _feedback_id = req.body.feedback_id ? req.body.feedback_id : null;
 
-        let _selectQuery = "select *,feedback.created_at as feedback_date,feedback.player_id as pid,feedback.\"status\" as feedback_status" +
+        let _selectQuery = "select feedback_id, full_name,phone_number, email_id, topic,details, comments, resolved_date, resolved_mode, feedback.created_at as feedback_date, feedback.player_id as pid,username as resolved_by, feedback.\"status\" as feedback_status" +
             " from tbl_feedback feedback" +
+            " left join tbl_user on tbl_user.user_id = feedback.user_id" +
             " inner join tbl_player player on player.player_id = feedback.player_id";
 
         if (_feedback_id) {
@@ -141,6 +158,24 @@ module.exports = {
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
-    }
+    },
+
+    pendingcount: async function (req, res) {
+
+        let _selectQuery = "select count(1) from tbl_feedback where \"status\" = 'PENDING'";
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
 
 }

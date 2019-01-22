@@ -60,9 +60,10 @@ module.exports = {
 
             let player_id = req.body.player_id;
             try {
-                queryText = "select contest.contest_name,contest_players.transaction_amount,contest_players.transaction_id,contest_players.transaction_date" +
+                queryText = "select app.app_name, contest.contest_name,contest_players.transaction_amount,contest_players.transaction_id,contest_players.transaction_date" +
                     " from tbl_contest_players contest_players" +
                     " inner join tbl_contest contest on contest_players.contest_id = contest.contest_id" +
+                    " inner join tbl_app app on app.app_id = contest.app_id" +
                     " where player_id = $1" +
                     " order by contest_players.transaction_date desc";
                 valuesArr = [player_id];
@@ -149,6 +150,47 @@ module.exports = {
                     " inner join tbl_contest contest on contest_winner.contest_id = contest.contest_id" +
                     " inner join tbl_app app on contest_winner.app_id = app.app_id" +
                     " where player_id = $1 order by contest_winner.transaction_date desc";
+                valuesArr = [player_id];
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+    playerFeedbackReport: async function (req, res) {
+
+        let rules = {
+            "player_id": 'required',
+        };
+
+        var custom_message = {
+            "required.player_id": "Player Id is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+
+            let player_id = req.body.player_id;
+            try {
+                queryText = "select feedback_id,topic,details,comments, feedback.created_at, resolved_date, resolved_mode, username as resolved_by, feedback.\"status\" as feedback_status" +
+                    " from tbl_feedback feedback" +
+                    " left join tbl_user on tbl_user.user_id = feedback.user_id" +
+                    " where player_id = $1" +
+                    " order by created_at desc";
                 valuesArr = [player_id];
 
                 let query = {
