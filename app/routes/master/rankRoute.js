@@ -14,6 +14,11 @@ appRoutes.post('/rank/add', function(req, res)
     appController.add(req, res);
 });
 
+appRoutes.post('/rank/bulkInsert', function(req, res)
+{ 
+    appController.bulkInsert(req, res);
+});
+
 appRoutes.post('/rank/update', function(req, res)
 {
     appController.add(req, res);

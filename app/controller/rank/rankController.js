@@ -33,7 +33,7 @@ module.exports = {
 
         Promise.all(rankFormArray.map(async (iterator) => {
             try {
-                let query = await bulkInsert(iterator, res, contest_id, userid)
+                let query = await bulkInsert(iterator, contest_id, userid)
                 // console.log(query);
                 let dbResult = await pgConnection.executeQuery('rmg_dev_db', query);
 
@@ -176,11 +176,9 @@ module.exports = {
 
 }
 
-function bulkInsert(xxx, res, contest_id, userid) {
+function bulkInsert(iterator, contest_id, userid) {
     return new Promise((resolve, reject) => {
-        let rules = {
-            // "contest_rank_id": 'required|numeric',
-            // "contest_id": 'required|numeric',
+        let rules = {            
             "rank_name": 'required',
             "rank_desc": 'required',
             "lower_rank": 'required',
@@ -190,23 +188,21 @@ function bulkInsert(xxx, res, contest_id, userid) {
             "status": 'required',
         };
 
-        let validation = new services.validator(xxx, rules);
+        let validation = new services.validator(iterator, rules);
 
         if (validation.passes()) {
 
             let _contest_id = contest_id ? contest_id : null;
-            let _rank_name = xxx.rank_name ? xxx.rank_name : null;
-            let _rank_desc = xxx.rank_desc ? xxx.rank_desc : null;
-            let _lower_rank = xxx.lower_rank ? xxx.lower_rank : null;
-            let _upper_rank = xxx.upper_rank ? xxx.upper_rank : null;
-            let _prize_amount = xxx.prize_amount ? xxx.prize_amount : null;
-            let _credit_type = xxx.credit_type ? xxx.credit_type : null;
-            let _status = xxx.status ? xxx.status : null;
+            let _rank_name = iterator.rank_name ? iterator.rank_name : null;
+            let _rank_desc = iterator.rank_desc ? iterator.rank_desc : null;
+            let _lower_rank = iterator.lower_rank ? iterator.lower_rank : null;
+            let _upper_rank = iterator.upper_rank ? iterator.upper_rank : null;
+            let _prize_amount = iterator.prize_amount ? iterator.prize_amount : null;
+            let _credit_type = iterator.credit_type ? iterator.credit_type : null;
+            let _status = iterator.status ? iterator.status : null;
             let _created_by = userid ? userid : null;
 
             let _query;
-            let errMsgType = 'ADD_FAILED'
-            let successMsgType = 'ADD_SUCCESS'
 
             _query = {
                 text: "INSERT INTO tbl_contest_rank(contest_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING contest_rank_id",
