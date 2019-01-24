@@ -253,19 +253,22 @@ module.exports = {
 
     userFunnelSummary: async function (req, res) {
         let rules = {
-            "date": 'required'
+            "frmdate": 'required',
+            "todate": 'required'
         };
         var custom_message = {
-            "required.date": "Date is mandatory!"
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
         };
 
         let validation = new services.validator(req.body, rules, custom_message);
         try {
             if (validation.passes()) {
                 console.log(req.body)
-                let date = req.body.date;
-                queryText = "select * from vw_admin_user_funnel where reg_date::Date = $1 ORDER BY trans_date asc ";
-                valuesArr = [date]
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                queryText = "select * from vw_admin_user_funnel where reg_date::Date between $1 and $2 ORDER BY trans_date asc ";
+                valuesArr = [fromDate, toDate]
 
                 let query = {
                     text: queryText,
