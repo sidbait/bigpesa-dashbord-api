@@ -189,11 +189,12 @@ module.exports = {
                         const queriesWithId = await getQueriesContestData(sheetData, _app_id)
                         // console.log(queriesWithId);
 
-                        for (const querieWithId of queriesWithId) {
+                        // for (const querieWithId of queriesWithId) {
+                        Promise.all(queriesWithId.map(async (querieWithId) => {
                             let query = querieWithId.query
                             let contest_uid = querieWithId.contest_uid
 
-                            console.log(query, contest_uid);
+                            // console.log(query, contest_uid);
 
                             let contest_master_id = await pgConnection.executeQuery('rmg_dev_db', query)
                             // let contest_master_id = '123'
@@ -204,15 +205,20 @@ module.exports = {
                                 if (query != false) {
                                     return await pgConnection.executeQuery('rmg_dev_db', query);
                                 }
-                            })).then((results) => {
-                                console.log(results);
-                                
+                            })).then((inresults) => {
+                                // console.log(inresults);
+
                             })
 
+                            return contest_master_id;
 
-                        }
+                        })).then((results) => {
+                            console.log(results);
+                            services.sendResponse.sendWithCode(req, res, results, customMsgType, "ADD_SUCCESS");
 
-                        services.sendResponse.sendWithCode(req, res, results, customMsgType, "ADD_SUCCESS");
+                        })
+
+
 
 
                     } catch (error) {
@@ -271,9 +277,7 @@ module.exports = {
 
         if (_publish_type && _publish_type != '') {
 
-            let _pt = _publish_type.map(v => `'${v}'`)
-
-            _selectQuery += " AND publish_type in (" + _pt + ")"
+            _selectQuery += " AND CONCAT(',', publish_type, ',') like '%," + _publish_type + ",%'"
         }
 
         if (_debit_type) {

@@ -1,5 +1,4 @@
 const pgConnection = require('../../model/pgConnection');
-const mv = require('mv');
 const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";

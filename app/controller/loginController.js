@@ -1,3 +1,5 @@
+const md5 = require('md5');
+
 const jwtToken = require('../auth/jwtToken');
 const pgConnection = require('../model/pgConnection');
 const services = require('../service/service');
@@ -9,47 +11,33 @@ module.exports = {
     register: async function (req, res) {
 
         let rules = {
-            "salutation": 'required',
-            "firstName": 'required',
-            "lastName": 'required',
+            "username": 'required',
             "emailId": 'required',
-            "countryId": 'required',
-            "mobileNumber": 'required'
+            "fullname": 'required',
+            "password": 'required',
         };
 
-        let custom_message = {
-            "required.salutation": "Salutation is mandatory!",
-            "required.firstName": "First name is mandatory!",
-            "required.lastName": "Last name is mandatory!",
-            "required.emailId": "Email Id is mandatory!",
-            "required.countryId": "Country is mandatory!",
-            "required.mobileNumber": "Mobile number is mandatory!",
-        }
-
-        let validation = new services.validator(req.body, rules, custom_message);
+        let validation = new services.validator(req.body, rules);
 
         if (validation.passes()) {
 
-            let salutation = req.body.salutation ? req.body.salutation : null;
-            let firstName = req.body.firstName ? req.body.firstName : null;
-            let lastName = req.body.lastName ? req.body.lastName : null;
-            let emailId = req.body.emailId ? req.body.emailId : null;
-            let countryId = req.body.countryId ? req.body.countryId : null;
-            let mobileNumber = req.body.mobileNumber ? req.body.mobileNumber : null;
-            let skypeId = req.body.skypeId ? req.body.skypeId : null;
-
-            let pgQuery = {
-                text: "select * from fn_register_user($1,$2,$3,$4,$5,$6,$7)",
+            let _username = req.body.username ? req.body.username : null;
+            let _email = req.body.emailId ? req.body.emailId : null;
+            let _fullname = req.body.fullname ? req.body.fullname : null;
+            let _password = req.body.password ? req.body.password : null;
+            let _created_by = req.body.userid ? req.body.userid : null;
+            let _updated_by = req.body.userid ? req.body.userid : null;
+            let _password_hash = md5(_password)
+            let _status = 'ACTIVE';
+            let _role_id = '420544009998401537'
+            let _query = {
+                text: "INSERT INTO tbl_user(username,email,fullname,password_hash,status,role_id,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now()) RETURNING *",
                 values: [
-                    salutation,
-                    firstName,
-                    lastName,
-                    emailId,
-                    countryId,
-                    mobileNumber,
-                    skypeId
-                ],
+                  _username,_email,_fullname,_password_hash,_status,_role_id,_created_by
+                ]
             }
+
+            let checkInDB = `select user_id from tbl_user where email = '${_email}' or username = '${_username}'`
 
             let response = {
                 accessToken: null,
@@ -58,34 +46,20 @@ module.exports = {
 
             try {
 
-                let dbResult = await pgConnection.executeQuery("cms", pgQuery)
+                let checkInDBResult = await pgConnection.executeQuery('rmg_dev_db', checkInDB)
+                // console.log(checkInDBResult);
 
-                if (dbResult && dbResult.length > 0) {
-
-                    if (dbResult[0].p_out_userid > 0) {
-
-                        services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_REGISTERED_SUCCESS");
-
-                        services.sendMail.sendToQueue(
-                            dbResult[0].p_out_userid, "USER_REGISTERATION",
-                            {
-                                userid: dbResult[0].p_out_userid,
-                                emailid: emailId,
-                                firstname: firstName,
-                                lastname: lastName,
-                                country: countryId,
-                                mobilenumber: mobileNumber,
-                                skypeid: skypeId,
-                                verificationcode: p_out_verificationcode
-                            },
-                            null);
-                    }
-                    else {
-                        services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_ALREADY_REGISTERD");
-                    }
+                if (checkInDBResult && checkInDBResult.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_ALREADY_REGISTERD");
                 }
                 else {
-                    services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_ALREADY_REGISTERD");
+                    let dbResult = await pgConnection.executeQuery('rmg_dev_db', _query)
+                    // console.log(dbResult);
+
+                    if (dbResult && dbResult.length > 0) {
+
+                        services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_REGISTERED_SUCCESS");
+                    }
                 }
             }
             catch (dbError) {
@@ -211,25 +185,21 @@ module.exports = {
             "password": 'required'
         };
 
-        let custom_message = {
-            "required.emailId": "Email Id is mandatory!",
-            "required.password": "Password is mandatory!"
-        }
-
-        let validation = new services.validator(req.body, rules, custom_message);
+        let validation = new services.validator(req.body, rules );
 
         if (validation.passes()) {
 
             let emailId = req.body.emailId ? req.body.emailId : '';
             let password = req.body.password ? req.body.password : '';
+            let _password_hash = md5(password)
 
             let pgQuery = {
-                text: "select tbl_user.*, usertype from tbl_user " +
-                    "left join tbl_usertype on tbl_usertype.usertypeid = tbl_user.usertypeid " +
-                    "where lower(emailid) = $1 and password = $2 limit 1",
+                text: "select tbl_user.*, role_title from tbl_user " +
+                    "left join tbl_role on tbl_role.role_id = tbl_user.role_id " +
+                    "where lower(email) = $1 and password_hash = $2 limit 1",
                 values: [
                     emailId.toLowerCase(),
-                    password
+                    _password_hash
                 ],
             }
 
@@ -237,63 +207,60 @@ module.exports = {
                 accessToken: null,
                 userDetails: null
             }
-            if (emailId == 'admin' && password == 'Vi6fFYz0') {
+            // if (emailId == 'admin' && password == 'Vi6fFYz0') {
 
-                response.accessToken = 'accessToken';
-                response.userDetails = {
-                    userId: 1,
-                    status: 'ACTIVE',
+            //     response.accessToken = 'accessToken';
+            //     response.userDetails = {
+            //         userId: 1,
+            //         status: 'ACTIVE',
+            //     }
+            //     services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_SUCCESS");
+            // } else {
+            //     services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_FAILED");
+            // }
+            try {
+
+                let dbResult = await pgConnection.executeQuery('rmg_dev_db', pgQuery)
+
+                if (dbResult && dbResult.length > 0) {
+
+                    if (dbResult[0].status == 'ACTIVE') {
+
+                        let userDetails = dbResult[0];
+                        // console.log(userDetails);
+
+                        let accessToken = jwtToken.generateToken(userDetails);
+
+                        response.accessToken = accessToken;
+                        response.userDetails = {
+                            userId: userDetails.user_id,
+                            userTypeId: userDetails.role_id,
+                            userType: userDetails.role_title,
+                            emailId: userDetails.email,
+                            resetPwd: userDetails.password_reset_token,
+                            status: userDetails.status,
+                        }
+
+                        services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_SUCCESS");
+                    }
+                    else if (dbResult[0].status == 'DE-ACTIVE')
+                        services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_DEACTIVE");
+                    else if (dbResult[0].status == 'PENDING')
+                        services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_PENDING");
+                    else if (dbResult[0].status == 'VERIFIED')
+                        services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_VERIFIED");
+                    else if (dbResult[0].status == 'REJECTED')
+                        services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_REJECTED");
+                    else
+                        services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_FAILED");
                 }
-                services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_SUCCESS");
-            } else {
-                services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_FAILED");
+                else {
+                    services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_FAILED");
+                }
             }
-            // try {
-
-            //     let dbResult = await pgConnection.executeQuery("cms", pgQuery)
-
-            //     if (dbResult && dbResult.length > 0) {
-
-            //         if (dbResult[0].status == 'ACTIVE') {
-
-            //             let userDetails = dbResult[0];
-
-            //             let accessToken = jwtToken.generateToken(userDetails);
-
-            //             response.accessToken = accessToken;
-            //             response.userDetails = {
-            //                 userId: userDetails.userid,
-            //                 userTypeId: userDetails.usertypeid,
-            //                 userType: userDetails.usertype,
-            //                 salutation: userDetails.salutation,
-            //                 firstName: userDetails.firstname,
-            //                 lastName: userDetails.lastname,
-            //                 profileImage: userDetails.profileimage,
-            //                 emailId: userDetails.emailid,
-            //                 resetPwd: userDetails.resetpwd,
-            //                 status: userDetails.status,
-            //             }
-
-            //             services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_SUCCESS");
-            //         }
-            //         else if (dbResult[0].status == 'DE-ACTIVE')
-            //             services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_DEACTIVE");
-            //         else if (dbResult[0].status == 'PENDING')
-            //             services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_PENDING");
-            //         else if (dbResult[0].status == 'VERIFIED')
-            //             services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_VERIFIED");
-            //         else if (dbResult[0].status == 'REJECTED')
-            //             services.sendResponse.sendWithCode(req, res, response, customMsgType, "USER_REJECTED");
-            //         else
-            //             services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_FAILED");
-            //     }
-            //     else {
-            //         services.sendResponse.sendWithCode(req, res, response, customMsgType, "LOGIN_FAILED");
-            //     }
-            // }
-            // catch (dbError) {
-            //     services.sendResponse.sendWithCode(req, res, response, "COMMON_MESSAGE", "DB_ERROR");
-            // }
+            catch (dbError) {
+                services.sendResponse.sendWithCode(req, res, response, "COMMON_MESSAGE", "DB_ERROR");
+            }
         }
         else {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, "COMMON_MESSAGE", "VALIDATION_FAILED");

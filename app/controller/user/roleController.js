@@ -1,5 +1,4 @@
 const pgConnection = require('../../model/pgConnection');
-
 const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";
@@ -9,7 +8,7 @@ module.exports = {
 
     getAll: async function (req, res) {
 
-        let _selectQuery = "Select * From tbl_app_version"
+        let _selectQuery = "SELECT * FROM tbl_role"
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
@@ -26,48 +25,44 @@ module.exports = {
 
     add: async function (req, res) {
         let rules = {
-            // "version_id": 'required|numeric',
-            "app_id": 'required|numeric',
-            "channel": 'required',
-            "old_version": 'required',
-            "new_version": 'required',
+            // "role_id": 'required|numeric',
+            "role_title": 'required',
+            "role_name": 'required',
+            "role_remark": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
-            "download_url": 'required',
         };
 
         let validation = new services.validator(req.body, rules);
 
         if (validation.passes()) {
 
-            let _version_id = req.body.version_id ? req.body.version_id : null;
-            let _app_id = req.body.app_id ? req.body.app_id : null;
-            let _channel = req.body.channel ? req.body.channel : null;
-            let _old_version = req.body.old_version ? req.body.old_version : null;
-            let _new_version = req.body.new_version ? req.body.new_version : null;
+            let _role_id = req.body.role_id ? req.body.role_id : null;
+            let _role_title = req.body.role_title ? req.body.role_title : null;
+            let _role_name = req.body.role_name ? req.body.role_name : null;
+            let _role_remark = req.body.role_remark ? req.body.role_remark : null;
             let _status = req.body.status ? req.body.status : null;
-            let _download_url = req.body.download_url ? req.body.download_url : null;
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
 
             let _query;
-            let errMsgType = _version_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
-            let successMsgType = _version_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
+            let errMsgType = _role_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
+            let successMsgType = _role_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
 
-            if (!_version_id) {
+            if (!_role_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_app_version(app_id,channel,old_version,new_version,status,download_url,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now()) RETURNING *",
+                    text: "INSERT INTO tbl_role(role_title,role_name,role_remark,status,created_by,created_at) VALUES ($1,$2,$3,$4,$5,now()) RETURNING *",
                     values: [
-                         _app_id, _channel, _old_version, _new_version, _status, _download_url, _created_by
+                        _role_title, _role_name, _role_remark, _status, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_app_version SET version_id=$1,app_id=$2,channel=$3,old_version=$4,new_version=$5,status=$6,download_url=$7,updated_by=$8,updated_at=now() WHERE version_id=$9 RETURNING *",
+                    text: "UPDATE tbl_role SET role_id=$1,role_title=$2,role_name=$3,role_remark=$4,status=$5,updated_by=$6,updated_at=now() WHERE role_id=$7 RETURNING *",
                     values: [
-                        _version_id, _app_id, _channel, _old_version, _new_version, _status, _download_url, _updated_by, _version_id
+                        _role_id, _role_title, _role_name, _role_remark, _status, _updated_by, _role_id
                     ]
                 }
 
@@ -94,41 +89,31 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
 
         }
-
     },
 
     search: async function (req, res) {
+        let _role_id = req.body.role_id ? req.body.role_id : null;
+        let _role_title = req.body.role_title ? req.body.role_title : null;
+        let _role_name = req.body.role_name ? req.body.role_name : null;
+        let _role_remark = req.body.role_remark ? req.body.role_remark : null;
+        let _role_status = req.body.role_status ? req.body.role_status : null;
 
-        let _version_id = req.body.version_id ? req.body.version_id : null;
-        let _app_id = req.body.app_id ? req.body.app_id : null;
-        let _channel = req.body.channel ? req.body.channel : null;
-        let _old_version = req.body.old_version ? req.body.old_version : null;
-        let _new_version = req.body.new_version ? req.body.new_version : null;
-        let _status = req.body.status ? req.body.status : null;
-        let _download_url = req.body.download_url ? req.body.download_url : null;
+        let _selectQuery = 'SELECT * FROM tbl_role WHERE  1=1'
 
-        let _selectQuery = 'SELECT * FROM tbl_app_version WHERE  1=1'
-
-        if (_version_id) {
-            _selectQuery += " AND version_id = " + _version_id
+        if (_role_id) {
+            _selectQuery += " AND role_id = " + _role_id
         }
-        if (_app_id) {
-            _selectQuery += " AND app_id = " + _app_id
+        if (_role_title) {
+            _selectQuery += " AND role_title = " + _role_title
         }
-        if (_channel) {
-            _selectQuery += " AND channel = " + _channel
+        if (_role_name) {
+            _selectQuery += " AND role_name = " + _role_name
         }
-        if (_old_version) {
-            _selectQuery += " AND old_version = " + _old_version
+        if (_role_remark) {
+            _selectQuery += " AND role_remark = " + _role_remark
         }
-        if (_new_version) {
-            _selectQuery += " AND new_version = " + _new_version
-        }
-        if (_status) {
-            _selectQuery += " AND status = " + _status
-        }
-        if (_download_url) {
-            _selectQuery += " AND download_url = " + _download_url
+        if (_role_status) {
+            _selectQuery += " AND role_status = " + _role_status
         }
 
         try {
@@ -143,7 +128,5 @@ module.exports = {
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
-
     }
-
 }
