@@ -6,14 +6,14 @@ module.exports = {
 
         var claims = {
             sub: 'authentication',
-            iss: 'http://nazara.com',
+            iss: 'http://bigpesa.com',
             permissions: 'all',
             identity: {
-                source: 'NAZARA-CMS',
-                userId: userDetails.userid,
-                emailId: userDetails.emailid,
-                userTypeId: userDetails.usertypeid,
-                userType:userDetails.usertype,
+                source: 'bigpesa-CMS',
+                userId: userDetails.user_id,
+                emailId: userDetails.email,
+                userTypeId: userDetails.role_id,
+                userType: userDetails.role_title,
                 date: new Date()
             }
         };

@@ -2,7 +2,7 @@ var appRoutes = express.Router();
 
 var validate = require('../../auth/validate');
 
-var appController = require('../../controller/master/eventController');
+var appController = require('../../controller/master/spinBonusController');
 
 appRoutes.get('/spinbonus', function(req, res)
 {

@@ -44,13 +44,13 @@ module.exports = {
 
         "USER_ALREADY_REGISTERD": {
             success: false,
-            message: "Email Id already exists. Please provide another Email Id!",
+            message: "Email Id or Username already exists. Please provide another!!",
             messageCode: "ALREADY_REGISTERD",
             statusCode: 401
         },
         "USER_REGISTERED_SUCCESS": {
             success: false,
-            message: "Registered Successfully. Please verify your Email Id to complete the registration. Verification link sent on your Email Id!",
+            message: "Registered Successfully.",
             messageCode: "REGISTERED_SUCCESS",
             statusCode: 401
         },

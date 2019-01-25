@@ -179,19 +179,47 @@ module.exports = {
 
                     try {
                         const xlsxFilePath = await moveFile(from_path, moveto)
-                        console.log(xlsxFilePath);
+                        // console.log(xlsxFilePath);
 
                         const sheetData = await readSheet(xlsxFilePath)
-                        console.log(sheetData);
+                        // console.log(sheetData);
 
-                        const queries = await getQueries(sheetData, _app_id)
-                        console.log(queries);
-                        Promise.all(queries.map(async (query) => {
-                            return await pgConnection.executeQuery('rmg_dev_db', query);
+                        // console.log(sheetData.rankData[0].contest_uid);
+
+                        const queriesWithId = await getQueriesContestData(sheetData, _app_id)
+                        // console.log(queriesWithId);
+
+                        // for (const querieWithId of queriesWithId) {
+                        Promise.all(queriesWithId.map(async (querieWithId) => {
+                            let query = querieWithId.query
+                            let contest_uid = querieWithId.contest_uid
+
+                            // console.log(query, contest_uid);
+
+                            let contest_master_id = await pgConnection.executeQuery('rmg_dev_db', query)
+                            // let contest_master_id = '123'
+                            const queries = await getQueriesRankData(sheetData, contest_uid, contest_master_id[0].contest_master_id)
+
+
+                            Promise.all(queries.map(async (query) => {
+                                if (query != false) {
+                                    return await pgConnection.executeQuery('rmg_dev_db', query);
+                                }
+                            })).then((inresults) => {
+                                // console.log(inresults);
+
+                            })
+
+                            return contest_master_id;
+
                         })).then((results) => {
                             console.log(results);
                             services.sendResponse.sendWithCode(req, res, results, customMsgType, "ADD_SUCCESS");
+
                         })
+
+
+
 
                     } catch (error) {
                         console.log(error);
@@ -249,9 +277,7 @@ module.exports = {
 
         if (_publish_type && _publish_type != '') {
 
-            let _pt = _publish_type.map(v => `'${v}'`)
-
-            _selectQuery += " AND publish_type in (" + _pt + ")"
+            _selectQuery += " AND CONCAT(',', publish_type, ',') like '%," + _publish_type + ",%'"
         }
 
         if (_debit_type) {
@@ -343,45 +369,61 @@ function readSheet(xlsxFilePath) {
     return new Promise((resolve, reject) => {
         const result = excelToJson({
             sourceFile: xlsxFilePath,
+            sheets: [{
+                name: 'contestData',
+                columnToKey: {
+                    A: 'contest_uid',
+                    B: 'contest_name',
+                    C: 'contest_type',
+                    D: 'contest_desc',
+                    E: 'is_repeat',
+                    F: 'start_date',
+                    G: 'end_date',
+                    H: 'from_time',
+                    I: 'to_time',
+                    J: 'max_players',
+                    K: 'winners',
+                    L: 'entry_fee',
+                    M: 'currency',
+                    N: 'profit_margin',
+                    O: 'next_start_date',
+                    P: 'status',
+                    Q: 'debit_type',
+                    R: 'credit_type',
+                    S: 'win_amount',
+                    T: 'css_class',
+                    U: 'contest_priority',
+                    V: 'game_conf',
+                    W: 'contest_icon',
+                    X: 'publish_type',
+                    Y: 'channel'
+                }
+            }, {
+                name: 'rankData',
+                columnToKey: {
+                    A: 'contest_uid',
+                    B: 'rank_name',
+                    C: 'rank_desc',
+                    D: 'lower_rank',
+                    E: 'upper_rank',
+                    F: 'prize_amount',
+                    G: 'status',
+                    H: 'credit_type'
+                }
+            }],
             header: {
                 rows: 1 // 2, 3, 4, etc.
-            },
-            columnToKey: {
-                A: 'contest_name',
-                B: 'contest_type',
-                C: 'contest_desc',
-                D: 'is_repeat',
-                E: 'start_date',
-                F: 'end_date',
-                G: 'from_time',
-                H: 'to_time',
-                I: 'max_players',
-                J: 'winners',
-                K: 'entry_fee',
-                L: 'currency',
-                M: 'profit_margin',
-                N: 'next_start_date',
-                O: 'status',
-                P: 'debit_type',
-                Q: 'credit_type',
-                R: 'win_amount',
-                S: 'css_class',
-                T: 'contest_priority',
-                U: 'game_conf',
-                V: 'contest_icon',
-                W: 'publish_type',
-                X: 'channel'
             }
         });
         resolve(result)
     });
 }
 
-function getQueries(sheetData, _app_id) {
+function getQueriesContestData(sheetData, _app_id) {
 
     return new Promise((resolve, reject) => {
-        if (sheetData && sheetData.Sheet1) {
-            let queries = sheetData.Sheet1.map(object => {
+        if (sheetData && sheetData.contestData) {
+            let queries = sheetData.contestData.map(object => {
 
                 object['app_id'] = _app_id
                 object['from_time'] = getFormattedTime(object['from_time'])
@@ -392,7 +434,7 @@ function getQueries(sheetData, _app_id) {
                 let dollcount = []
 
                 for (const key in object) {
-                    if (object.hasOwnProperty(key)) {
+                    if (object.hasOwnProperty(key) && key != 'contest_uid') {
 
                         const element = object[key];
 
@@ -410,12 +452,18 @@ function getQueries(sheetData, _app_id) {
                     text: `INSERT INTO tbl_contest_master(${cols.toString()}) VALUES (${dollcount}) RETURNING contest_master_id`,
                     values: values
                 }
-
-                return query;
+                // console.log(query,object['contest_uid']);
+                let contest_uid = object['contest_uid'];
+                let output = {
+                    query,
+                    contest_uid
+                }
+                return output;
             })
+
             resolve(queries)
         } else {
-            reject('wrong sheetData or sheet name please set Sheet1')
+            reject('wrong sheetData or sheet name')
         }
     });
 }
@@ -442,4 +490,48 @@ function getFormattedTime(date) {
     let sec = momentDate.seconds();
 
     return hr + ':' + min + ':' + sec;
+}
+
+function getQueriesRankData(sheetData, contest_uid, contest_master_id) {
+
+    return new Promise((resolve, reject) => {
+
+        let queries = sheetData.rankData.map(object => {
+            if (contest_uid == object['contest_uid']) {
+                object['contest_master_id'] = contest_master_id
+
+                let count = 0;
+                let cols = [];
+                let values = [];
+                let dollcount = []
+
+                for (const key in object) {
+                    if (object.hasOwnProperty(key) && key != 'contest_uid') {
+
+                        const element = object[key];
+
+                        cols.push(key)
+
+                        values.push(element)
+                        count = count + 1;
+
+                        dollcount.push(`$${count}`)
+
+                    }
+                }
+
+                query = {
+                    text: `INSERT INTO tbl_contest_rank_master(${cols.toString()}) VALUES (${dollcount}) RETURNING contest_rank_master_id`,
+                    values: values
+                }
+
+                return query;
+            } else {
+                return false;
+            }
+
+        })
+
+        resolve(queries)
+    });
 }
