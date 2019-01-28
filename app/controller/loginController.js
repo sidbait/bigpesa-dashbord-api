@@ -29,7 +29,7 @@ module.exports = {
             let _updated_by = req.body.userid ? req.body.userid : null;
             let _password_hash = md5(_password)
             let _status = 'ACTIVE';
-            let _role_id = '420544009998401537'
+            let _role_id = '420575820530548737'
             let _query = {
                 text: "INSERT INTO tbl_user(username,email,fullname,password_hash,status,role_id,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now()) RETURNING *",
                 values: [

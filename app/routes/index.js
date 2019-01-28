@@ -21,7 +21,9 @@ const contestRoutes = require('../routes/contest/contestRoute');
 const rankRoutes = require('../routes/rank/rankRoute');
 const userRoutes = require('../routes/users/userRoute');
 const roleRoutes = require('../routes/users/roleRoute');
+const dashboardRoutes = require('../routes/dashboard/dashboardRoute');
 const playerReportRoute = require('../routes/reports/playerReportRoute');
+const menuRoutes = require('../routes/menu/menuRoute');
 
 apiRoutes.get('/', function (req, res) {
     sendResponse.sendWithCode(req, res, null, "COMMON_MESSAGE", "WELCOME");
@@ -37,7 +39,9 @@ app.use(middleware.injectMiddleware(
         apiRoutes_user.use('/contest', contestRoutes),
         apiRoutes_user.use('/rank', rankRoutes),
         apiRoutes_user.use('/user', userRoutes),
-        apiRoutes_user.use('/role', roleRoutes)
+        apiRoutes_user.use('/role', roleRoutes),
+        apiRoutes_user.use('/dashboard', dashboardRoutes),
+        apiRoutes_user.use('/menu', menuRoutes)
     ]
 ));
 app.use(middleware.injectMiddleware(
