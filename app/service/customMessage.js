@@ -225,5 +225,19 @@ module.exports = {
             messageCode: "GET_FAILED",
             statusCode: 401
         }
+    },
+    "BULKSMS_MESSAGE":{
+        "FILE_IMPORT":{
+            success: true,
+            message: "File Imported Successfully",
+            messageCode: "FILE_IMPORTED",
+            statusCode: 200
+        },
+        "WRONG_HEADER":{
+            success: false,
+            message: "File should have column - phone_number",
+            messageCode: "FILE_IMPORTED",
+            statusCode: 401
+        }
     }
 }
