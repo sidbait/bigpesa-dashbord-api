@@ -170,7 +170,7 @@ module.exports = {
         let _fullname = req.body.fullname ? req.body.fullname : null;
         let _status = req.body.status ? req.body.status : null;
 
-        let _selectQuery = 'select * from tbl_user inner join tbl_role on tbl_role.role_id = tbl_user.role_id where 1=1'
+        let _selectQuery = 'select * from tbl_user where 1=1'
 
         if (_user_id) {
             _selectQuery += " AND user_id = " + _user_id
