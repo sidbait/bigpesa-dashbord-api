@@ -440,13 +440,13 @@ module.exports = {
                 let status = req.body.status;
                 let source = req.body.source;
                 let date = req.body.date;
-                let queryText = "select * from tbl_wallet_transaction" +
+                let queryText = "select created_at, pg_source, nz_txn_status,player_id, mobile_no, amount from tbl_wallet_transaction" +
                     " where nz_txn_type = 'DEPOSIT'" +
                     " and amount ~ '^[0-9\.]+$' = true" +
                     " and created_at::date = $1" +
                     " and pg_source = $2" +
                     " and nz_txn_status = $3" +
-                    " order by created_at::date desc";
+                    " order by created_at";
 
                 let valuesArr = [date, source, status]
                 let query = {
