@@ -350,7 +350,7 @@ module.exports = {
                 let queryText = " select created_at::date::string," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " COALESCE(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),0) as DEBIT," +
-                " COALESCE(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),0) as CREDIT," +
+                    " COALESCE(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),0) as CREDIT," +
                     " COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW," +
                     " sum(amount::decimal) as total" +
                     " from tbl_wallet_transaction " +
@@ -395,14 +395,60 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 let queryText = "select created_at::date::string, pg_source, nz_txn_status, count(1) as pcount, sum(amount::decimal) as total" +
-                " from tbl_wallet_transaction" +
-                " where nz_txn_type = 'DEPOSIT'" +
-                " and amount ~ '^[0-9\.]+$' = true" +
-                " and created_at::date between $1 and $2" +
-                " group by created_at::date::string, pg_source, nz_txn_status" +
-                " order by 1";
+                    " from tbl_wallet_transaction" +
+                    " where nz_txn_type = 'DEPOSIT'" +
+                    " and amount ~ '^[0-9\.]+$' = true" +
+                    " and created_at::date between $1 and $2" +
+                    " group by created_at::date::string, pg_source, nz_txn_status" +
+                    " order by 1";
 
                 let valuesArr = [fromDate, toDate]
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+    paymentgatewayDetailReport: async function (req, res) {
+        let rules = {
+            "status": 'required',
+            "date": 'required',
+            "source": 'required'
+        };
+        var custom_message = {
+            "required.status": "status is mandatory!",
+            "required.source": "source is mandatory!",
+            "required.date": "date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let status = req.body.status;
+                let source = req.body.source;
+                let date = req.body.date;
+                let queryText = "select created_at, pg_source, nz_txn_status,player_id, mobile_no, amount from tbl_wallet_transaction" +
+                    " where nz_txn_type = 'DEPOSIT'" +
+                    " and amount ~ '^[0-9\.]+$' = true" +
+                    " and created_at::date = $1" +
+                    " and pg_source = $2" +
+                    " and nz_txn_status = $3" +
+                    " order by created_at";
+
+                let valuesArr = [date, source, status]
                 let query = {
                     text: queryText,
                     values: valuesArr

@@ -48,7 +48,7 @@ module.exports = {
             let _feedback_id = req.body.feedback_id ? req.body.feedback_id : null;
             let _comments = req.body.comments ? req.body.comments : null;
             let _status = req.body.feedback_status ? req.body.feedback_status : null;
-            //let _user_id = req.body.user_id ? req.body.user_id : 386813768023638017;
+            let _user_id = req.body.user_id ? req.body.user_id : 420559314854608897;
             let _resolved_mode = req.body.resolved_mode ? req.body.resolved_mode : null;
 
             /* let _userid = req.body.userid ? req.body.userid : null;
@@ -64,12 +64,12 @@ module.exports = {
                             SET
                             comments=$1,
                             status=$2,
-                            user_id=386813768023638017,
+                            user_id=$3,
                             resolved_date=now(),
-                            resolved_mode=$3
-                            WHERE feedback_id=$4
+                            resolved_mode=$4
+                            WHERE feedback_id=$5
                             RETURNING *`;
-                valuesArr = [_comments, _status, _resolved_mode, _feedback_id]
+                valuesArr = [_comments, _status, _user_id, _resolved_mode, _feedback_id]
             } else {
                 queryText = `UPDATE tbl_feedback
                             SET
