@@ -11,6 +11,7 @@ module.exports = {
 
     getMenu: async function (req, res) {
         let userType = req.body.userType ? req.body.userType : null;
+
         switch (userType) {
             case 'Administrator':
                 limit = {
@@ -102,6 +103,32 @@ module.exports = {
                 break;
             case 'Reporting':
                 limit = {
+                    Dashboard: false,
+                    UserDetails: {
+                        main: false,
+                        users: false,
+                        roles: false,
+                    },
+                    AppDetails: {
+                        main: false,
+                        app: false,
+                        appversion: false,
+                    },
+                    EventDetails: {
+                        main: false,
+                        event: false,
+                        winnerevent: false,
+                        spinwheel: false,
+                    },
+                    ContestDetails: {
+                        main: false,
+                        mastercontest: false,
+                        contest: false,
+                    },
+                    FeedbackDetails: {
+                        main: false,
+                        feedback: false,
+                    },
                     Reports: {
                         main: true,
                         contest: true,
@@ -119,14 +146,46 @@ module.exports = {
                 }
                 break;
             case 'Support':
+
                 limit = {
+                    Dashboard: false,
+                    UserDetails: {
+                        main: false,
+                        users: false,
+                        roles: false,
+                    },
+                    AppDetails: {
+                        main: false,
+                        app: false,
+                        appversion: false,
+                    },
+                    EventDetails: {
+                        main: false,
+                        event: false,
+                        winnerevent: false,
+                        spinwheel: false,
+                    },
+                    ContestDetails: {
+                        main: false,
+                        mastercontest: false,
+                        contest: false,
+                    },
                     FeedbackDetails: {
                         main: true,
                         feedback: true,
                     },
                     Reports: {
                         main: true,
+                        contest: false,
+                        contestsummary: false,
+                        downloadsummary: false,
                         userreport: true,
+                        cash: false,
+                        paymentgateway: false,
+                        acquisitionsummary: false,
+                        acquisitiondetails: false,
+                        userfunnel: false,
+                        summary: false,
                         export: true,
                     }
                 }
