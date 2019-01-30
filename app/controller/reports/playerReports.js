@@ -291,10 +291,8 @@ module.exports = {
 
         try {
             queryText = "select phone_number from tbl_player" +
-                " where phone_number_verified = true" +
-                " and player_id not in(" +
-                " select distinct player_id" +
-                " from tbl_contest_players)";
+                " left join tbl_contest_players on tbl_player.player_id = tbl_contest_players.player_id" +
+                " where tbl_contest_players.player_id is null and tbl_player.phone_number_verified = true";
 
             let query = {
                 text: queryText
