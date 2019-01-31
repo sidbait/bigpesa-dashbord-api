@@ -108,11 +108,51 @@ module.exports = {
 
             let player_id = req.body.player_id;
             try {
-                queryText = "select app.app_name,wallet_transaction.amount,wallet_transaction.created_at, wallet_transaction.nz_txn_type,wallet_transaction.nz_txn_status" +
-                    " from tbl_wallet_transaction wallet_transaction" +
-                    " inner join tbl_app app on wallet_transaction.app_id = app.app_id" +
-                    " where wallet_transaction.player_id = $1" +
-                    " order by wallet_transaction.created_at desc";
+                queryText = "select amount, created_at, nz_txn_type,nz_txn_status" +
+                    " from tbl_wallet_transaction" +
+                    " where player_id = $1" +
+                    " order by created_at desc";
+                valuesArr = [player_id];
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+    withdrawDepositTransactionReport: async function (req, res) {
+
+        let rules = {
+            "player_id": 'required',
+        };
+
+        var custom_message = {
+            "required.player_id": "Player Id is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+
+            let player_id = req.body.player_id;
+            try {
+                queryText = "select created_at, nz_txn_type as transaction_type, amount, nz_txn_status" +
+                    " from tbl_wallet_transaction" +
+                    " where player_id = $1" +
+                    " and nz_txn_type in ('WITHDRAW', 'DEPOSIT')" +
+                    " order by created_at desc";
                 valuesArr = [player_id];
 
                 let query = {
@@ -156,6 +196,56 @@ module.exports = {
                     " inner join tbl_contest contest on contest_winner.contest_id = contest.contest_id" +
                     " inner join tbl_app app on contest_winner.app_id = app.app_id" +
                     " where player_id = $1 order by contest_winner.transaction_date desc";
+                valuesArr = [player_id];
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+    playerContestReport: async function (req, res) {
+
+        let rules = {
+            "player_id": 'required',
+        };
+
+        var custom_message = {
+            "required.player_id": "Player Id is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+
+            let player_id = req.body.player_id;
+            try {
+                queryText = "select app.app_name, contest.contest_name, contest.entry_fee, contest.debit_type," +
+                    " contest_players.transaction_date as joined_date," +
+                    " contest_winner.player_rank, contest_winner.win_amount," +
+                    " contest_winner.credit_type, contest_winner.transaction_date as winning_date" +
+                    " from tbl_app as app" +
+                    " inner join tbl_contest as contest on" +
+                    " app.app_id = contest.app_id" +
+                    " inner join tbl_contest_players as contest_players on" +
+                    " contest_players.contest_id = contest.contest_id" +
+                    " left join tbl_contest_winner as contest_winner on" +
+                    " (contest_winner.contest_id = contest.contest_id) and" +
+                    " (contest_winner.player_id = contest_players.player_id)" +
+                    " where contest_players.player_id = $1" +
+                    " order by winning_date desc";
                 valuesArr = [player_id];
 
                 let query = {
