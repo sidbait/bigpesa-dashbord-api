@@ -45,6 +45,7 @@ module.exports = {
                         main: true,
                         contest: true,
                         contestsummary: true,
+                        gamesummary: true,
                         downloadsummary: true,
                         userreport: true,
                         cash: true,
@@ -89,6 +90,7 @@ module.exports = {
                         main: true,
                         contest: false,
                         contestsummary: false,
+                        gamesummary: false,
                         downloadsummary: false,
                         userreport: true,
                         cash: false,
@@ -133,6 +135,7 @@ module.exports = {
                         main: true,
                         contest: true,
                         contestsummary: true,
+                        gamesummary: true,
                         downloadsummary: true,
                         userreport: true,
                         cash: true,
@@ -178,6 +181,7 @@ module.exports = {
                         main: true,
                         contest: false,
                         contestsummary: false,
+                        gamesummary: false,
                         downloadsummary: false,
                         userreport: true,
                         cash: false,
@@ -228,6 +232,7 @@ module.exports = {
                         main: false,
                         contest: false,
                         contestsummary: false,
+                        gamesummary: false,
                         downloadsummary: false,
                         userreport: false,
                         cash: false,
@@ -309,6 +314,7 @@ module.exports = {
                 children: [
                     { path: '/reports/contest', title: 'Contest Report', show: limit.Reports.contest, },
                     { path: '/reports/contestsummary', title: 'Contest Summary', show: limit.Reports.contestsummary, },
+                    { path: '/reports/gamesummary', title: 'Top Game Summary', show: limit.Reports.gamesummary, },
                     { path: '/reports/downloadsummary', title: 'Download Summary', show: limit.Reports.downloadsummary, },
                     { path: '/reports/userreport', title: 'User Report', show: limit.Reports.userreport, },
                     { path: '/reports/cash', title: 'cash Report', show: limit.Reports.cash, },
@@ -317,7 +323,7 @@ module.exports = {
                     { path: '/reports/acquisitiondetails', title: 'Acquisition Details', show: limit.Reports.acquisitiondetails, },
                     { path: '/reports/userfunnel', title: 'User Funnel', show: limit.Reports.userfunnel, },
                     { path: '/reports/summary', title: 'Summary', show: limit.Reports.summary, },
-                    { path: '/reports/export', title: 'Export', show: limit.Reports.export, },
+                    { path: '/reports/export', title: 'Export & Bulk SMS', show: limit.Reports.export, }
                 ]
             },
 
