@@ -6,6 +6,7 @@ appRoutes.post('/playercontestjoined',  playerReports.playerContestJoinedReport)
 appRoutes.post('/playercontestwin',  playerReports.playerContestWinReport);
 appRoutes.post('/playerwallettransaction',  playerReports.walletTransactionReport);
 appRoutes.post('/playerwithdrawdeposittransaction',  playerReports.withdrawDepositTransactionReport);
+appRoutes.post('/gettransactiondetails',  playerReports.getTransactionDetails);
 appRoutes.post('/playercontestreport',  playerReports.playerContestReport);
 appRoutes.post('/playerfeedbackreport',  playerReports.playerFeedbackReport);
 appRoutes.get('/activeplayerdata',  playerReports.activePlayerData);
