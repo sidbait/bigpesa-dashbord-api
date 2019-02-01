@@ -354,7 +354,7 @@ module.exports = {
     activePlayerData: async function (req, res) {
 
         try {
-            queryText = "select fullname, phone_number, email_id from tbl_player" +
+            queryText = "select full_name, phone_number, email_id from tbl_player" +
                 " where phone_number_verified = true" +
                 " and player_id in(" +
                 " select distinct player_id from tbl_contest_players" +
@@ -378,7 +378,7 @@ module.exports = {
     inActivePlayerData: async function (req, res) {
 
         try {
-            queryText = "select fullname, phone_number, email_id from tbl_player" +
+            queryText = "select full_name, phone_number, email_id from tbl_player" +
                 " where phone_number_verified = true" +
                 " and player_id in(" +
                 " select distinct player_id from tbl_contest_players" +
@@ -402,7 +402,7 @@ module.exports = {
     verifiedPlayerData: async function (req, res) {
 
         try {
-            queryText = "select fullname, phone_number, email_id from tbl_player" +
+            queryText = "select full_name, phone_number, email_id from tbl_player" +
                 " where phone_number_verified = true";
 
             let query = {
@@ -423,7 +423,7 @@ module.exports = {
     verifiedButNotPlayedPlayerData: async function (req, res) {
 
         try {
-            queryText = "select fullname, phone_number, email_id from tbl_player" +
+            queryText = "select full_name, phone_number, email_id from tbl_player" +
                 " left join tbl_contest_players on tbl_player.player_id = tbl_contest_players.player_id" +
                 " where tbl_contest_players.player_id is null and tbl_player.phone_number_verified = true";
 
