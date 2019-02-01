@@ -512,7 +512,8 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 queryText = "select * from vw_admin_top_game_summary" +
-                " where \"date\"::Date between $1 and $2 ORDER BY \"date\"::Date asc";
+                    " where \"date\"::Date between $1 and $2" +
+                    " ORDER BY total_players_joined desc";
                 valuesArr = [fromDate, toDate]
 
                 let query = {
