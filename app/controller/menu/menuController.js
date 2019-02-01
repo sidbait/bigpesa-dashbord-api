@@ -61,9 +61,9 @@ module.exports = {
                 limit = {
                     Dashboard: true,
                     UserDetails: {
-                        main: true,
-                        users: true,
-                        roles: true,
+                        main: false,
+                        users: false,
+                        roles: false,
                     },
                     AppDetails: {
                         main: true,
@@ -71,10 +71,10 @@ module.exports = {
                         appversion: true,
                     },
                     EventDetails: {
-                        main: true,
-                        event: true,
-                        winnerevent: true,
-                        spinwheel: true,
+                        main: false,
+                        event: false,
+                        winnerevent: false,
+                        spinwheel: false,
                     },
                     ContestDetails: {
                         main: true,
@@ -87,16 +87,16 @@ module.exports = {
                     },
                     Reports: {
                         main: true,
-                        contest: true,
-                        contestsummary: true,
-                        downloadsummary: true,
+                        contest: false,
+                        contestsummary: false,
+                        downloadsummary: false,
                         userreport: true,
-                        cash: true,
-                        paymentgateway: true,
-                        acquisitionsummary: true,
-                        acquisitiondetails: true,
-                        userfunnel: true,
-                        summary: true,
+                        cash: false,
+                        paymentgateway: false,
+                        acquisitionsummary: false,
+                        acquisitiondetails: false,
+                        userfunnel: false,
+                        summary: false,
                         export: true,
                     }
                 }
