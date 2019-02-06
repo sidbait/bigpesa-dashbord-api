@@ -4,29 +4,16 @@ var validate = require('../../auth/validate');
 
 var contestController = require('../../controller/master/contestController');
 
-contestRoutes.get('/contest', function(req, res)
-{
-    contestController.getAll(req, res);
-});
+contestRoutes.get('/contest', contestController.getAll);
 
-contestRoutes.post('/contest/add', function(req, res)
-{ 
-    contestController.add(req, res);
-});
+contestRoutes.post('/contest/add', contestController.add);
 
-contestRoutes.post('/contest/addbulk', function(req, res)
-{ 
-    contestController.addBulk(req, res);
-});
+contestRoutes.post('/contest/addbulk', contestController.addBulk);
 
-contestRoutes.post('/contest/update', function(req, res)
-{
-    contestController.add(req, res);
-});
+contestRoutes.post('/contest/update', contestController.add);
 
-contestRoutes.post('/contest/search', function(req, res)
-{
-    contestController.search(req, res);
-});
+contestRoutes.post('/contest/search', contestController.search);
+
+contestRoutes.post('/contest/updateContestStatus', contestController.updateContestStatus);
 
 module.exports = contestRoutes;
