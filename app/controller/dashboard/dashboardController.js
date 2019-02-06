@@ -168,22 +168,46 @@ module.exports = {
     todaysDownloadSummary: async function (req, res) {
 
         let _selectQuery = `select
-            app_download.agency_source,
-            count(distinct app_download.download_id) as downloads,
-            count(distinct player_device.device_id) as register,
-            count(distinct case when player.phone_number_verified = true then player_device.player_id end) as otp_verified
+        xsource as xsource,
+        sum(downloads) as downloads,
+        sum(register) as register,
+        sum(otp_verified) as otp_verified
+    from
+        (
+        select
+            case
+                when agency_source like 'refer%' then 'Referrer'
+                when agency_source = '' then 'Unknown'
+                else agency_source
+            end as xsource,
+            count(distinct download_id)::decimal as downloads,
+            0:::decimal::decimal as register,
+            0:::decimal::decimal as otp_verified
         from
-            tbl_app_download app_download
-        left join tbl_player_device player_device on
-            player_device.device_id = app_download.device_id
-        left join tbl_player player on
-            player.player_id = player_device.player_id
+            tbl_app_download
         where
-            app_download.download_date::date = current_date
+            download_date::date = current_date
         group by
-            app_download.agency_source
-        order by
-	        downloads desc`;
+            agency_source
+    union all
+        select
+            case
+                when source like 'refer%' then 'Referrer'			
+                when source  = '' then 'Unknown'
+                else source
+            end as xsource,
+            0:::decimal::decimal as downloads,
+            count(player_id)::decimal as register,
+            count(distinct case when phone_number_verified = true then player_id end)::decimal as otp_verified
+        from
+            tbl_player
+        where
+            created_at::date = current_date
+        group by
+            source)
+    group by
+        xsource
+    order by downloads desc`;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)

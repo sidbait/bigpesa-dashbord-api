@@ -26,6 +26,49 @@ module.exports = {
         }
     },
 
+    updateContestStatus: async function (req, res) {
+
+        let rules = {
+            "selectedContests": 'required',
+            "status": 'required',
+        }
+
+        let validation = new services.validator(req.body, rules);
+
+        if (validation.passes()) {
+
+            let _selectedContests = req.body.selectedContests ? req.body.selectedContests : null;
+            let _userid = req.body.userid ? req.body.userid : null;
+            let _status = req.body.status ? req.body.status : null;
+
+            let _selectQuery = `select contest_id,status from tbl_contest
+            where contest_id in (${_selectedContests.toString()})
+            AND now():::timestamptz + (330:::int * '1m':::interval) < start_date`
+            try {
+
+                let isUpComing = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+                if (isUpComing && isUpComing.length > 0) {
+
+                    let _updateQuery = `update tbl_contest set status = '${_status}', updated_by = '${_userid}', updated_at = now() where contest_id in (${_selectedContests.toString()}) returning contest_id`
+
+                    let _updated_id = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
+
+                    services.sendResponse.sendWithCode(req, res, _updated_id, "CONTEST_MESSAGE", "CONTEST_UPDATED");
+                }
+                else
+                    services.sendResponse.sendWithCode(req, res, null, "CONTEST_MESSAGE", "IS_UPCOMING_FALSE");
+            }
+            catch (error) {
+                console.log(error);
+
+                services.sendResponse.sendWithCode(req, res, 'error', customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+
     add: async function (req, res) {
 
         let rules = {
@@ -78,7 +121,7 @@ module.exports = {
             let _publish_type = req.body.publish_type ? req.body.publish_type : null;
             let _status = req.body.status ? req.body.status : null;
             let _created_by = req.body.userid ? req.body.userid : null;
-            let _updated_by = null;
+            let _updated_by = req.body.userid ? req.body.userid : null;
             let _contest_priority = req.body.contest_priority ? req.body.contest_priority : null;
             let _game_conf = req.body.game_conf ? req.body.game_conf : null;
             let _channel = req.body.channel ? req.body.channel : null;
@@ -203,6 +246,7 @@ module.exports = {
         let _fromDate = req.body.frmdate ? req.body.frmdate : null;
         let _toDate = req.body.todate ? req.body.todate : null;
         let _status = req.body.status ? req.body.status : null;
+        let _grep = req.body.grep ? req.body.grep : null;
         let _publish_type = req.body.publish_type ? req.body.publish_type : null;
         let _debit_type = req.body.debit_type ? req.body.debit_type : null;
         let _credit_type = req.body.credit_type ? req.body.credit_type : null;
@@ -250,6 +294,14 @@ module.exports = {
             _toDate = _toDate.split(' ');
 
             _selectQuery += ` AND start_date::date >= '${_fromDate[0]}' AND end_date::date <= '${_toDate[0]}' AND from_time >= '${_fromDate[1]}' AND to_time <= '${_toDate[1]}'`
+        }
+
+        if (_grep && _grep == 'Live') {
+            _selectQuery += ` AND now():::timestamptz + (330:::int * '1m':::interval) between start_date and end_date`
+        }
+
+        if (_grep && _grep == 'Upcoming') {
+            _selectQuery += ` AND now():::timestamptz + (330:::int * '1m':::interval) < start_date `
         }
 
         // _selectQuery += ' LIMIT 50'

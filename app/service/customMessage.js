@@ -239,5 +239,19 @@ module.exports = {
             messageCode: "FILE_IMPORTED",
             statusCode: 401
         }
+    },
+    "CONTEST_MESSAGE":{
+        "IS_UPCOMING_FALSE":{
+            success: false,
+            message: "Please select only upcoming contest",
+            messageCode: "IS_UPCOMING_FALSE",
+            statusCode: 401
+        },
+        "CONTEST_UPDATED":{
+            success: true,
+            message: "CONTEST_UPDATED",
+            messageCode: "CONTEST_UPDATED",
+            statusCode: 200
+        },
     }
 }
