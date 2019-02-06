@@ -108,11 +108,52 @@ module.exports = {
 
             let player_id = req.body.player_id;
             try {
-                queryText = "select amount, created_at, nz_txn_type,nz_txn_status" +
+                queryText = "select order_id, amount, created_at, nz_txn_type,nz_txn_status, nz_txn_event_name" +
                     " from tbl_wallet_transaction" +
                     " where player_id = $1" +
                     " order by created_at desc";
                 valuesArr = [player_id];
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+    getTransactionDetails: async function (req, res) {
+
+        let rules = {
+            "transaction_id": 'required',
+        };
+
+        var custom_message = {
+            "required.transaction_id": "Transaction Id is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+
+            let transaction_id = req.body.transaction_id;
+            try {
+                queryText = "select que.transaction_id, amount, contest.contest_id, contest.contest_name, contest.contest_type, start_date::date, contest.from_time, contest.to_time, contest.entry_fee, is_credit, is_claim, transaction_date" +
+                    " from tbl_wallet_credit_que as que" +
+                    " inner join tbl_contest as contest" +
+                    " on contest.contest_id = que.event_id::int" +
+                    " where transaction_id = $1";
+                valuesArr = [transaction_id];
 
                 let query = {
                     text: queryText,
@@ -148,11 +189,13 @@ module.exports = {
 
             let player_id = req.body.player_id;
             try {
-                queryText = "select created_at, nz_txn_type as transaction_type, amount, nz_txn_status" +
+                queryText = "select tbl_wallet_transaction.order_id,  tbl_wallet_transaction.created_at, nz_txn_type as transaction_type, amount, nz_txn_status, chmod, pg_source, resp_text" +
                     " from tbl_wallet_transaction" +
-                    " where player_id = $1" +
+                    " left join tbl_wallet_paytm_txn" +
+                    " on tbl_wallet_paytm_txn.order_id = tbl_wallet_transaction.order_id" +
+                    " where tbl_wallet_transaction.player_id = $1" +
                     " and nz_txn_type in ('WITHDRAW', 'DEPOSIT')" +
-                    " order by created_at desc";
+                    " order by tbl_wallet_transaction.created_at desc";
                 valuesArr = [player_id];
 
                 let query = {
@@ -232,7 +275,7 @@ module.exports = {
 
             let player_id = req.body.player_id;
             try {
-                queryText = "select app.app_name, contest.contest_name, contest.entry_fee, contest.debit_type," +
+                queryText = "select app.app_name, contest.contest_id, contest.contest_name, contest.entry_fee, contest.debit_type," +
                     " contest_players.transaction_date as joined_date," +
                     " contest_winner.player_rank, contest_winner.win_amount," +
                     " contest_winner.credit_type, contest_winner.transaction_date as winning_date" +
@@ -311,7 +354,7 @@ module.exports = {
     activePlayerData: async function (req, res) {
 
         try {
-            queryText = "select phone_number from tbl_player" +
+            queryText = "select full_name, phone_number, email_id from tbl_player" +
                 " where phone_number_verified = true" +
                 " and player_id in(" +
                 " select distinct player_id from tbl_contest_players" +
@@ -335,7 +378,7 @@ module.exports = {
     inActivePlayerData: async function (req, res) {
 
         try {
-            queryText = "select phone_number from tbl_player" +
+            queryText = "select full_name, phone_number, email_id from tbl_player" +
                 " where phone_number_verified = true" +
                 " and player_id in(" +
                 " select distinct player_id from tbl_contest_players" +
@@ -359,7 +402,7 @@ module.exports = {
     verifiedPlayerData: async function (req, res) {
 
         try {
-            queryText = "select phone_number from tbl_player" +
+            queryText = "select full_name, phone_number, email_id from tbl_player" +
                 " where phone_number_verified = true";
 
             let query = {
@@ -380,7 +423,7 @@ module.exports = {
     verifiedButNotPlayedPlayerData: async function (req, res) {
 
         try {
-            queryText = "select phone_number from tbl_player" +
+            queryText = "select full_name, phone_number, email_id from tbl_player" +
                 " left join tbl_contest_players on tbl_player.player_id = tbl_contest_players.player_id" +
                 " where tbl_contest_players.player_id is null and tbl_player.phone_number_verified = true";
 
