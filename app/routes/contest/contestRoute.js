@@ -29,4 +29,9 @@ contestRoutes.post('/search', function(req, res)
     contestController.search(req, res);
 });
 
+contestRoutes.post('/updateContestStatus', function(req, res)
+{ 
+    contestController.updateContestStatus(req, res);
+});
+
 module.exports = contestRoutes;

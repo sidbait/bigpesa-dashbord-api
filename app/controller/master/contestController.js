@@ -314,7 +314,40 @@ module.exports = {
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
-    }
+    },
+
+    updateContestStatus: async function (req, res) {
+
+        let rules = {
+            "selectedContests": 'required',
+            "status": 'required',
+        }
+
+        let validation = new services.validator(req.body, rules);
+
+        if (validation.passes()) {
+
+            let _selectedContests = req.body.selectedContests ? req.body.selectedContests : null;
+            let _userid = req.body.userid ? req.body.userid : null;
+            let _status = req.body.status ? req.body.status : null;
+
+            try {
+
+                let _updateQuery = `update tbl_contest_master set status = '${_status}', updated_by = '${_userid}', updated_at = now() where contest_master_id in (${_selectedContests.toString()}) returning contest_master_id`
+
+                let _updated_id = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
+
+                services.sendResponse.sendWithCode(req, res, _updated_id, "CONTEST_MESSAGE", "CONTEST_UPDATED");
+            }
+            catch (error) {
+                console.log(error);
+
+                services.sendResponse.sendWithCode(req, res, 'error', customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
 
 }
 
