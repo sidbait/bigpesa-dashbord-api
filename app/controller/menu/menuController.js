@@ -55,6 +55,7 @@ module.exports = {
                         userfunnel: true,
                         summary: true,
                         export: true,
+                        hourly:true
                     }
                 }
                 break;
@@ -100,6 +101,7 @@ module.exports = {
                         userfunnel: false,
                         summary: false,
                         export: true,
+                        hourly:false
                     }
                 }
                 break;
@@ -145,6 +147,7 @@ module.exports = {
                         userfunnel: true,
                         summary: true,
                         export: true,
+                        hourly:true
                     }
                 }
                 break;
@@ -191,6 +194,7 @@ module.exports = {
                         userfunnel: false,
                         summary: false,
                         export: true,
+                        hourly:false
                     }
                 }
                 break;
@@ -242,6 +246,7 @@ module.exports = {
                         userfunnel: false,
                         summary: false,
                         export: false,
+                        hourly:false
                     }
                 }
                 break;
@@ -323,7 +328,8 @@ module.exports = {
                     { path: '/reports/acquisitiondetails', title: 'Acquisition Details', show: limit.Reports.acquisitiondetails, },
                     { path: '/reports/userfunnel', title: 'User Funnel', show: limit.Reports.userfunnel, },
                     { path: '/reports/summary', title: 'Summary', show: limit.Reports.summary, },
-                    { path: '/reports/export', title: 'Export & Bulk SMS', show: limit.Reports.export, }
+                    { path: '/reports/export', title: 'Export & Bulk SMS', show: limit.Reports.export, },
+                    { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, }
                 ]
             },
 

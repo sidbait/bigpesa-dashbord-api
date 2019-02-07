@@ -31,5 +31,8 @@ dashboardRoutes.get('/todaysCounts', function (req, res) {
 dashboardRoutes.get('/todaysCountsDebitCredit', function (req, res) {
     dashboardController.todaysCountsDebitCredit(req, res);
 });
-
+// appWiseActiveUsers
+dashboardRoutes.post('/appWiseActiveUsers', function (req, res) {
+    dashboardController.appWiseActiveUsers(req, res);
+});
 module.exports = dashboardRoutes;

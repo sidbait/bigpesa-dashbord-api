@@ -301,4 +301,56 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+
+    appWiseActiveUsers: async function (req, res) {
+        let duration = req.body.duration ? req.body.duration : 'Today';
+        let days = 0;
+        let opt = '='
+        switch (duration) {
+            case 'Today':
+                days = 0;
+                opt = '='
+                break;
+            case 'Yesterday':
+                days = 1;
+                opt = '='
+                break;
+            case 'Week':
+                days = 7;
+                opt = '>'
+                break;
+            case 'Month':
+                days = 30;
+                opt = '>'
+                break;
+            default:
+                break;
+        }
+        let _selectQuery = `select
+        a.app_name,
+        count(distinct player_id)
+    from
+        tbl_contest_players cp
+    inner join tbl_contest c on cp.contest_id = c.contest_id
+    inner join tbl_app a on c.app_id = a.app_id
+    where
+        transaction_date::date ${opt} (current_date - interval '${days} days')::date
+    group by
+        a.app_name
+    order by 2 desc`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
 }
