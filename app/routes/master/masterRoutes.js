@@ -10,5 +10,6 @@ apiRoutes.use(require('./eventRoute'));
 apiRoutes.use(require('./topWinnerRoute'));
 apiRoutes.use(require('./appVersionRoute'));
 apiRoutes.use(require('./feedbackRoute'));
+apiRoutes.use(require('./playerRoute'));
 
 module.exports = apiRoutes;

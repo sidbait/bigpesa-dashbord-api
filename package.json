@@ -23,6 +23,7 @@
     "pg": "^7.7.1",
     "request": "^2.88.0",
     "tracer": "^0.9.6",
+    "uniqid": "^5.0.3",
     "validatorjs": "^3.15.1"
   },
   "devDependencies": {},

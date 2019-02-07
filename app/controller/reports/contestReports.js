@@ -88,7 +88,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
-
     downloadSummary: async function (req, res) {
 
         let rules = {
@@ -250,7 +249,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
-
     userFunnelSummary: async function (req, res) {
         let rules = {
             "frmdate": 'required',
