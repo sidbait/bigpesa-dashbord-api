@@ -44,7 +44,7 @@ module.exports = {
                     text: "INSERT INTO public.tbl_bonus_credit_que " +
                         " ( event_id, event_type, event_name, amount, " +
                         " \"comment\", player_id, is_credit, status,is_claim, add_date,next_retry, clarified_by, refunded_by) " +
-                        " VALUES($1,$2,$3,$4,$5,$6, false, 'ACTIVE',true, now(), now(),$7,$8 )RETURNING que_id, 'coin' as credit_type, amount;",
+                        " VALUES($1,$2,$3,$4,$5,$6, false, 'PENDING',true, now(), now(),$7,$8 )RETURNING que_id, 'coin' as credit_type, amount;",
                     values: [traxid, event_type, event_type, amount, event_type, player_id, clarified_by, refunded_by]
                 };
 
@@ -53,7 +53,7 @@ module.exports = {
                     text: "INSERT INTO public.tbl_wallet_credit_que " +
                         " ( event_id, event_type, event_name, amount, " +
                         " \"comment\", player_id, is_credit, status, add_date,is_claim,next_retry, clarified_by, refunded_by) " +
-                        " VALUES($1,$2,$3,$4,$5,$6, false, 'ACTIVE', now(), true, now(),$7,$8)RETURNING que_id, 'cash' as credit_type, amount;",
+                        " VALUES($1,$2,$3,$4,$5,$6, false, 'PENDING', now(), true, now(),$7,$8)RETURNING que_id, 'cash' as credit_type, amount;",
                     values: [traxid, event_type, event_type, amount, event_type, player_id, clarified_by, refunded_by]
                 }
             }
