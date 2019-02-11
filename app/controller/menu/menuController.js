@@ -13,6 +13,73 @@ module.exports = {
         let userType = req.body.userType ? req.body.userType : null;
 
         switch (userType) {
+            case 'Beta Mode':
+                limit = {
+                    Dashboard: true,
+                    UserDetails: {
+                        main: true,
+                        users: true,
+                        roles: true,
+                    },
+                    AppDetails: {
+                        main: true,
+                        app: true,
+                        appversion: true,
+                    },
+                    EventDetails: {
+                        main: true,
+                        event: true,
+                        winnerevent: true,
+                        spinwheel: true,
+                    },
+                    ContestDetails: {
+                        main: true,
+                        mastercontest: true,
+                        contest: true,
+                    },
+                    FeedbackDetails: {
+                        main: true,
+                        feedback: true,
+                    },
+                    Reports: {
+                        main: true,
+                        contest: true,
+                        contestsummary: true,
+                        gamesummary: true,
+                        downloadsummary: true,
+                        userreport: true,
+                        cash: true,
+                        paymentgateway: true,
+                        acquisitionsummary: true,
+                        acquisitiondetails: true,
+                        userfunnel: true,
+                        summary: true,
+                        export: true,
+                        hourly: true
+                    },
+                    UserReports: {
+                        main: true,
+                        PlayerReport: true,
+                        UserCashReport: true,
+                        UserContestReport: true,
+                        ActiveUserReport: true,
+                        UserRetention: true
+                    },
+                    AcquisitionReports: {
+                        main: true,
+                        AcquisitionSummary: true,
+                        AcquisitionDetails: true,
+                        UserFunnel: true
+                    },
+                    Summary: {
+                        main: true,
+                        ContestReport: true,
+                        ContestSummary: true,
+                        TopGameSummary: true,
+                        DownloadSummary: true
+                    }
+                }
+                break;
             case 'Administrator':
                 limit = {
                     Dashboard: true,
@@ -55,6 +122,28 @@ module.exports = {
                         userfunnel: true,
                         summary: true,
                         export: true,
+                        hourly: true
+                    },
+                    UserReports: {
+                        main: false,
+                        PlayerReport: false,
+                        UserCashReport: false,
+                        UserContestReport: false,
+                        ActiveUserReport: false,
+                        UserRetention: false
+                    },
+                    AcquisitionReports: {
+                        main: false,
+                        AcquisitionSummary: false,
+                        AcquisitionDetails: false,
+                        UserFunnel: false
+                    },
+                    Summary: {
+                        main: false,
+                        ContestReport: false,
+                        ContestSummary: false,
+                        TopGameSummary: false,
+                        DownloadSummary: false
                     }
                 }
                 break;
@@ -100,6 +189,28 @@ module.exports = {
                         userfunnel: false,
                         summary: false,
                         export: true,
+                        hourly: false
+                    },
+                    UserReports: {
+                        main: false,
+                        PlayerReport: false,
+                        UserCashReport: false,
+                        UserContestReport: false,
+                        ActiveUserReport: false,
+                        UserRetention: false
+                    },
+                    AcquisitionReports: {
+                        main: false,
+                        AcquisitionSummary: false,
+                        AcquisitionDetails: false,
+                        UserFunnel: false
+                    },
+                    Summary: {
+                        main: false,
+                        ContestReport: false,
+                        ContestSummary: false,
+                        TopGameSummary: false,
+                        DownloadSummary: false
                     }
                 }
                 break;
@@ -145,6 +256,28 @@ module.exports = {
                         userfunnel: true,
                         summary: true,
                         export: true,
+                        hourly: true
+                    },
+                    UserReports: {
+                        main: false,
+                        PlayerReport: false,
+                        UserCashReport: false,
+                        UserContestReport: false,
+                        ActiveUserReport: false,
+                        UserRetention: false
+                    },
+                    AcquisitionReports: {
+                        main: false,
+                        AcquisitionSummary: false,
+                        AcquisitionDetails: false,
+                        UserFunnel: false
+                    },
+                    Summary: {
+                        main: false,
+                        ContestReport: false,
+                        ContestSummary: false,
+                        TopGameSummary: false,
+                        DownloadSummary: false
                     }
                 }
                 break;
@@ -191,6 +324,28 @@ module.exports = {
                         userfunnel: false,
                         summary: false,
                         export: true,
+                        hourly: false
+                    },
+                    UserReports: {
+                        main: false,
+                        PlayerReport: false,
+                        UserCashReport: false,
+                        UserContestReport: false,
+                        ActiveUserReport: false,
+                        UserRetention: false
+                    },
+                    AcquisitionReports: {
+                        main: false,
+                        AcquisitionSummary: false,
+                        AcquisitionDetails: false,
+                        UserFunnel: false
+                    },
+                    Summary: {
+                        main: false,
+                        ContestReport: false,
+                        ContestSummary: false,
+                        TopGameSummary: false,
+                        DownloadSummary: false
                     }
                 }
                 break;
@@ -242,6 +397,28 @@ module.exports = {
                         userfunnel: false,
                         summary: false,
                         export: false,
+                        hourly: false
+                    },
+                    UserReports: {
+                        main: false,
+                        PlayerReport: false,
+                        UserCashReport: false,
+                        UserContestReport: false,
+                        ActiveUserReport: false,
+                        UserRetention: false
+                    },
+                    AcquisitionReports: {
+                        main: false,
+                        AcquisitionSummary: false,
+                        AcquisitionDetails: false,
+                        UserFunnel: false
+                    },
+                    Summary: {
+                        main: false,
+                        ContestReport: false,
+                        ContestSummary: false,
+                        TopGameSummary: false,
+                        DownloadSummary: false
                     }
                 }
                 break;
@@ -323,7 +500,52 @@ module.exports = {
                     { path: '/reports/acquisitiondetails', title: 'Acquisition Details', show: limit.Reports.acquisitiondetails, },
                     { path: '/reports/userfunnel', title: 'User Funnel', show: limit.Reports.userfunnel, },
                     { path: '/reports/summary', title: 'Summary', show: limit.Reports.summary, },
-                    { path: '/reports/export', title: 'Export & Bulk SMS', show: limit.Reports.export, }
+                    { path: '/reports/export', title: 'Export & Bulk SMS', show: limit.Reports.export, },
+                    { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, }
+                ]
+            },
+
+            {
+                path: '',
+                title: 'User Reports',
+                type: 'menu__toggle',
+                icontype: 'fa fa-mobile-alt',
+                show: limit.UserReports.main,
+                children: [
+                    { path: '/reports/contest', title: 'Player Report', show: limit.UserReports.PlayerReport, },
+                    { path: '/reports/contestsummary', title: 'User Cash Report', show: limit.UserReports.UserCashReport, },
+                    { path: '/reports/gamesummary', title: 'User Contest Report', show: limit.UserReports.UserContestReport, },
+                    { path: '/reports/downloadsummary', title: 'Active User Report', show: limit.UserReports.ActiveUserReport, },
+                    { path: '/reports/userreport', title: 'User Retention', show: limit.UserReports.UserRetention, }
+                ]
+            },
+
+            {
+                path: '',
+                title: 'Acquisition Reports',
+                type: 'menu__toggle',
+                icontype: 'fa fa-mobile-alt',
+                show: limit.AcquisitionReports.main,
+                children: [
+
+                    { path: '/reports/acquisitionsummary', title: 'AcquisitionSummary', show: limit.AcquisitionReports.AcquisitionSummary, },
+                    { path: '/reports/acquisitiondetails', title: 'AcquisitionDetails', show: limit.AcquisitionReports.AcquisitionDetails, },
+                    { path: '/reports/userfunnel', title: 'User Funnel', show: limit.AcquisitionReports.UserFunnel, }
+                ]
+            },
+
+
+            {
+                path: '',
+                title: 'Summary',
+                type: 'menu__toggle',
+                icontype: 'fa fa-mobile-alt',
+                show: limit.Summary.main,
+                children: [
+                    { path: '/reports/contest', title: 'Contest Report', show: limit.Summary.ContestReport, },
+                    { path: '/reports/contestsummary', title: 'Contest Summary', show: limit.Summary.ContestSummary, },
+                    { path: '/reports/gamesummary', title: 'Top Game Summary', show: limit.Summary.TopGameSummary, },
+                    { path: '/reports/downloadsummary', title: 'Download Summary', show: limit.Summary.DownloadSummary, }
                 ]
             },
 

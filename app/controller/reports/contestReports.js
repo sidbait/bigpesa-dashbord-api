@@ -536,4 +536,58 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+    HourlyReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required',
+            "source": 'required'
+        };
+
+        let validation = new services.validator(req.body, rules);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                let source = req.body.source ? req.body.source : null;
+                queryText = `select
+                created_at::date::string,
+                 extract(hour from created_at) as hours,
+                count(1) as total,
+                count(case phone_number_verified when true then 1 end) as verified
+            from
+                tbl_player
+            where
+                1 = 1
+                and source = $1
+                and created_at::date between $2 and $3
+            group by
+                created_at::date,
+                extract(hour
+            from
+                created_at)
+            order by
+                1,
+                2;`;
+                valuesArr = [source, fromDate, toDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
 }

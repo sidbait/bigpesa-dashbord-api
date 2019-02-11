@@ -1,35 +1,23 @@
 var dashboardRoutes = express.Router();
 
-var validate = require('../../auth/validate');
-
 var dashboardController = require('../../controller/dashboard/dashboardController');
 
-dashboardRoutes.get('/todaysDownloadSummary', function (req, res) {
-    dashboardController.todaysDownloadSummary(req, res);
-});
+dashboardRoutes.get('/todaysDownloadSummary',dashboardController.todaysDownloadSummary);
 
-dashboardRoutes.post('/cashSummary', function (req, res) {
-    dashboardController.cashSummary(req, res);
-});
+dashboardRoutes.post('/cashSummary',dashboardController.cashSummary);
 
-dashboardRoutes.get('/registeredVerifiedNotPlayed', function (req, res) {
-    dashboardController.registeredVerifiedNotPlayed(req, res);
-});
+dashboardRoutes.get('/registeredVerifiedNotPlayed',dashboardController.registeredVerifiedNotPlayed);
 
-dashboardRoutes.post('/registeredVerifiedNotPlayedDayWise', function (req, res) {
-    dashboardController.registeredVerifiedNotPlayedDayWise(req, res);
-});
+dashboardRoutes.post('/registeredVerifiedNotPlayedDayWise',dashboardController.registeredVerifiedNotPlayedDayWise);
 
-dashboardRoutes.get('/todaysCashSummary', function (req, res) {
-    dashboardController.todaysCashSummary(req, res);
-});
+dashboardRoutes.get('/todaysCashSummary',dashboardController.todaysCashSummary);
 
-dashboardRoutes.get('/todaysCounts', function (req, res) {
-    dashboardController.todaysCounts(req, res);
-});
+dashboardRoutes.get('/todaysCounts',dashboardController.todaysCounts);
 
-dashboardRoutes.get('/todaysCountsDebitCredit', function (req, res) {
-    dashboardController.todaysCountsDebitCredit(req, res);
-});
+dashboardRoutes.get('/todaysCountsDebitCredit',dashboardController.todaysCountsDebitCredit);
+
+dashboardRoutes.post('/appWiseActiveUsers',dashboardController.appWiseActiveUsers);
+
+dashboardRoutes.post('/dayWiseActiveUsers',dashboardController.dayWiseActiveUsers);
 
 module.exports = dashboardRoutes;
