@@ -504,6 +504,39 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
 
         }
+    },
+    getRefundList: async function (req, res) {
+
+        let _selectQuery = " select que_id, player_id,tbl_refund.\"status\", event_type,amount," +
+            " type,\"comment\", refunded_by.username as refunded_by, approved_by.username as approved_by" +
+            " from " +
+            " (" +
+            " select que_id, player_id,\"status\", event_type,amount," +
+            "  case when event_type = 'REWARD' then 'COIN' end as type," +
+            "  \"comment\", refunded_by, approved_by from tbl_bonus_credit_que" +
+            "  where event_type = 'REWARD'" +
+            "  union all" +
+            "  select que_id, player_id,\"status\", event_type,amount," +
+            "  case when event_type = 'REFUND' then 'CASH' end as type," +
+            "  \"comment\", refunded_by, approved_by from tbl_wallet_credit_que" +
+            "  where event_type = 'REFUND'" +
+            "  ) as tbl_refund" +
+            "  left join tbl_user as refunded_by on refunded_by.user_id = tbl_refund.refunded_by" +
+            "  left join tbl_user as approved_by on approved_by.user_id = tbl_refund.approved_by" +
+            "  where tbl_refund.\"status\" = 'SUCCESS' ";
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
     }
 }
 
