@@ -14,4 +14,5 @@ appRoutes.get('/inactiveplayerdata',  playerReports.inActivePlayerData);
 appRoutes.get('/verifiedplayerdata',  playerReports.verifiedPlayerData);
 appRoutes.get('/verifiedbutnotplayedplayerdata',  playerReports.verifiedButNotPlayedPlayerData);
 appRoutes.post('/bulksmsnotification',  playerReports.bulkSMSNotification);
+appRoutes.get('/getrefundlist', playerReports.getRefundList);
 module.exports = appRoutes;

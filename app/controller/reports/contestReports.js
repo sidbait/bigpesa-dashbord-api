@@ -346,9 +346,12 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 let queryText = " select created_at::date::string," +
+
+                    " count(case when nz_txn_type = 'DEPOSIT' then 1 end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " COALESCE(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),0) as DEBIT," +
                     " COALESCE(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),0) as CREDIT," +
+                    " count(case when nz_txn_type = 'WITHDRAW' then 1 end) as withdraw_count," +
                     " COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW," +
                     " sum(amount::decimal) as total" +
                     " from tbl_wallet_transaction " +
