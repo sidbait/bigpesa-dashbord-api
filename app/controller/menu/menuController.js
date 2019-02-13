@@ -134,7 +134,7 @@ module.exports = {
                         UserCashReport: false,
                         UserContestReport: false,
                         ActiveUserReport: false,
-                        UserRetention: false
+                        UserRetention: true
                     },
                     AcquisitionReports: {
                         main: false,
@@ -203,7 +203,7 @@ module.exports = {
                         UserCashReport: false,
                         UserContestReport: false,
                         ActiveUserReport: false,
-                        UserRetention: false
+                        UserRetention: true
                     },
                     AcquisitionReports: {
                         main: false,
@@ -530,7 +530,7 @@ module.exports = {
                     { path: '/reports/contestsummary', title: 'User Cash Report', show: limit.UserReports.UserCashReport, },
                     { path: '/reports/gamesummary', title: 'User Contest Report', show: limit.UserReports.UserContestReport, },
                     { path: '/reports/downloadsummary', title: 'Active User Report', show: limit.UserReports.ActiveUserReport, },
-                    { path: '/reports/userreport', title: 'User Retention', show: limit.UserReports.UserRetention, }
+                    { path: '/reports/retention', title: 'User Retention', show: limit.UserReports.UserRetention, }
                 ]
             },
 
