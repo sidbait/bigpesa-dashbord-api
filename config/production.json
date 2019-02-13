@@ -21,7 +21,7 @@
       "ssl": true,
       "max": 50,
       "min": 10,
-      "idleTimeoutMillis": 5000
+      "idleTimeoutMillis": 50000
       }      
     }
   },
