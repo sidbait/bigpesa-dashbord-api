@@ -547,22 +547,24 @@ module.exports = {
     },
     getRefundList: async function (req, res) {
 
-        let _selectQuery = " select que_id, player_id,tbl_refund.\"status\", event_type,amount," +
+        let _selectQuery = " select que_id, tbl_refund.player_id, phone_number,tbl_refund.\"status\", event_type,amount," +
             " type,\"comment\", refunded_by.username as refunded_by, approved_by.username as approved_by" +
             " from " +
             " (" +
             " select que_id, player_id,\"status\", event_type,amount," +
-            "  case when event_type = 'REWARD' then 'COIN' end as type," +
-            "  \"comment\", refunded_by, approved_by from tbl_bonus_credit_que" +
+            " 'COIN' as type," +
+            "  \"comment\",transaction_date, refunded_by, approved_by from tbl_bonus_credit_que" +
             "  where event_type = 'REWARD'" +
             "  union all" +
             "  select que_id, player_id,\"status\", event_type,amount," +
-            "  case when event_type = 'REFUND' then 'CASH' end as type," +
-            "  \"comment\", refunded_by, approved_by from tbl_wallet_credit_que" +
-            "  where event_type = 'REFUND'" +
+            "  'CASH' as type," +
+            "  \"comment\",transaction_date, refunded_by, approved_by from tbl_wallet_credit_que" +
+            "  where event_type in ('REFUND','DepositBonus')" +
             "  ) as tbl_refund" +
+            "  left join tbl_player as player on tbl_refund.player_id = player.player_id" +
             "  left join tbl_user as refunded_by on refunded_by.user_id = tbl_refund.refunded_by" +
-            "  left join tbl_user as approved_by on approved_by.user_id = tbl_refund.approved_by";
+            "  left join tbl_user as approved_by on approved_by.user_id = tbl_refund.approved_by" + 
+            " order by tbl_refund.transaction_date desc";
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)

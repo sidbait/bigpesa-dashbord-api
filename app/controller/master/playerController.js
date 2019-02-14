@@ -24,7 +24,7 @@ module.exports = {
 
             let credit_type = req.body.credit_type;
 
-            let _selectQuery = "select que_id, player_id,event_type,amount,\"comment\"," +
+            let _selectQuery = "select que_id, player.player_id, phone_number, event_type,amount,\"comment\"," +
                 " refunded_by.username as refunded_by";
 
             if (credit_type == "COIN") {
@@ -33,7 +33,9 @@ module.exports = {
                 _selectQuery += " from tbl_wallet_credit_que as que"
             }
 
-            _selectQuery += " left join tbl_user as refunded_by on refunded_by.user_id = que.refunded_by" +
+            _selectQuery += 
+            "  left join tbl_player as player on que.player_id = player.player_id" +
+            " left join tbl_user as refunded_by on refunded_by.user_id = que.refunded_by" +
                 " where que.\"status\" = 'PENDING'";
 
             try {
@@ -91,7 +93,7 @@ module.exports = {
                     values: [traxid, event_type, event_type, amount, comment, player_id, refunded_by]
                 };
 
-            } else if (event_type == "REFUND") {
+            } else if (event_type == "REFUND" || event_type == "DepositBonus") {
                 _query = {
                     text: "INSERT INTO public.tbl_wallet_credit_que " +
                         " ( event_id, event_type, event_name, amount, " +
