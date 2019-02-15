@@ -108,8 +108,48 @@ module.exports = {
 
             let player_id = req.body.player_id;
             try {
-                queryText = "select order_id, amount, created_at, nz_txn_type,nz_txn_status, nz_txn_event_name" +
+                queryText = "select order_id, (amount::decimal + cash_bonus) as amount, created_at, nz_txn_type,nz_txn_status, nz_txn_event_name" +
                     " from tbl_wallet_transaction" +
+                    " where player_id = $1" +
+                    " order by created_at desc";
+                valuesArr = [player_id];
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+    bonusTransactionReport: async function (req, res) {
+
+        let rules = {
+            "player_id": 'required',
+        };
+
+        var custom_message = {
+            "required.player_id": "Player Id is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+
+            let player_id = req.body.player_id;
+            try {
+                queryText = "select event_type, bonus_type, bonus_value, created_at, \"comment\"" +
+                    " from tbl_bonus_transaction" +
                     " where player_id = $1" +
                     " order by created_at desc";
                 valuesArr = [player_id];
@@ -277,7 +317,7 @@ module.exports = {
             try {
                 queryText = "select app.app_name, contest.contest_id, contest.contest_name, contest.entry_fee, contest.debit_type," +
                     " contest_players.transaction_date as joined_date," +
-                    " contest_winner.player_rank, contest_winner.win_amount," +
+                    " contest_winner.player_rank, contest_winner.total_score, contest_winner.win_amount," +
                     " contest_winner.credit_type, contest_winner.transaction_date as winning_date" +
                     " from tbl_app as app" +
                     " inner join tbl_contest as contest on" +
@@ -503,6 +543,40 @@ module.exports = {
         else {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
 
+        }
+    },
+    getRefundList: async function (req, res) {
+
+        let _selectQuery = " select que_id, tbl_refund.player_id, phone_number,tbl_refund.\"status\", event_type,amount," +
+            " type,\"comment\", refunded_by.username as refunded_by, approved_by.username as approved_by" +
+            " from " +
+            " (" +
+            " select que_id, player_id,\"status\", event_type,amount," +
+            " 'COIN' as type," +
+            "  \"comment\",transaction_date, refunded_by, approved_by from tbl_bonus_credit_que" +
+            "  where event_type = 'REWARD'" +
+            "  union all" +
+            "  select que_id, player_id,\"status\", event_type,amount," +
+            "  'CASH' as type," +
+            "  \"comment\",transaction_date, refunded_by, approved_by from tbl_wallet_credit_que" +
+            "  where event_type in ('REFUND','DepositBonus')" +
+            "  ) as tbl_refund" +
+            "  left join tbl_player as player on tbl_refund.player_id = player.player_id" +
+            "  left join tbl_user as refunded_by on refunded_by.user_id = tbl_refund.refunded_by" +
+            "  left join tbl_user as approved_by on approved_by.user_id = tbl_refund.approved_by" + 
+            " order by tbl_refund.transaction_date desc";
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     }
 }

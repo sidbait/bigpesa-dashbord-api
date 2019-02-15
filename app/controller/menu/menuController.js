@@ -60,6 +60,8 @@ module.exports = {
                     UserReports: {
                         main: true,
                         PlayerReport: true,
+                        approvedRefund: true,
+                        refundReport: true,
                         UserCashReport: true,
                         UserContestReport: true,
                         ActiveUserReport: true,
@@ -125,12 +127,14 @@ module.exports = {
                         hourly: true
                     },
                     UserReports: {
-                        main: false,
+                        main: true,
                         PlayerReport: false,
+                        approvedRefund: true,
+                        refundReport: true,
                         UserCashReport: false,
                         UserContestReport: false,
                         ActiveUserReport: false,
-                        UserRetention: false
+                        UserRetention: true
                     },
                     AcquisitionReports: {
                         main: false,
@@ -145,7 +149,7 @@ module.exports = {
                         TopGameSummary: false,
                         DownloadSummary: false
                     }
-                }
+                }                
                 break;
             case 'Maintainer':
                 limit = {
@@ -192,12 +196,14 @@ module.exports = {
                         hourly: false
                     },
                     UserReports: {
-                        main: false,
+                        main: true,
                         PlayerReport: false,
+                        approvedRefund: true,
+                        refundReport: true,
                         UserCashReport: false,
                         UserContestReport: false,
                         ActiveUserReport: false,
-                        UserRetention: false
+                        UserRetention: true
                     },
                     AcquisitionReports: {
                         main: false,
@@ -261,6 +267,8 @@ module.exports = {
                     UserReports: {
                         main: false,
                         PlayerReport: false,
+                        approvedRefund: false,
+                        refundReport: false,
                         UserCashReport: false,
                         UserContestReport: false,
                         ActiveUserReport: false,
@@ -327,8 +335,10 @@ module.exports = {
                         hourly: false
                     },
                     UserReports: {
-                        main: false,
+                        main: true,
                         PlayerReport: false,
+                        approvedRefund: false,
+                        refundReport: true,
                         UserCashReport: false,
                         UserContestReport: false,
                         ActiveUserReport: false,
@@ -402,6 +412,8 @@ module.exports = {
                     UserReports: {
                         main: false,
                         PlayerReport: false,
+                        approvedRefund: false,
+                        refundReport: false,
                         UserCashReport: false,
                         UserContestReport: false,
                         ActiveUserReport: false,
@@ -513,10 +525,12 @@ module.exports = {
                 show: limit.UserReports.main,
                 children: [
                     { path: '/reports/contest', title: 'Player Report', show: limit.UserReports.PlayerReport, },
+                    { path: '/master/player/approverefund', title: 'Approve Refund', show: limit.UserReports.approvedRefund, },
+                    { path: '/reports/refund', title: 'Refund Report', show: limit.UserReports.refundReport, },
                     { path: '/reports/contestsummary', title: 'User Cash Report', show: limit.UserReports.UserCashReport, },
                     { path: '/reports/gamesummary', title: 'User Contest Report', show: limit.UserReports.UserContestReport, },
                     { path: '/reports/downloadsummary', title: 'Active User Report', show: limit.UserReports.ActiveUserReport, },
-                    { path: '/reports/userreport', title: 'User Retention', show: limit.UserReports.UserRetention, }
+                    { path: '/reports/retention', title: 'User Retention', show: limit.UserReports.UserRetention, }
                 ]
             },
 

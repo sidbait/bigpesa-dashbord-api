@@ -1,5 +1,7 @@
 const pgConnection = require('../../model/pgConnection');
 
+const jsonToPivotjson = require("json-to-pivot-json");
+
 const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";
@@ -346,16 +348,20 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 let queryText = " select created_at::date::string," +
+                    " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
+                    " count(distinct case when nz_txn_type = 'DEBIT' then player_id end) as debit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),0) as DEBIT," +
+                    " count(distinct case when nz_txn_type = 'CREDIT' then player_id end) as credit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),0) as CREDIT," +
+                    " count(distinct case when nz_txn_type = 'WITHDRAW' then player_id end) as withdraw_count," +
                     " COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW," +
                     " sum(amount::decimal) as total" +
                     " from tbl_wallet_transaction " +
                     " where nz_txn_status = 'SUCCESS'" +
                     " and created_at::date between $1 and $2" +
                     " group by created_at::date::string" +
-                    " order by 1";
+                    " order by 1 desc";
 
                 let valuesArr = [fromDate, toDate]
                 let query = {
@@ -576,6 +582,66 @@ module.exports = {
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    retentionReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required'
+        };
+
+        let validation = new services.validator(req.body, rules);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                queryText = `select
+                active.transaction_date::date::string as start_date,
+	future_activity.transaction_date::date::string as to_date,
+                count(distinct future_activity.player_id) as retention
+            from
+                (
+                select
+                    transaction_date::date,
+                    player_id
+                from
+                    tbl_contest_players
+                where
+                    transaction_date::date >= $1) as active
+            inner join tbl_contest_players as future_activity on
+                future_activity.player_id = active.player_id
+            where
+                future_activity.transaction_date::date >= active.transaction_date::date
+                group by
+                active.transaction_date::date::string,
+                future_activity.transaction_date::date::string
+            order by
+            active.transaction_date::date::string desc;`;
+                valuesArr = [fromDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    let options = {
+                        row: "start_date",
+                        column: "to_date",
+                        value: "retention"
+                    };
+                    let output = jsonToPivotjson(result, options);
+                    services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
                 } else {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
                 }

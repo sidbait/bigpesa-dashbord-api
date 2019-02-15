@@ -15,12 +15,13 @@
         "user": "nazara",
       "password": "VXUdS7XfrbKhqHS57fsK",
       "host": "cockroach-ef774991a31567cc.elb.ap-south-1.amazonaws.com",
+      "application_name" : "admin-api",
       "database": "rmg_db",
       "port": 26257,
       "ssl": true,
       "max": 50,
       "min": 10,
-      "idleTimeoutMillis": 5000
+      "idleTimeoutMillis": 500000
       }      
     }
   },
