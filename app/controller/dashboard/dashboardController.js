@@ -386,30 +386,30 @@ module.exports = {
         switch (duration) {
             case 'Daily':
                 _selectQuery = `select trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
-            sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
-            from (
-            select created_at::date::string as trans_date, count(player_id) as register_users, 
-            count(case when phone_number_verified = true then 1 end) as verified_users,
-            0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
-            from tbl_player 
-            where created_at::date > (current_date - interval '7 days')::date 
-            group by created_at::date::string
-            union all
-            select transaction_date::date::string as trans_date, 0 as register_users, 0 as verified_users, 
-            count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
-            from tbl_contest_players
-            where transaction_date::date > (current_date - interval '7 days')::date
-            group by transaction_date::date::string
-            union all
-            select created_at::date::string as trans_date, 0 as register_users, 0 as verified_users, 
-            0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
-            from tbl_wallet_transaction
-            where created_at::date > (current_date - interval '30 days')::date and 
-            nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
-            group by created_at::date::string
-            ) as active_users
-            group by trans_date
-            order by trans_date`;
+                sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
+                from (
+                select created_at::date::string as trans_date, count(player_id) as register_users, 
+                count(case when phone_number_verified = true then 1 end) as verified_users,
+                0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                from tbl_player 
+                where created_at::date > (current_date - interval '30 days')::date 
+                group by created_at::date::string
+                union all
+                select transaction_date::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                from tbl_contest_players
+                where transaction_date::date > (current_date - interval '30 days')::date
+                group by transaction_date::date::string
+                union all
+                select created_at::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
+                from tbl_wallet_transaction
+                where created_at::date > (current_date - interval '30 days')::date and 
+                nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
+                group by created_at::date::string
+                ) as active_users
+                group by trans_date
+                order by trans_date`;
                 break;
             case 'Weekly':
                 _selectQuery = `select trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
