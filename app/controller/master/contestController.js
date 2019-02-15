@@ -28,6 +28,66 @@ module.exports = {
         }
     },
 
+    getPending: async function (req, res) {
+        // console.log(req.body);
+
+        let app_id = req.body.app_id ? req.body.app_id : null;
+
+        let _selectQuery = `select * from tbl_contest_master where 1=1
+        and "status" = 'PENDING' and app_id = ${app_id} order by from_time`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    getRank: async function (req, res) {
+        // console.log(req.body);
+
+        let contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+
+        let _selectQuery = `select * from tbl_contest_rank_master where contest_master_id = ${contest_master_id}`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    enablePendingContest: async function (req, res) {
+
+        let pendingIds = req.body.pendingIds ? req.body.pendingIds : null;
+
+        let _selectQuery = `update tbl_contest_master set "status"='ACTIVE' where contest_master_id in (${pendingIds}) returning contest_master_id`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
     add: async function (req, res) {
 
         let rules = {
@@ -256,6 +316,7 @@ module.exports = {
         let _debit_type = req.body.debit_type ? req.body.debit_type : null;
         let _credit_type = req.body.credit_type ? req.body.credit_type : null;
         let _win_amount = req.body.win_amount ? req.body.win_amount : null;
+        let _entry_fee = req.body.entry_fee ? req.body.entry_fee : null;
 
         let _selectQuery = 'SELECT * FROM tbl_contest_master WHERE  1=1'
 
@@ -268,11 +329,15 @@ module.exports = {
         }
 
         if (_contestname) {
-            _selectQuery += " AND contest_name = '" + _contestname + "'"
+            _selectQuery += " AND contest_name ilike '%" + _contestname + "%'"
         }
 
         if (_win_amount) {
             _selectQuery += " AND win_amount = '" + _win_amount + "'"
+        }
+
+        if (_entry_fee) {
+            _selectQuery += " AND entry_fee = '" + _entry_fee + "'"
         }
 
         if (_publish_type && _publish_type != '') {

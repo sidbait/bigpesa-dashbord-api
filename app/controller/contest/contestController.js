@@ -137,12 +137,15 @@ module.exports = {
 
             }
 
+            let new_start_date = joinDateTime(_start_date,_from_time);
+            let new_end_date = joinDateTime(_end_date,_to_time);            
+
             if (!_contest_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_contest(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,status,created_by,created_at,publish_type,channel,is_repeat) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,now(),$23,$24) RETURNING *",
+                    text: "INSERT INTO tbl_contest(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,status,created_by,created_at,publish_type,channel) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,now(),$23,$24) RETURNING *",
                     values: [
-                        _app_id, _contest_name, _contest_type, _contest_desc, _start_date, _end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _created_by, _publish_type, _channel
+                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _created_by, _publish_type, _channel
                     ]
                 }
             }
@@ -151,7 +154,7 @@ module.exports = {
                 _query = {
                     text: "UPDATE tbl_contest SET app_id=$1,contest_name=$2,contest_type=$3,contest_desc=$4,start_date=$5,end_date=$6,from_time=$7,to_time=$8,max_players=$9,winners=$10,entry_fee=$11,currency=$12,profit_margin=$13,debit_type=$14,credit_type=$15,win_amount=$16,css_class=$17,next_start_date=$18,contest_priority=$19,game_conf=$20,status=$21,updated_by=$22,updated_at=now(),publish_type = $24,channel=$25 WHERE contest_id=$23 RETURNING *",
                     values: [
-                        _app_id, _contest_name, _contest_type, _contest_desc, _start_date, _end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _updated_by, _contest_id, _publish_type, _channel
+                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _updated_by, _contest_id, _publish_type, _channel
                     ]
                 }
 
@@ -251,6 +254,7 @@ module.exports = {
         let _debit_type = req.body.debit_type ? req.body.debit_type : null;
         let _credit_type = req.body.credit_type ? req.body.credit_type : null;
         let _win_amount = req.body.win_amount ? req.body.win_amount : null;
+        let _entry_fee = req.body.entry_fee ? req.body.entry_fee : null;
 
         let _selectQuery = 'SELECT * FROM tbl_contest WHERE  1=1'
 
@@ -263,11 +267,15 @@ module.exports = {
         }
 
         if (_contestname) {
-            _selectQuery += " AND contest_name = '" + _contestname + "'"
+            _selectQuery += " AND contest_name ilike '%" + _contestname + "%'"
         }
 
         if (_win_amount) {
             _selectQuery += " AND win_amount = '" + _win_amount + "'"
+        }
+
+        if (_entry_fee) {
+            _selectQuery += " AND entry_fee = '" + _entry_fee + "'"
         }
 
         if (_publish_type && _publish_type != '') {
@@ -292,8 +300,9 @@ module.exports = {
         if (_fromDate && _toDate) {
             _fromDate = _fromDate.split(' ');
             _toDate = _toDate.split(' ');
-
-            _selectQuery += ` AND start_date::date >= '${_fromDate[0]}' AND end_date::date <= '${_toDate[0]}' AND from_time >= '${_fromDate[1]}' AND to_time <= '${_toDate[1]}'`
+            let new_start_date = joinDateTime(_fromDate[0],_fromDate[1]);
+            let new_end_date = joinDateTime(_toDate[0],_toDate[1]);
+            _selectQuery += ` AND start_date >= '${new_start_date}' AND end_date <= '${new_end_date}'`
         }
 
         if (_grep && _grep == 'Live') {
@@ -423,4 +432,16 @@ function getFormattedTime(date) {
     let sec = momentDate.seconds();
 
     return hr + ':' + min + ':' + sec;
+}
+
+function add530(date, time) {
+    let new_date = new Date(date + 'T' + time + 'Z');
+    new_date.setHours(new_date.getHours() + 5);
+    new_date.setMinutes(new_date.getMinutes() + 30);
+    return new_date
+}
+
+function joinDateTime(date, time) {
+    let new_date = date + 'T' + time + 'Z';
+    return new_date
 }
