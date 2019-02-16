@@ -347,7 +347,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let queryText = " select created_at::date::string," +
+                let queryText = "select created_at::date::string," +
                     " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " count(distinct case when nz_txn_type = 'DEBIT' then player_id end) as debit_count," +
@@ -596,7 +596,8 @@ module.exports = {
 
     retentionReport: async function (req, res) {
         let rules = {
-            "frmdate": 'required'
+            "frmdate": 'required',
+            "column_name": 'required'
         };
 
         let validation = new services.validator(req.body, rules);
@@ -604,41 +605,19 @@ module.exports = {
             if (validation.passes()) {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
-                queryText = `select
-                active.transaction_date::date::string as start_date,
-	future_activity.transaction_date::date::string as to_date,
-                count(distinct future_activity.player_id) as retention
-            from
-                (
-                select
-                    transaction_date::date,
-                    player_id
-                from
-                    tbl_contest_players
-                where
-                    transaction_date::date >= $1) as active
-            inner join tbl_contest_players as future_activity on
-                future_activity.player_id = active.player_id
-            where
-                future_activity.transaction_date::date >= active.transaction_date::date
-                group by
-                active.transaction_date::date::string,
-                future_activity.transaction_date::date::string
-            order by
-            active.transaction_date::date::string desc;`;
-                valuesArr = [fromDate]
+                let column_name = req.body.column_name;
+                queryText = "select reg_date::string,trans_date::string," + column_name +
+                    " from tbl_user_funnel" +
+                    " where reg_date::date >= '" + fromDate +"'" +
+                    " and trans_date >= '" + fromDate +"'" +
+                    " order by 1,2";
 
-                let query = {
-                    text: queryText,
-                    values: valuesArr
-                };
-
-                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                let result = await pgConnection.executeQuery('rmg_dev_db', queryText)
                 if (result.length > 0) {
                     let options = {
-                        row: "start_date",
-                        column: "to_date",
-                        value: "retention"
+                        row: "reg_date",
+                        column: "trans_date",
+                        value: column_name
                     };
                     let output = jsonToPivotjson(result, options);
                     services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
