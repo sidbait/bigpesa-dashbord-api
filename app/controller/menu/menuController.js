@@ -490,7 +490,7 @@ module.exports = {
                 type: 'menu__toggle',
                 icontype: 'fa fa-mobile-alt',
                 show: limit.FeedbackDetails.main,
-                countClass: 'feedbackPendingCount',
+                // countClass: 'feedbackPendingCount',
                 children: [
                     { path: '/master/feedback', title: 'Feedback', show: limit.FeedbackDetails.feedback },
                 ]

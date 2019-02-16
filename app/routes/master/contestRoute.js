@@ -6,6 +6,12 @@ var contestController = require('../../controller/master/contestController');
 
 contestRoutes.get('/contest', contestController.getAll);
 
+contestRoutes.post('/contest/getPending', contestController.getPending);
+
+contestRoutes.post('/contest/getRank', contestController.getRank);
+
+contestRoutes.post('/contest/enablePendingContest', contestController.enablePendingContest);
+
 contestRoutes.post('/contest/add', contestController.add);
 
 contestRoutes.post('/contest/addbulk', contestController.addBulk);

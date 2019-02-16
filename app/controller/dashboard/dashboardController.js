@@ -140,7 +140,7 @@ module.exports = {
         }
     },
 
-    todaysCashSummary: async function (req, res) {
+    totalCashSummary: async function (req, res) {
 
         let _selectQuery = `select COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as total_cash_deposit,
         COALESCE(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),0) as total_cash_debit,
@@ -353,6 +353,7 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+
     dayWiseActiveUsers: async function (req, res) {
         let duration = req.body.duration ? req.body.duration : 'Daily';
 
@@ -384,7 +385,31 @@ module.exports = {
 
         switch (duration) {
             case 'Daily':
-
+                _selectQuery = `select trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
+                sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
+                from (
+                select created_at::date::string as trans_date, count(player_id) as register_users, 
+                count(case when phone_number_verified = true then 1 end) as verified_users,
+                0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                from tbl_player 
+                where created_at::date > (current_date - interval '30 days')::date 
+                group by created_at::date::string
+                union all
+                select transaction_date::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                from tbl_contest_players
+                where transaction_date::date > (current_date - interval '30 days')::date
+                group by transaction_date::date::string
+                union all
+                select created_at::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
+                from tbl_wallet_transaction
+                where created_at::date > (current_date - interval '30 days')::date and 
+                nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
+                group by created_at::date::string
+                ) as active_users
+                group by trans_date
+                order by trans_date`;
                 break;
             case 'Weekly':
                 _selectQuery = `select trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
@@ -443,6 +468,97 @@ module.exports = {
             default:
                 break;
         }
+
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    totalUsersWithCashCoin: async function (req, res) {
+
+
+        let _selectQuery = `select count(player.player_id) as verfied_users,
+        sum(winning_balance) as winning_cash, sum(reward_balance) as reward_cash,
+        sum(deposit_balance) as deposit_cash, sum(bonus) as coin
+        from tbl_player as player
+        left join tbl_wallet_balance as cash on player.player_id = cash.player_id 
+        left join tbl_bonus as coin on player.player_id = coin.player_id
+        where phone_number_verified = true`;
+
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    activeUsersWithCashCoin: async function (req, res) {
+
+
+        let _selectQuery = `select
+        count(player.player_id) as active_users,
+        sum(winning_balance) as winning_cash,
+        sum(reward_balance) as reward_cash,
+        sum(deposit_balance) as deposit_cash,
+        sum(bonus) as coin
+        from (
+        select distinct player_id
+        from tbl_contest_players) as player 
+        left join tbl_wallet_balance as cash on player.player_id = cash.player_id 
+        left join tbl_bonus as coin on player.player_id = coin.player_id`;
+
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    inactiveUsersWithCashCoin: async function (req, res) {
+
+
+        let _selectQuery = `select
+        count(distinct player.player_id) as inactive_users,
+        sum(winning_balance) as winning_cash,
+        sum(reward_balance) as reward_cash,
+        sum(deposit_balance) as deposit_cash,
+        sum(bonus) as coin
+        from tbl_player as player         
+        left join tbl_contest_players as contest_players on player.player_id = contest_players.player_id
+        left join tbl_wallet_balance as cash on player.player_id = cash.player_id 
+        left join tbl_bonus as coin on player.player_id = coin.player_id
+        where
+        contest_players.player_id is null
+        and phone_number_verified = true`;
 
 
         try {

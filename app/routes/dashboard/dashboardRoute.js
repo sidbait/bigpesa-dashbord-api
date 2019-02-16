@@ -10,7 +10,7 @@ dashboardRoutes.get('/registeredVerifiedNotPlayed',dashboardController.registere
 
 dashboardRoutes.post('/registeredVerifiedNotPlayedDayWise',dashboardController.registeredVerifiedNotPlayedDayWise);
 
-dashboardRoutes.get('/todaysCashSummary',dashboardController.todaysCashSummary);
+dashboardRoutes.get('/totalCashSummary',dashboardController.totalCashSummary);
 
 dashboardRoutes.get('/todaysCounts',dashboardController.todaysCounts);
 
@@ -19,5 +19,11 @@ dashboardRoutes.get('/todaysCountsDebitCredit',dashboardController.todaysCountsD
 dashboardRoutes.post('/appWiseActiveUsers',dashboardController.appWiseActiveUsers);
 
 dashboardRoutes.post('/dayWiseActiveUsers',dashboardController.dayWiseActiveUsers);
+
+dashboardRoutes.post('/totalUsersWithCashCoin',dashboardController.totalUsersWithCashCoin);
+
+dashboardRoutes.post('/activeUsersWithCashCoin',dashboardController.activeUsersWithCashCoin);
+
+dashboardRoutes.post('/inactiveUsersWithCashCoin',dashboardController.inactiveUsersWithCashCoin);
 
 module.exports = dashboardRoutes;
