@@ -161,5 +161,36 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
+    unblockPlayer: async function (req, res) {
+
+        let rules = {
+            "player_id": 'required',
+        }
+
+        let validation = new services.validator(req.body, rules);
+
+        if (validation.passes()) {
+
+            let player_id = req.body.player_id;
+            let _updateQuery = "";
+
+            try {
+
+                _updateQuery = `update tbl_player set status = 'ACTIVE' where player_id = (${player_id}) returning player_id`
+
+                let _updated_id = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
+                console.log(_updateQuery);
+
+                services.sendResponse.sendWithCode(req, res, _updated_id, customMsgType, "UPDATE_SUCCESS");
+            }
+            catch (error) {
+                console.log(error);
+
+                services.sendResponse.sendWithCode(req, res, 'error', customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
 
 }
