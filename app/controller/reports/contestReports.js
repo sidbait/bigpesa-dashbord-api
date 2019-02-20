@@ -606,13 +606,14 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let column_name = req.body.column_name;
-                queryText = "select reg_date::string,trans_date::string," + column_name +
+                queryText = "select reg_date::string,trans_date::string, total_register, " + column_name +
                     " from tbl_user_funnel" +
-                    " where reg_date::date >= '" + fromDate +"'" +
-                    " and trans_date >= '" + fromDate +"'" +
+                    " where reg_date::date >= '" + fromDate + "'" +
+                    " and trans_date::date >= '" + fromDate + "'" +
                     " order by 1,2";
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', queryText)
+
                 if (result.length > 0) {
                     let options = {
                         row: "reg_date",
@@ -620,6 +621,13 @@ module.exports = {
                         value: column_name
                     };
                     let output = jsonToPivotjson(result, options);
+
+                    // for (let index = 0; index < result.length; index++) {
+                    //     const element = result.total_register[index];
+                    //     output = output.push(element);
+                    // }
+                    //console.log(output);
+
                     services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
                 } else {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
@@ -632,4 +640,54 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+
+    channelRetentionReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "channel": 'required',
+            "column_name": 'required'
+        };
+
+        let validation = new services.validator(req.body, rules);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let channel = req.body.channel;
+                let column_name = req.body.column_name;
+                queryText = "select reg_date::string,trans_date::string, total_register, " + column_name +
+                    " from tbl_user_funnel_channel" +
+                    " where channel = '" + channel + "'" +
+                    " and reg_date::date >= '" + fromDate + "'" +
+                    " and trans_date::date >= '" + fromDate + "'" +
+                    " order by 1,2";
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', queryText)
+
+                if (result.length > 0) {
+                    let options = {
+                        row: "reg_date",
+                        column: "trans_date",
+                        value: column_name
+                    };
+                    let output = jsonToPivotjson(result, options);
+
+                    // for (let index = 0; index < result.length; index++) {
+                    //     const element = result.total_register[index];
+                    //     output = output.push(element);
+                    // }
+                    //console.log(output);
+
+                    services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    }
 }
