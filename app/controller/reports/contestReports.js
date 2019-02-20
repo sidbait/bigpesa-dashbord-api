@@ -614,7 +614,17 @@ module.exports = {
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', queryText)
 
-                if (result.length > 0) {
+                const rlength = result.length;
+                var element = null;
+                let total_register = [];
+                for (let i = 0; i < rlength; i++) {
+                    if (result[i].reg_date == result[i].trans_date) {
+                        element = result[i];
+                        total_register.push(element.total_register);
+                    }
+                }
+
+                if (rlength > 0) {
                     let options = {
                         row: "reg_date",
                         column: "trans_date",
@@ -622,13 +632,30 @@ module.exports = {
                     };
                     let output = jsonToPivotjson(result, options);
 
-                    // for (let index = 0; index < result.length; index++) {
-                    //     const element = result.total_register[index];
-                    //     output = output.push(element);
-                    // }
-                    //console.log(output);
+                    let count = 0;
+                    let finalout = [];
+                    output.forEach(element => {
+                        let out = {}
+                        let isadded = false;
+                        for (var k in element) {
+                            console.log(k)
+                            if (k == "reg_date") {
+                                out[k] = element[k]
+                            } else {
+                                if (!isadded) {
+                                    isadded = true;
+                                    out['total_register'] = total_register[count];
+                                    out[k] = element[k]
+                                } else {
+                                    out[k] = element[k]
+                                }
+                            }
+                        }
+                        finalout.push(out)
+                        count = count + 1;
+                    });
 
-                    services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
+                    services.sendResponse.sendWithCode(req, res, finalout, customMsgType, "GET_SUCCESS");
                 } else {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
                 }
@@ -664,7 +691,17 @@ module.exports = {
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', queryText)
 
-                if (result.length > 0) {
+                const rlength = result.length;
+                var element = null;
+                let total_register = [];
+                for (let i = 0; i < rlength; i++) {
+                    if (result[i].reg_date == result[i].trans_date) {
+                        element = result[i];
+                        total_register.push(element.total_register);
+                    }
+                }
+
+                if (rlength > 0) {
                     let options = {
                         row: "reg_date",
                         column: "trans_date",
@@ -672,13 +709,30 @@ module.exports = {
                     };
                     let output = jsonToPivotjson(result, options);
 
-                    // for (let index = 0; index < result.length; index++) {
-                    //     const element = result.total_register[index];
-                    //     output = output.push(element);
-                    // }
-                    //console.log(output);
+                    let count = 0;
+                    let finalout = [];
+                    output.forEach(element => {
+                        let out = {}
+                        let isadded = false;
+                        for (var k in element) {
+                            console.log(k)
+                            if (k == "reg_date") {
+                                out[k] = element[k]
+                            } else {
+                                if (!isadded) {
+                                    isadded = true;
+                                    out['total_register'] = total_register[count];
+                                    out[k] = element[k]
+                                } else {
+                                    out[k] = element[k]
+                                }
+                            }
+                        }
+                        finalout.push(out)
+                        count = count + 1;
+                    });
 
-                    services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
+                    services.sendResponse.sendWithCode(req, res, finalout, customMsgType, "GET_SUCCESS");
                 } else {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
                 }
