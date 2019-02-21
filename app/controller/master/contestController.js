@@ -88,6 +88,26 @@ module.exports = {
         }
     },
 
+    getContestById: async function (req, res) {
+
+        let contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+
+        let _selectQuery = `select * from tbl_contest_master where contest_master_id = ${contest_master_id}`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
     add: async function (req, res) {
 
         let rules = {

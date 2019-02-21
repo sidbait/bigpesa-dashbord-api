@@ -22,4 +22,6 @@ contestRoutes.post('/contest/search', contestController.search);
 
 contestRoutes.post('/contest/updateContestStatus', contestController.updateContestStatus);
 
+contestRoutes.post('/contest/getContestById', contestController.getContestById);
+
 module.exports = contestRoutes;
