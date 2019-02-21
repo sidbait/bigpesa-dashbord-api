@@ -347,7 +347,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let queryText = " select created_at::date::string," +
+                let queryText = "select created_at::date::string," +
                     " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " count(distinct case when nz_txn_type = 'DEBIT' then player_id end) as debit_count," +
@@ -596,7 +596,8 @@ module.exports = {
 
     retentionReport: async function (req, res) {
         let rules = {
-            "frmdate": 'required'
+            "frmdate": 'required',
+            "column_name": 'required'
         };
 
         let validation = new services.validator(req.body, rules);
@@ -604,44 +605,57 @@ module.exports = {
             if (validation.passes()) {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
-                queryText = `select
-                active.transaction_date::date::string as start_date,
-	future_activity.transaction_date::date::string as to_date,
-                count(distinct future_activity.player_id) as retention
-            from
-                (
-                select
-                    transaction_date::date,
-                    player_id
-                from
-                    tbl_contest_players
-                where
-                    transaction_date::date >= $1) as active
-            inner join tbl_contest_players as future_activity on
-                future_activity.player_id = active.player_id
-            where
-                future_activity.transaction_date::date >= active.transaction_date::date
-                group by
-                active.transaction_date::date::string,
-                future_activity.transaction_date::date::string
-            order by
-            active.transaction_date::date::string desc;`;
-                valuesArr = [fromDate]
+                let column_name = req.body.column_name;
+                queryText = "select reg_date::string,trans_date::string, total_register, " + column_name +
+                    " from tbl_user_funnel" +
+                    " where reg_date::date >= '" + fromDate + "'" +
+                    " and trans_date::date >= '" + fromDate + "'" +
+                    " order by 1,2";
 
-                let query = {
-                    text: queryText,
-                    values: valuesArr
-                };
+                let result = await pgConnection.executeQuery('rmg_dev_db', queryText)
 
-                let result = await pgConnection.executeQuery('rmg_dev_db', query)
-                if (result.length > 0) {
+                const rlength = result.length;
+                var element = null;
+                let total_register = [];
+                for (let i = 0; i < rlength; i++) {
+                    if (result[i].reg_date == result[i].trans_date) {
+                        element = result[i];
+                        total_register.push(element.total_register);
+                    }
+                }
+
+                if (rlength > 0) {
                     let options = {
-                        row: "start_date",
-                        column: "to_date",
-                        value: "retention"
+                        row: "reg_date",
+                        column: "trans_date",
+                        value: column_name
                     };
                     let output = jsonToPivotjson(result, options);
-                    services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
+
+                    let count = 0;
+                    let finalout = [];
+                    output.forEach(element => {
+                        let out = {}
+                        let isadded = false;
+                        for (var k in element) {
+                            console.log(k)
+                            if (k == "reg_date") {
+                                out[k] = element[k]
+                            } else {
+                                if (!isadded) {
+                                    isadded = true;
+                                    out['total_register'] = total_register[count];
+                                    out[k] = element[k]
+                                } else {
+                                    out[k] = element[k]
+                                }
+                            }
+                        }
+                        finalout.push(out)
+                        count = count + 1;
+                    });
+
+                    services.sendResponse.sendWithCode(req, res, finalout, customMsgType, "GET_SUCCESS");
                 } else {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
                 }
@@ -653,4 +667,81 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+
+    channelRetentionReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "channel": 'required',
+            "column_name": 'required'
+        };
+
+        let validation = new services.validator(req.body, rules);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let channel = req.body.channel;
+                let column_name = req.body.column_name;
+                queryText = "select reg_date::string,trans_date::string, total_register, " + column_name +
+                    " from tbl_user_funnel_channel" +
+                    " where channel = '" + channel + "'" +
+                    " and reg_date::date >= '" + fromDate + "'" +
+                    " and trans_date::date >= '" + fromDate + "'" +
+                    " order by 1,2";
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', queryText)
+
+                const rlength = result.length;
+                var element = null;
+                let total_register = [];
+                for (let i = 0; i < rlength; i++) {
+                    if (result[i].reg_date == result[i].trans_date) {
+                        element = result[i];
+                        total_register.push(element.total_register);
+                    }
+                }
+
+                if (rlength > 0) {
+                    let options = {
+                        row: "reg_date",
+                        column: "trans_date",
+                        value: column_name
+                    };
+                    let output = jsonToPivotjson(result, options);
+
+                    let count = 0;
+                    let finalout = [];
+                    output.forEach(element => {
+                        let out = {}
+                        let isadded = false;
+                        for (var k in element) {
+                            console.log(k)
+                            if (k == "reg_date") {
+                                out[k] = element[k]
+                            } else {
+                                if (!isadded) {
+                                    isadded = true;
+                                    out['total_register'] = total_register[count];
+                                    out[k] = element[k]
+                                } else {
+                                    out[k] = element[k]
+                                }
+                            }
+                        }
+                        finalout.push(out)
+                        count = count + 1;
+                    });
+
+                    services.sendResponse.sendWithCode(req, res, finalout, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    }
 }

@@ -13,6 +13,8 @@ appRoutes.post('/playerfeedbackreport',  playerReports.playerFeedbackReport);
 appRoutes.get('/activeplayerdata',  playerReports.activePlayerData);
 appRoutes.get('/inactiveplayerdata',  playerReports.inActivePlayerData);
 appRoutes.get('/verifiedplayerdata',  playerReports.verifiedPlayerData);
+appRoutes.get('/notverifiedplayerdata',  playerReports.notVerifiedPlayerData);
+appRoutes.get('/withdrawreport',  playerReports.withdrawReport);
 appRoutes.get('/verifiedbutnotplayedplayerdata',  playerReports.verifiedButNotPlayedPlayerData);
 appRoutes.post('/bulksmsnotification',  playerReports.bulkSMSNotification);
 appRoutes.get('/getrefundlist', playerReports.getRefundList);

@@ -16,4 +16,5 @@ appRoutes.post('/paymentgatewaydetailreport',contestReports.paymentgatewayDetail
 appRoutes.post('/topgamesummary',contestReports.topGameSummary);
 appRoutes.post('/Hourly',contestReports.HourlyReport);
 appRoutes.post('/retentionreport',contestReports.retentionReport);
+appRoutes.post('/channelretentionreport',contestReports.channelRetentionReport);
 module.exports = appRoutes;

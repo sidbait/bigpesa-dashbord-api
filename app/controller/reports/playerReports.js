@@ -460,6 +460,60 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+
+    notVerifiedPlayerData: async function (req, res) {
+
+        try {
+            queryText = "select phone_number from tbl_player" +
+            " where phone_number_verified = false";
+
+            let query = {
+                text: queryText
+            };
+
+            let result = await pgConnection.executeQuery('rmg_dev_db', query)
+            if (result.length > 0) {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    withdrawReport: async function (req, res) {
+
+        try {
+            queryText = `select 
+            player.player_id,
+            player.phone_number,
+            player.full_name,
+            player.email_id,
+            amount::decimal,
+            (wallet_transaction.created_at + (330:::int::int * '1m':::interval))::date::string as report_date
+            from tbl_wallet_transaction as wallet_transaction
+            inner join tbl_player as player on player.player_id = wallet_transaction.player_id
+            where nz_txn_status = 'SUCCESS'
+            and nz_txn_type = 'WITHDRAW'
+            order by report_date`;
+
+            let query = {
+                text: queryText
+            };
+
+            let result = await pgConnection.executeQuery('rmg_dev_db', query)
+            if (result.length > 0) {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
     verifiedButNotPlayedPlayerData: async function (req, res) {
 
         try {
