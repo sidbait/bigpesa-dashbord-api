@@ -575,4 +575,22 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+
+    chkEnvironment: function (req, res) {
+        console.log('<=======chkEnvironment=======>');
+        let environment = ''
+        if (config.db_connectionString.pg.cms.host == '13.126.241.0') {
+            environment = 'Staging' //staging environment
+        } else {
+            environment = 'Live' //Live environment
+        }
+
+        console.log(environment);
+
+        let op = {
+            environment
+        }
+
+        res.send(op)
+    }
 }

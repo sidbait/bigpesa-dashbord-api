@@ -26,6 +26,100 @@ module.exports = {
         }
     },
 
+    getRank: async function (req, res) {
+        // console.log(req.body);
+
+        let contest_id = req.body.contest_id ? req.body.contest_id : null;
+
+        let _selectQuery = `select * from tbl_contest_rank where contest_id = ${contest_id} order by lower_rank`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    getContestById: async function (req, res) {
+
+        let contest_id = req.body.contest_id ? req.body.contest_id : null;
+
+        let _selectQuery = `select * from tbl_contest where contest_id = ${contest_id}`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    getContestLeaderboard:async function (req, res) {
+
+        let contest_id = req.body.contest_id ? req.body.contest_id : null;
+
+        let _selectQuery = `select
+        contest_id,
+        tbl_contest_leader_board.app_id,
+        tbl_contest_leader_board.player_id,
+        case
+            when (full_name is null)
+            or (full_name = '') then phone_number
+            else full_name
+        end as full_name,
+        phone_number,
+        total_score,
+        rank() over (partition by contest_id
+    order by
+        tbl_contest_leader_board.total_score desc,
+        tbl_contest_leader_board.created_at asc) as player_rank
+    from
+        rmg_db.public.tbl_contest_leader_board
+    inner join rmg_db.public.tbl_player on
+        tbl_player.player_id = tbl_contest_leader_board.player_id
+    where
+        contest_id = ${contest_id}
+    group by
+        contest_id,
+        tbl_contest_leader_board.app_id,
+        tbl_contest_leader_board.player_id,
+        full_name,
+        email_id,
+        phone_number,
+        contest_date,
+        total_score,
+        tbl_contest_leader_board.created_at
+    order by
+        (rank() over (partition by contest_id
+    order by
+        total_score desc)) asc;`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
     updateContestStatus: async function (req, res) {
 
         let rules = {
@@ -256,14 +350,14 @@ module.exports = {
         let _win_amount = req.body.win_amount ? req.body.win_amount : null;
         let _entry_fee = req.body.entry_fee ? req.body.entry_fee : null;
 
-        let _selectQuery = 'SELECT * FROM tbl_contest WHERE  1=1'
+        let _selectQuery = `select case when now():::timestamptz + (330:::int * '1m':::interval) < start_date then true end as Upcoming, tbl_app.app_name,tbl_contest.* from tbl_contest inner join tbl_app on tbl_app.app_id = tbl_contest.app_id WHERE  1=1`
 
         if (_contest_id) {
             _selectQuery += " AND contest_id = " + _contest_id
         }
 
         if (_app_id) {
-            _selectQuery += " AND app_id = '" + _app_id + "'"
+            _selectQuery += " AND tbl_contest.app_id = '" + _app_id + "'"
         }
 
         if (_contestname) {
@@ -294,7 +388,7 @@ module.exports = {
         }
 
         if (_status) {
-            _selectQuery += " AND status = '" + _status + "'"
+            _selectQuery += " AND tbl_contest.status = '" + _status + "'"
         }
 
         if (_fromDate && _toDate) {
@@ -313,7 +407,7 @@ module.exports = {
             _selectQuery += ` AND now():::timestamptz + (330:::int * '1m':::interval) < start_date `
         }
 
-        // _selectQuery += ' LIMIT 50'
+        _selectQuery += ' order by tbl_app.app_name,tbl_contest.start_date'
 
 
         try {
