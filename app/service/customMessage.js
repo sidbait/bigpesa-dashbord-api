@@ -25,20 +25,20 @@ module.exports = {
             messageCode: "VALIDATION_FAILED",
             statusCode: 412
         },
-        "INVALID_APP_SECRET_KEY":{
+        "INVALID_APP_SECRET_KEY": {
             success: false,
             message: "Invalid App Secret Key!",
             messageCode: "INVALID_APP_SECRET_KEY",
             statusCode: 401
         },
-        "INVALID_ACCESS_TOKEN":{
+        "INVALID_ACCESS_TOKEN": {
             success: false,
             message: "Invalid Access Token!",
             messageCode: "INVALID_ACCESS_TOKEN",
             statusCode: 401
         }
     },
-    
+
     //LOGIN/REGISTER MODULES
     "LOGIN_MESSAGE": {
 
@@ -114,7 +114,7 @@ module.exports = {
             messageCode: "PASSWORD_LINK_SENT",
             statusCode: 200
         },
-        "PASSWORD_LINK_FAILED":{
+        "PASSWORD_LINK_FAILED": {
             success: false,
             message: "Password reset link failed! Please try again.",
             messageCode: "PASSWORD_LINK_FAILED",
@@ -138,7 +138,7 @@ module.exports = {
             messageCode: "INVALID_VERIFICATION_CODE",
             statusCode: 401
         },
-        "ACCOUNT_NOT_ACTIVE":{
+        "ACCOUNT_NOT_ACTIVE": {
             success: false,
             message: "Your account not active to reset password!",
             messageCode: "ACCOUNT_NOT_ACTIVE",
@@ -170,25 +170,25 @@ module.exports = {
             message: "Added successfully!",
             messageCode: "REGISTERED_SUCCESS",
             statusCode: 200
-        }, 
+        },
         "ALREADY_REGISTERED": {
             success: false,
             message: "Already exists!",
             messageCode: "ALREADY_REGISTERED",
             statusCode: 401
-        }, 
+        },
         "FAILED_REGISTERED": {
             success: false,
             message: "Failed to add!",
             messageCode: "FAILED_REGISTERED",
             statusCode: 401
-        }, 
+        },
         "ADD_SUCCESS": {
             success: true,
             message: "Added successfully!",
             messageCode: "ADD_SUCCESS",
             statusCode: 200
-        }, 
+        },
         "ALREADY_ADDED": {
             success: false,
             message: "Already exists!",
@@ -226,31 +226,45 @@ module.exports = {
             statusCode: 401
         }
     },
-    "BULKSMS_MESSAGE":{
-        "FILE_IMPORT":{
+    "BULKSMS_MESSAGE": {
+        "FILE_IMPORT": {
             success: true,
             message: "File Imported Successfully",
             messageCode: "FILE_IMPORTED",
             statusCode: 200
         },
-        "WRONG_HEADER":{
+        "WRONG_HEADER": {
             success: false,
             message: "File should have column - phone_number",
             messageCode: "FILE_IMPORTED",
             statusCode: 401
         }
     },
-    "CONTEST_MESSAGE":{
-        "IS_UPCOMING_FALSE":{
+    "CONTEST_MESSAGE": {
+        "IS_UPCOMING_FALSE": {
             success: false,
             message: "Please select only upcoming contest",
             messageCode: "IS_UPCOMING_FALSE",
             statusCode: 401
         },
-        "CONTEST_UPDATED":{
+        "CONTEST_UPDATED": {
             success: true,
             message: "CONTEST_UPDATED",
             messageCode: "CONTEST_UPDATED",
+            statusCode: 200
+        },
+    },
+    "Rebuild_Cache": {
+        "on_failed": {
+            success: false,
+            message: "Something went worng..",
+            messageCode: "on_failed",
+            statusCode: 401
+        },
+        "on_success": {
+            success: true,
+            message: "cache rebuild successfully",
+            messageCode: "on_success",
             statusCode: 200
         },
     }

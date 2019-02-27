@@ -3,6 +3,7 @@ const pgConnection = require('../../model/pgConnection');
 const mv = require('mv');
 const excelToJson = require('convert-excel-to-json');
 const moment = require('moment')
+const request = require("request");
 
 const services = require('../../service/service');
 
@@ -10,6 +11,35 @@ const customMsgType = "MASTER_MESSAGE";
 const customMsgTypeCM = "COMMON_MESSAGE";
 
 module.exports = {
+
+    rebuildCache: async function (req, res) {
+
+        let options = {
+            method: 'GET',
+            url: 'http://localhost:3002/rebuildcashe',
+            qs: { key: 'XVyDHGaMr7diiHMV7PP9oxugZdIty1ud' },
+            headers:
+            {
+                'cache-control': 'no-cache'
+            }
+        };
+
+        try {
+            request(options, function (error, response, body) {
+                // if (error) throw new Error(error);
+
+                console.log(body);
+                if (body) {
+                    services.sendResponse.sendWithCode(req, res, body, 'Rebuild_Cache', "on_success");
+                }
+                else
+                    services.sendResponse.sendWithCode(req, res, error, 'Rebuild_Cache', "on_failed");
+            });
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, 'Rebuild_Cache', "on_failed");
+        }
+    },
 
     getAll: async function (req, res) {
 
