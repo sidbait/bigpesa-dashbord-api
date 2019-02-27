@@ -16,7 +16,7 @@ module.exports = {
 
         let options = {
             method: 'GET',
-            url: 'http://localhost:3000/rebuildcashe',
+            url: 'http://localhost:3002/rebuildcashe',
             qs: { key: 'XVyDHGaMr7diiHMV7PP9oxugZdIty1ud' },
             headers:
             {
