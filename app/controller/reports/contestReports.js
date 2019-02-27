@@ -53,12 +53,10 @@ module.exports = {
     contestSummaryReport: async function (req, res) {
 
         let rules = {
-            "appid": 'required',
             "startdate": 'required',
             "enddate": 'required'
         };
         var custom_message = {
-            "required.appid": "App Id is mandatory!",
             "required.startdate": "Date is mandatory!",
             "required.enddate": "Date is mandatory!"
         };
@@ -68,8 +66,24 @@ module.exports = {
             let startdate = req.body.startdate;
             let enddate = req.body.enddate;
             try {
-                queryText = "select * from vw_admin_contest_summary_report where app_id = $1 and start_date::Date between $2 and $3";
-                valuesArr = [appid, startdate, enddate]
+                queryText = "select contest_name, count(contest_name) as total_contest, start_date, debit_type, credit_type, entry_fee, prize_pool, max_players," +
+                    " sum(players_joined) as players_joined," +
+                    " sum(max_players) as players_joined_limit," +
+                    " (entry_fee * sum(players_joined)) as player_amount," +
+                    " (entry_fee * sum(max_players)) as contest_amount," +
+                    " sum(win_cash) as win_cash," +
+                    " sum(win_coin) as win_coin" +
+                    " from vw_admin_contest_summary_report";
+
+                if (appid) {
+                    queryText += " where app_id = $1 and start_date::Date between $2 and $3";
+                    valuesArr = [appid, startdate, enddate];
+                } else {
+                    queryText += " where start_date::Date between $1 and $2";
+                    valuesArr = [startdate, enddate]
+                }
+                queryText += " group by contest_name, start_date, debit_type, credit_type, entry_fee, prize_pool, max_players" +
+                " order by players_joined desc";
 
                 let query = {
                     text: queryText,
@@ -638,7 +652,6 @@ module.exports = {
                         let out = {}
                         let isadded = false;
                         for (var k in element) {
-                            console.log(k)
                             if (k == "reg_date") {
                                 out[k] = element[k]
                             } else {
@@ -715,7 +728,7 @@ module.exports = {
                         let out = {}
                         let isadded = false;
                         for (var k in element) {
-                            console.log(k)
+                            //console.log(k)
                             if (k == "reg_date") {
                                 out[k] = element[k]
                             } else {
