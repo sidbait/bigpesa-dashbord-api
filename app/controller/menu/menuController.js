@@ -52,11 +52,14 @@ module.exports = {
                         cash: true,
                         paymentgateway: true,
                         acquisitionsummary: true,
+                        channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         userfunnel: true,
                         summary: true,
+                        dailySummary: true,
                         export: true,
-                        hourly: true
+                        hourly: true,
+                        splitWiseReport: true
                     },
                     UserReports: {
                         main: true,
@@ -123,11 +126,14 @@ module.exports = {
                         cash: true,
                         paymentgateway: true,
                         acquisitionsummary: true,
+                        channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         userfunnel: true,
                         summary: true,
+                        dailySummary: true,
                         export: true,
-                        hourly: true
+                        hourly: true,
+                        splitWiseReport: true
                     },
                     UserReports: {
                         main: true,
@@ -194,11 +200,14 @@ module.exports = {
                         cash: false,
                         paymentgateway: false,
                         acquisitionsummary: false,
+                        channelAcquisitionsummary: false,
                         acquisitiondetails: false,
                         userfunnel: false,
                         summary: false,
+                        dailySummary: false,
                         export: true,
-                        hourly: false
+                        hourly: false,
+                        splitWiseReport: true
                     },
                     UserReports: {
                         main: true,
@@ -265,11 +274,14 @@ module.exports = {
                         cash: true,
                         paymentgateway: true,
                         acquisitionsummary: true,
+                        channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         userfunnel: true,
                         summary: true,
+                        dailySummary: true,
                         export: true,
-                        hourly: true
+                        hourly: true,
+                        splitWiseReport: true
                     },
                     UserReports: {
                         main: false,
@@ -337,11 +349,14 @@ module.exports = {
                         cash: false,
                         paymentgateway: false,
                         acquisitionsummary: false,
+                        channelAcquisitionsummary: false,
                         acquisitiondetails: false,
                         userfunnel: false,
                         summary: false,
+                        dailySummary: false,
                         export: true,
-                        hourly: false
+                        hourly: false,
+                        splitWiseReport: false
                     },
                     UserReports: {
                         main: true,
@@ -414,11 +429,14 @@ module.exports = {
                         cash: false,
                         paymentgateway: false,
                         acquisitionsummary: false,
+                        channelAcquisitionsummary: false,
                         acquisitiondetails: false,
                         userfunnel: false,
                         summary: false,
+                        dailySummary: false,
                         export: false,
-                        hourly: false
+                        hourly: false,
+                        splitWiseReport: false
                     },
                     UserReports: {
                         main: false,
@@ -522,11 +540,14 @@ module.exports = {
                     { path: '/reports/cash', title: 'cash Report', show: limit.Reports.cash, },
                     { path: '/reports/paymentgateway', title: 'Payment Gateway Report', show: limit.Reports.paymentgateway, },
                     { path: '/reports/acquisitionsummary', title: 'Acquisition Summary', show: limit.Reports.acquisitionsummary, },
+                    { path: '/reports/channelacquisitionsummary', title: 'Channel Acquisition Summary', show: limit.Reports.channelAcquisitionsummary, },
                     { path: '/reports/acquisitiondetails', title: 'Acquisition Details', show: limit.Reports.acquisitiondetails, },
                     { path: '/reports/userfunnel', title: 'User Funnel', show: limit.Reports.userfunnel, },
                     { path: '/reports/summary', title: 'Summary', show: limit.Reports.summary, },
+                    { path: '/reports/dailysummary', title: 'Daily Summary', show: limit.Reports.dailySummary, },
                     { path: '/reports/export', title: 'Export & Bulk SMS', show: limit.Reports.export, },
-                    { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, }
+                    { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, },
+                    { path: '/reports/splitwisebalance', title: 'Splitwise Balance Report', show: limit.Reports.splitWiseReport, }
                 ]
             },
 
