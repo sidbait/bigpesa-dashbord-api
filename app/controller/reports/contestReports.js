@@ -83,7 +83,7 @@ module.exports = {
                     valuesArr = [startdate, enddate]
                 }
                 queryText += " group by contest_name, start_date, debit_type, credit_type, entry_fee, prize_pool, max_players" +
-                " order by players_joined desc";
+                    " order by players_joined desc";
 
                 let query = {
                     text: queryText,
@@ -226,6 +226,52 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+    channelAcquisitionSummary: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required',
+            "channel": 'required'
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!",
+            "required.channel": "Channel is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                let channel = req.body.channel;
+                let source = req.body.source ? req.body.source : '';
+
+                queryText = "select * from tbl_acquisition_summary_channel" +
+                    " where channel = $1" +
+                    " and reg_source ilike '%" + source + "%'" +
+                    " and report_date between $2 and $3" +
+                    " ORDER BY report_date, reg_source";
+                valuesArr = [channel, fromDate, toDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
     userAcquisitionDetail: async function (req, res) {
         let rules = {
             "frmdate": 'required',
@@ -331,6 +377,43 @@ module.exports = {
                      values: valuesArr
                  }; */
 
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+    dailySummary: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required'
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                let queryText = "select * from tbl_daily_summary where report_date between $1 and $2 ORDER BY report_date asc ";
+                valuesArr = [fromDate, toDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
@@ -553,11 +636,10 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
-    HourlyReport: async function (req, res) {
+    hourlyReport: async function (req, res) {
         let rules = {
             "frmdate": 'required',
-            "todate": 'required',
-            "source": 'required'
+            "todate": 'required'
         };
 
         let validation = new services.validator(req.body, rules);
@@ -566,18 +648,18 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let source = req.body.source ? req.body.source : null;
+                let source = req.body.source ? req.body.source : '';
                 queryText = `select
                 created_at::date::string,
                  extract(hour from created_at) as hours,
-                count(1) as total,
+                count(1) as total_register,
                 count(case phone_number_verified when true then 1 end) as verified
             from
                 tbl_player
             where
                 1 = 1
-                and source = $1
-                and created_at::date between $2 and $3
+                and source ilike '%` + source + `%'
+                and created_at::date between $1 and $2
             group by
                 created_at::date,
                 extract(hour
@@ -586,7 +668,7 @@ module.exports = {
             order by
                 1,
                 2;`;
-                valuesArr = [source, fromDate, toDate]
+                valuesArr = [fromDate, toDate]
 
                 let query = {
                     text: queryText,
@@ -606,6 +688,49 @@ module.exports = {
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
+    },
+
+    balanceReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required',
+        };
+
+        let validation = new services.validator(req.body, rules);
+        //try {
+        if (validation.passes()) {
+            console.log(req.body)
+            let fromDate = req.body.frmdate;
+            let toDate = req.body.todate;
+            let balance_type = req.body.balance_type ? req.body.balance_type : false;
+            let range = req.body.range ? req.body.range : false;
+
+            let query = "select report_date::date::string, balance_type, balance_range, players, amount" + " from tbl_balance_range where 1 = 1";
+
+            if (balance_type) {
+                query += " and balance_type = '" + balance_type + "'";
+            }
+
+            if (range) {
+                query += " and priority = " + range;
+            }
+
+            query += " and report_date between '" + fromDate + "' and '" + toDate +
+                "' order by report_date, priority ";
+
+            let result = await pgConnection.executeQuery('rmg_dev_db', query)
+            if (result.length > 0) {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+        //}
+        // catch (error) {
+        //     services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        // }
     },
 
     retentionReport: async function (req, res) {
