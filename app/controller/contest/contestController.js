@@ -66,7 +66,7 @@ module.exports = {
         }
     },
 
-    getContestLeaderboard:async function (req, res) {
+    getContestLeaderboard: async function (req, res) {
 
         let contest_id = req.body.contest_id ? req.body.contest_id : null;
 
@@ -193,7 +193,7 @@ module.exports = {
         if (validation.passes()) {
 
             let _contest_id = req.body.contest_id ? req.body.contest_id : null;
-            let _contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+            let _contest_clone_id = req.body.contest_clone_id ? req.body.contest_clone_id : null;
             let _app_id = req.body.app_id ? req.body.app_id : null;
             let _contest_name = req.body.contest_name ? req.body.contest_name : null;
             let _contest_type = req.body.contest_type ? req.body.contest_type : null;
@@ -231,8 +231,8 @@ module.exports = {
 
             }
 
-            let new_start_date = joinDateTime(_start_date,_from_time);
-            let new_end_date = joinDateTime(_end_date,_to_time);            
+            let new_start_date = joinDateTime(_start_date, _from_time);
+            let new_end_date = joinDateTime(_end_date, _to_time);
 
             if (!_contest_id) {
 
@@ -261,6 +261,11 @@ module.exports = {
                 console.log(result);
 
                 if (result.length > 0) {
+
+                    if (contest_clone_id) {
+                        // cloneRanks(contest_clone_id);
+                    }
+
                     services.sendResponse.sendWithCode(req, res, result[0], customMsgType, successMsgType);
                 } else {
                     services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
@@ -394,8 +399,8 @@ module.exports = {
         if (_fromDate && _toDate) {
             _fromDate = _fromDate.split(' ');
             _toDate = _toDate.split(' ');
-            let new_start_date = joinDateTime(_fromDate[0],_fromDate[1]);
-            let new_end_date = joinDateTime(_toDate[0],_toDate[1]);
+            let new_start_date = joinDateTime(_fromDate[0], _fromDate[1]);
+            let new_end_date = joinDateTime(_toDate[0], _toDate[1]);
             _selectQuery += ` AND start_date >= '${new_start_date}' AND end_date <= '${new_end_date}'`
         }
 
@@ -538,4 +543,23 @@ function add530(date, time) {
 function joinDateTime(date, time) {
     let new_date = date + 'T' + time + 'Z';
     return new_date
+}
+
+async function cloneRanks(contest_clone_id) {
+    // try {
+
+    //     let result = await pgConnection.executeQuery('rmg_dev_db', _query)
+
+    //     console.log(result);
+
+    //     if (result.length > 0) {
+    //         console.log('done');
+
+    //     } else {
+    //         console.log('result.length', result.length);
+    //     }
+    // }
+    // catch (error) {
+    //     console.log(error);
+    // }
 }

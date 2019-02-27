@@ -24,4 +24,6 @@ contestRoutes.post('/contest/updateContestStatus', contestController.updateConte
 
 contestRoutes.post('/contest/getContestById', contestController.getContestById);
 
+contestRoutes.get('/contest/rebuildCache', contestController.rebuildCache);
+
 module.exports = contestRoutes;
