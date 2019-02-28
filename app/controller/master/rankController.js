@@ -126,6 +126,8 @@ module.exports = {
                 _selectQuery += " AND contest_master_id = '" + _contest_master_id + "'"
             }
 
+            _selectQuery += " order by lower_rank";
+
             try {
                 let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 

@@ -267,5 +267,19 @@ module.exports = {
             messageCode: "on_success",
             statusCode: 200
         },
+    },
+    "runContestCron": {
+        "on_failed": {
+            success: false,
+            message: "No Contest to Insert",
+            messageCode: "on_failed",
+            statusCode: 401
+        },
+        "on_success": {
+            success: true,
+            message: " Contests Inserted",
+            messageCode: "on_success",
+            statusCode: 200
+        },
     }
 }
