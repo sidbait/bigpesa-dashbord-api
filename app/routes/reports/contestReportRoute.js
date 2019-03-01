@@ -9,6 +9,7 @@ appRoutes.post('/channelacquisitionsummary',contestReports.channelAcquisitionSum
 appRoutes.post('/userAcquisitionDetail',contestReports.userAcquisitionDetail);
 appRoutes.post('/Summary',contestReports.summary);
 appRoutes.post('/dailysummary',contestReports.dailySummary);
+appRoutes.post('/dailychannelwisesummary',contestReports.dailyChannelWiseSummary);
 appRoutes.post('/dashboard',contestReports.dashboardReport);
 appRoutes.post('/userfunnelsummary',contestReports.userFunnelSummary);
 appRoutes.post('/downloadsummary',contestReports.downloadSummary);

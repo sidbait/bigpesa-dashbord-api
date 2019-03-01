@@ -57,6 +57,7 @@ module.exports = {
                         userfunnel: true,
                         summary: true,
                         dailySummary: true,
+                        dailyChannelSummary: true,
                         export: true,
                         hourly: true,
                         splitWiseReport: true
@@ -131,6 +132,7 @@ module.exports = {
                         userfunnel: true,
                         summary: true,
                         dailySummary: true,
+                        dailyChannelSummary: true,
                         export: true,
                         hourly: true,
                         splitWiseReport: true
@@ -205,6 +207,7 @@ module.exports = {
                         userfunnel: false,
                         summary: false,
                         dailySummary: false,
+                        dailyChannelSummary: false,
                         export: true,
                         hourly: false,
                         splitWiseReport: true
@@ -279,6 +282,7 @@ module.exports = {
                         userfunnel: true,
                         summary: true,
                         dailySummary: true,
+                        dailyChannelSummary: true,
                         export: true,
                         hourly: true,
                         splitWiseReport: true
@@ -354,6 +358,7 @@ module.exports = {
                         userfunnel: false,
                         summary: false,
                         dailySummary: false,
+                        dailyChannelSummary: false,
                         export: true,
                         hourly: false,
                         splitWiseReport: false
@@ -434,6 +439,7 @@ module.exports = {
                         userfunnel: false,
                         summary: false,
                         dailySummary: false,
+                        dailyChannelSummary: false,
                         export: false,
                         hourly: false,
                         splitWiseReport: false
@@ -545,6 +551,7 @@ module.exports = {
                     { path: '/reports/userfunnel', title: 'User Funnel', show: limit.Reports.userfunnel, },
                     { path: '/reports/summary', title: 'Summary', show: limit.Reports.summary, },
                     { path: '/reports/dailysummary', title: 'Daily Summary', show: limit.Reports.dailySummary, },
+                    { path: '/reports/dailychannelwisesummary', title: 'Daily channelwise Summary', show: limit.Reports.dailyChannelSummary, },
                     { path: '/reports/export', title: 'Export & Bulk SMS', show: limit.Reports.export, },
                     { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, },
                     { path: '/reports/splitwisebalance', title: 'Splitwise Balance Report', show: limit.Reports.splitWiseReport, }
