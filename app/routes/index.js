@@ -32,7 +32,7 @@ apiRoutes.get('/', function (req, res) {
 app.use(middleware.injectMiddleware(
     [
        // validate.validateAppSecret,
-    //    validate.validateAccessToken,
+       // validate.validateAccessToken,
     ],
     [
         apiRoutes_user.use('/master', masterRoutes),
