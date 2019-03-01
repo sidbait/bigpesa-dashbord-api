@@ -3,30 +3,54 @@ const logger = require('tracer').colorConsole();
 const config = require('config');
 const perf = require('execution-time')();
 //const services = require('../service/service.js');
-const consoleLog= require('../service/consoleLog.js');
+const consoleLog = require('../service/consoleLog.js');
+
+const redis = require('./redisConnection');
 
 const pool_cms = new pg.Pool(config.db_connectionString.pg.cms);
 
 module.exports = {
 
-    executeQuery: function (dataBase, dbQuery) {
+    executeQuery: function (dataBase, dbQuery, isRedis = false, expiretime = 0) {
 
         perf.start();
 
         return new Promise(function (resolve, reject) {
+            if (isRedis) {
+                redis.GetRedis(dbQuery).then(redisResult => {
+                    console.log('getting value from redis');
+                    resolve(redisResult);
+                }).catch(async x => {
+                    executeQuery_db(dataBase, dbQuery, function (dbError, dbResult) {
 
-            executeQuery_db(dataBase, dbQuery, function (dbError, dbResult) {
+                        let timeToExecute = perf.stop();
 
-                let timeToExecute = perf.stop();
+                        consoleLog.consoleQueryExecution(dataBase, dbQuery, dbError, dbResult, timeToExecute);
 
-                consoleLog.consoleQueryExecution(dataBase, dbQuery, dbError, dbResult, timeToExecute);
-                
-                if (dbError) {
-                    reject(dbError)
-                } else {
-                    resolve(dbResult);
-                }
-            });
+                        if (dbError) {
+                            reject(dbError)
+                        } else {
+                            redis.SetRedis(dbQuery, dbResult, expiretime)
+                            .then(x=> console.log('value set in redis'))
+                            .catch(x=> console.log('error while setting value in redis'))
+                            resolve(dbResult);
+                        }
+                    });
+                });
+            } else {
+                executeQuery_db(dataBase, dbQuery, function (dbError, dbResult) {
+
+                    let timeToExecute = perf.stop();
+
+                    consoleLog.consoleQueryExecution(dataBase, dbQuery, dbError, dbResult, timeToExecute);
+
+                    if (dbError) {
+                        reject(dbError)
+                    } else {
+                        resolve(dbResult);
+                    }
+                });
+            }
         })
     },
 }

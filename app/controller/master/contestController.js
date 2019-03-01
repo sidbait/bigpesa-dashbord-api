@@ -4,6 +4,7 @@ const mv = require('mv');
 const excelToJson = require('convert-excel-to-json');
 const moment = require('moment')
 const request = require("request");
+const dateFormat = require('dateformat');
 
 const services = require('../../service/service');
 
@@ -38,6 +39,35 @@ module.exports = {
         }
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, 'Rebuild_Cache', "on_failed");
+        }
+    },
+
+    runContestCron: async function (req, res) {
+
+        console.log('createDailyContest Start ' + new Date());
+        var todaysDate = new Date()
+        var dt = dateFormat(todaysDate, "yyyy-mm-dd");
+        let insertquery = `insert into tbl_contest (contest_master_id, app_id, contest_name, contest_type,contest_desc, start_date, end_date, from_time, to_time, max_players, winners, entry_fee, currency, profit_margin, status, debit_type, credit_type, win_amount, css_class, contest_priority, game_conf,created_at,publish_type,channel) 
+        select contest_master_id, app_id, contest_name, contest_type, contest_desc,  (('${dt}' || ' ' || from_time :: string)::timestamptz) ,  (('${dt}' || ' ' || to_time ::string)::timestamptz ),   from_time, to_time, max_players, winners, entry_fee, currency, profit_margin, status, debit_type, credit_type, win_amount, css_class, contest_priority, game_conf,now(),publish_type,channel from tbl_contest_master 
+        where contest_master_id not in (select contest_master_id from tbl_contest where start_date::DATE = '${dt}' and contest_master_id is not null) 
+        and contest_type ='Daily' and status = 'ACTIVE' returning contest_master_id`;
+
+        console.log('addContestForDate - ', insertquery);
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', insertquery);
+
+            console.log('addContestForDate dbResult - ', JSON.stringify(dbResult));
+
+            if (dbResult && dbResult.length > 0) {
+                insertContestRankDetails()
+                services.sendResponse.sendWithCode(req, res, dbResult.length, 'runContestCron', "on_success");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, 'runContestCron', "on_failed");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
 
@@ -84,7 +114,7 @@ module.exports = {
 
         let contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
 
-        let _selectQuery = `select * from tbl_contest_rank_master where contest_master_id = ${contest_master_id}`
+        let _selectQuery = `select * from tbl_contest_rank_master where contest_master_id = ${contest_master_id} order by lower_rank`
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
@@ -168,6 +198,7 @@ module.exports = {
         if (validation.passes()) {
 
             let _contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+            let _contest_clone_id = req.body.contest_clone_id ? req.body.contest_clone_id : null;
             let _app_id = req.body.app_id ? req.body.app_id : null;
             let _contest_name = req.body.contest_name ? req.body.contest_name : null;
             let _contest_type = req.body.contest_type ? req.body.contest_type : null;
@@ -208,7 +239,7 @@ module.exports = {
             if (!_contest_master_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_contest_master(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,publish_type,status,created_by,created_at,channel,is_repeat) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,now(),$24,$25)) RETURNING *",
+                    text: "INSERT INTO tbl_contest_master(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,publish_type,status,created_by,created_at,channel,is_repeat) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,now(),$24,$25) RETURNING *",
                     values: [
                         _app_id, _contest_name, _contest_type, _contest_desc, _start_date, _end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _publish_type, _status, _created_by, _channel, _is_repeat
                     ]
@@ -232,6 +263,11 @@ module.exports = {
                 // console.log(result);
 
                 if (result.length > 0) {
+
+                    if (_contest_clone_id) {
+                        cloneRanks(_contest_clone_id,result[0].contest_master_id);
+                    }
+
                     if (req.files != null && req.files.length > 0) {
                         let movePath = await uploadBanner(req, result[0].contest_master_id);
 
@@ -247,6 +283,7 @@ module.exports = {
 
                         console.log(mvResult);
                     }
+
                     services.sendResponse.sendWithCode(req, res, result[0], customMsgType, successMsgType);
                 } else {
                     services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
@@ -356,6 +393,7 @@ module.exports = {
     search: async function (req, res) {
 
         let _contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+        let _contest_clone_id = req.body.contest_clone_id ? req.body.contest_clone_id : null;
         let _app_id = req.body.app_id ? req.body.app_id : null;
         let _contestname = req.body.contestname ? req.body.contestname : null;
         let _fromDate = req.body.frmdate ? req.body.frmdate : null;
@@ -372,6 +410,10 @@ module.exports = {
 
         if (_contest_master_id) {
             _selectQuery += " AND contest_master_id = '" + _contest_master_id + "'"
+        }
+
+        if (_contest_clone_id) {
+            _selectQuery += " AND contest_master_id = '" + _contest_clone_id + "'"
         }
 
         if (_app_id) {
@@ -470,7 +512,7 @@ async function uploadBanner(req, contest_master_id) {
 
     return new Promise((resolve, reject) => {
 
-        let uploadFilepath = `./public/master/contest/${req.body.app_id}/${contest_master_id}/${req.body.contest_type}`;
+        let uploadFilepath = `./public/master/contest/${req.body.app_id}/${contest_master_id}/`;
 
         let object = req.files;
         for (const key in object) {
@@ -682,4 +724,70 @@ function getQueriesRankData(sheetData, contest_uid, contest_master_id) {
 
         resolve(queries)
     });
+}
+
+async function insertContestRankDetails() {
+
+    let pendingContestRank = 'select distinct contest_id, contest_master_id from ' +
+        ' tbl_contest where created_at::Date = now()::date and ' +
+        ' contest_id not in (select distinct contest_id from tbl_contest_rank) order by contest_id'
+
+    try {
+        let dbResult = await pgConnection.executeQuery('rmg_dev_db', pendingContestRank);
+
+        if (dbResult != null) {
+            dbResult.forEach(async element => {
+
+                console.log(element)
+
+                let insertRankdetails = "insert into tbl_contest_rank ( contest_id, rank_name, rank_desc, lower_rank, upper_rank, prize_amount, status, created_at, updated_at, credit_type) " +
+                    " select  " + element.contest_id + ", rank_name, rank_desc,  lower_rank, upper_rank, prize_amount, status, created_at, updated_at,credit_type from tbl_contest_rank_master where contest_master_id =  " + element.contest_master_id +" returning contest_id";
+
+                console.log('insertRankdetails - ', insertRankdetails);
+                try {
+
+                    let dbResult = await pgConnection.executeQuery('rmg_dev_db', insertRankdetails);
+
+                    console.log(dbResult);
+
+                } catch (error) {
+                    console.log(error);
+                }
+
+            });
+        }
+        else
+            console.log('Error In distinct');
+    }
+    catch (error) {
+        console.log('Error In distinct', error);
+    }
+}
+
+
+async function cloneRanks(contest_clone_id,contest_master_id) {
+
+    console.log('contest_clone_id',contest_clone_id);
+    console.log('contest_master_id',contest_master_id);
+
+    let insertBulkRank = `INSERT INTO tbl_contest_rank_master(contest_master_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by)
+    select ${contest_master_id},rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by from tbl_contest_rank_master
+    where contest_master_id = ${contest_clone_id} RETURNING rank_name`
+    
+    try {
+
+        let result = await pgConnection.executeQuery('rmg_dev_db', insertBulkRank)
+
+        console.log(result);
+
+        if (result.length > 0) {
+            console.log('done');
+
+        } else {
+            console.log('result.length', result.length);
+        }
+    }
+    catch (error) {
+        console.log(error);
+    }
 }

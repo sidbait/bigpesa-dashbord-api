@@ -154,6 +154,8 @@ module.exports = {
                 _selectQuery += " AND contest_id = '" + _contest_id + "'"
             }
 
+            _selectQuery += " order by lower_rank";
+
             try {
                 let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
@@ -178,7 +180,7 @@ module.exports = {
 
 function bulkInsert(iterator, contest_id, userid) {
     return new Promise((resolve, reject) => {
-        let rules = {            
+        let rules = {
             "rank_name": 'required',
             "rank_desc": 'required',
             "lower_rank": 'required',

@@ -102,9 +102,7 @@ module.exports = {
         total_score,
         tbl_contest_leader_board.created_at
     order by
-        (rank() over (partition by contest_id
-    order by
-        total_score desc)) asc;`;
+        player_rank asc;`;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
@@ -258,20 +256,40 @@ module.exports = {
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', _query)
 
-                console.log(result);
+                console.log('result contest_id', result[0].contest_id);
 
                 if (result.length > 0) {
 
-                    if (contest_clone_id) {
-                        // cloneRanks(contest_clone_id);
+                    if (_contest_clone_id) {
+                        cloneRanks(_contest_clone_id,result[0].contest_id);
+                    }
+
+                    if (req.files != null && req.files.length > 0) {
+                        let movePath = await uploadBanner(req, result[0].contest_id);
+
+                        let mvQuery = {
+                            text: "UPDATE tbl_contest set contest_icon = $1 WHERE contest_id= $2 RETURNING *",
+                            values: [
+                                movePath.replace('./public', ''),
+                                result[0].contest_id
+                            ]
+                        }
+
+                        let mvResult = await pgConnection.executeQuery('rmg_dev_db', mvQuery)
+
+                        console.log(mvResult);
                     }
 
                     services.sendResponse.sendWithCode(req, res, result[0], customMsgType, successMsgType);
+
                 } else {
-                    services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
+
+                    services.sendResponse.sendWithCode(req, res, 'error', customMsgType, errMsgType);
                 }
             }
             catch (error) {
+
+                console.log(error);
 
                 services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
             }
@@ -343,6 +361,7 @@ module.exports = {
     search: async function (req, res) {
 
         let _contest_id = req.body.contest_id ? req.body.contest_id : null;
+        let _contest_clone_id = req.body.contest_clone_id ? req.body.contest_clone_id : null;
         let _app_id = req.body.app_id ? req.body.app_id : null;
         let _contestname = req.body.contestname ? req.body.contestname : null;
         let _fromDate = req.body.frmdate ? req.body.frmdate : null;
@@ -359,6 +378,9 @@ module.exports = {
 
         if (_contest_id) {
             _selectQuery += " AND contest_id = " + _contest_id
+        }
+        if (_contest_clone_id) {
+            _selectQuery += " AND contest_id = " + _contest_clone_id
         }
 
         if (_app_id) {
@@ -545,21 +567,76 @@ function joinDateTime(date, time) {
     return new_date
 }
 
-async function cloneRanks(contest_clone_id) {
-    // try {
+async function uploadBanner(req, contest_master_id) {
 
-    //     let result = await pgConnection.executeQuery('rmg_dev_db', _query)
+    return new Promise((resolve, reject) => {
 
-    //     console.log(result);
+        let uploadFilepath = `./public/contest/${req.body.app_id}/${contest_master_id}/`;
 
-    //     if (result.length > 0) {
-    //         console.log('done');
+        let object = req.files;
+        for (const key in object) {
+            if (object.hasOwnProperty(key)) {
 
-    //     } else {
-    //         console.log('result.length', result.length);
-    //     }
-    // }
-    // catch (error) {
-    //     console.log(error);
-    // }
+                const element = object[key];
+
+                let fromPath = element.destination + element.filename;
+
+                let extension = path.extname(fromPath)
+
+                if (extension.toLowerCase() == ".jpg" ||
+                    extension.toLowerCase() == ".jpeg" ||
+                    extension.toLowerCase() == ".png" ||
+                    extension.toLowerCase() == ".gif") {
+
+                    let movePath = uploadFilepath + element.filename;
+                    movePath = movePath.toLowerCase();
+
+                    console.log("fromPath - " + fromPath + "\n" +
+                        "extension - " + extension + "\n" +
+                        "movePath - " + movePath + "\n"
+                    );
+
+                    mv(fromPath, movePath, { mkdirp: true }, function (err) {
+
+                        if (err) {
+                            reject(err);
+                        }
+                        else
+                            resolve(movePath)
+                    });
+                }
+                else
+                    reject("error - Invalid File Format")
+            }
+            else
+                reject("error - hasOwnProperty error")
+        }
+    });
+}
+
+async function cloneRanks(contest_clone_id,contest_id) {
+
+    console.log('contest_clone_id',contest_clone_id);
+    console.log('contest_id',contest_id);
+
+    let insertBulkRank = `INSERT INTO tbl_contest_rank(contest_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by)
+    select ${contest_id},rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by from tbl_contest_rank
+    where contest_id = ${contest_clone_id} RETURNING rank_name`
+    
+    try {
+
+        let result = await pgConnection.executeQuery('rmg_dev_db', insertBulkRank)
+
+        console.log(result);
+
+        if (result.length > 0) {
+            console.log('done');
+
+        } else {
+            console.log('result.length', result.length);
+        }
+    }
+    catch (error) {
+        console.log(error);
+    }
 }
