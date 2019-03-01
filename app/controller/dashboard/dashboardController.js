@@ -3,7 +3,7 @@ const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";
 const customMsgTypeCM = "COMMON_MESSAGE";
-let expiretime = 15*60 // in sec 
+let expiretime = 15*60 // in sec //
 module.exports = {
 
     cashSummary: async function (req, res) {
