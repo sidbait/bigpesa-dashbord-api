@@ -3,7 +3,7 @@ const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";
 const customMsgTypeCM = "COMMON_MESSAGE";
-
+let expiretime = 15*60 // in sec 
 module.exports = {
 
     cashSummary: async function (req, res) {
@@ -23,14 +23,14 @@ module.exports = {
         tbl_wallet_transaction
     where
         nz_txn_status = 'SUCCESS'
-        and created_at > current_date - interval '${days} days'
+        and created_at > (now():::timestamptz + (330:::int * '1m':::interval))::date - interval '${days} days'
     group by
         created_at::date
     order by
         created_at desc`;
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
@@ -72,7 +72,7 @@ module.exports = {
     `;
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
                 services.sendResponse.sendWithCode(req, res, dbResult[0], customMsgType, "GET_SUCCESS");
@@ -119,18 +119,19 @@ module.exports = {
         group by
             created_at::date) t_one
     where
-        created_at::date > current_date - interval '${days} days'
+        created_at::date > (now():::timestamptz + (330:::int * '1m':::interval))::date - interval '${days} days'
     group by
         created_at::date
     order by
         created_at::date desc
     `;
-
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
+
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+
             } else {
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
             }
@@ -138,6 +139,7 @@ module.exports = {
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
+
     },
 
     totalCashSummary: async function (req, res) {
@@ -150,10 +152,10 @@ module.exports = {
         where nz_txn_status = 'SUCCESS'`;
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
-                console.log(dbResult[0]);
+                // console.log(dbResult[0]);
 
                 services.sendResponse.sendWithCode(req, res, dbResult[0], customMsgType, "GET_SUCCESS");
             } else {
@@ -186,7 +188,7 @@ module.exports = {
         from
             tbl_app_download
         where
-            download_date::date = current_date
+            download_date::date = (now():::timestamptz + (330:::int * '1m':::interval))::date
         group by
             agency_source
     union all
@@ -202,7 +204,7 @@ module.exports = {
         from
             tbl_player
         where
-            created_at::date = current_date
+            created_at::date = (now():::timestamptz + (330:::int * '1m':::interval))::date
         group by
             source)
     group by
@@ -210,7 +212,7 @@ module.exports = {
     order by downloads desc`;
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
@@ -250,14 +252,14 @@ module.exports = {
         contest.start_date::date,
         contest.debit_type, entry_fee
         ) game_contest
-        where date::date = current_date
+        where date::date = (now():::timestamptz + (330:::int * '1m':::interval))::date
         group by date`;
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
-                console.log(dbResult[0]);
+                // console.log(dbResult[0]);
 
                 services.sendResponse.sendWithCode(req, res, dbResult[0], customMsgType, "GET_SUCCESS");
             } else {
@@ -282,15 +284,15 @@ module.exports = {
         COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW
         from tbl_wallet_transaction 
         where nz_txn_status = 'SUCCESS'
-        and created_at::date = current_date
+        and created_at::date = (now():::timestamptz + (330:::int * '1m':::interval))::date
         group by created_at::date::string
         order by 1`;
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
-                console.log(dbResult[0]);
+                // console.log(dbResult[0]);
 
                 services.sendResponse.sendWithCode(req, res, dbResult[0], customMsgType, "GET_SUCCESS");
             } else {
@@ -334,13 +336,13 @@ module.exports = {
     inner join tbl_contest c on cp.contest_id = c.contest_id
     inner join tbl_app a on c.app_id = a.app_id
     where
-        transaction_date::date ${opt} (current_date - interval '${days} days')::date
+        transaction_date::date ${opt} ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '${days} days')::date
     group by
         a.app_name
     order by 2 desc`;
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
 
@@ -364,19 +366,19 @@ module.exports = {
         count(case when phone_number_verified = true then 1 end) as verified_users,
         0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
         from tbl_player 
-        where created_at::date > (current_date - interval '7 days')::date 
+        where created_at::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '7 days')::date 
         group by created_at::date::string
         union all
         select transaction_date::date::string as trans_date, 0 as register_users, 0 as verified_users, 
         count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
         from tbl_contest_players
-        where transaction_date::date > (current_date - interval '7 days')::date
+        where transaction_date::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '7 days')::date
         group by transaction_date::date::string
         union all
         select created_at::date::string as trans_date, 0 as register_users, 0 as verified_users, 
         0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
         from tbl_wallet_transaction
-        where created_at::date > (current_date - interval '30 days')::date and 
+        where created_at::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '30 days')::date and 
         nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
         group by created_at::date::string
         ) as active_users
@@ -392,19 +394,19 @@ module.exports = {
                 count(case when phone_number_verified = true then 1 end) as verified_users,
                 0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
                 from tbl_player 
-                where created_at::date > (current_date - interval '30 days')::date 
+                where created_at::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '30 days')::date 
                 group by created_at::date::string
                 union all
                 select transaction_date::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
                 from tbl_contest_players
-                where transaction_date::date > (current_date - interval '30 days')::date
+                where transaction_date::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '30 days')::date
                 group by transaction_date::date::string
                 union all
                 select created_at::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
                 from tbl_wallet_transaction
-                where created_at::date > (current_date - interval '30 days')::date and 
+                where created_at::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '30 days')::date and 
                 nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
                 group by created_at::date::string
                 ) as active_users
@@ -471,7 +473,7 @@ module.exports = {
 
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
 
@@ -498,7 +500,7 @@ module.exports = {
 
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
 
@@ -529,7 +531,7 @@ module.exports = {
 
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
 
@@ -562,7 +564,7 @@ module.exports = {
 
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
 
