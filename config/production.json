@@ -3,7 +3,7 @@
     "host": "0.0.0.0",
     "port": "3005",
     "app_key": "yXzLPeD4f3FXHsK33aExnuKyBHAFr8AmxYyWMAvaH2jaMhMTap"
-  },       
+  },
   "logger": {
     "level": "info",
     "filename": "cmsapi.log"
@@ -12,17 +12,17 @@
   "db_connectionString": {
     "pg": {
       "cms": {
-        "user": "nazara",
-      "password": "VXUdS7XfrbKhqHS57fsK",
-      "host": "cockroach-ef774991a31567cc.elb.ap-south-1.amazonaws.com",
-      "application_name" : "admin-api",
-      "database": "rmg_db",
-      "port": 26257,
-      "ssl": true,
-      "max": 50,
-      "min": 10,
-      "idleTimeoutMillis": 500000
-      }      
+        "user": "bigpesa",
+        "password": "YP8mhNqxaZBbDtjQrS6m",
+        "host": "CDB-Internal-2fd7a8cb3bbe9654.elb.ap-south-1.amazonaws.com",
+        "application_name": "admin-api",
+        "database": "rmg_db",
+        "port": 26257,
+        "ssl": true,
+        "max": 50,
+        "min": 10,
+        "idleTimeoutMillis": 500000
+      }
     }
   },
   "jwt_sessions": {

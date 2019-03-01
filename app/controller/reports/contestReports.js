@@ -429,6 +429,48 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+    dailyChannelWiseSummary: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required',
+            "channel": 'required',
+
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                let channel = req.body.channel;
+                let queryText = "select * from tbl_daily_channel_summary" +
+                    " where channel = $1 and report_date between $2 and $3" +
+                    " ORDER BY report_date asc";
+                valuesArr = [channel, fromDate, toDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
     cashReport: async function (req, res) {
         let rules = {
             "frmdate": 'required',
@@ -689,7 +731,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
-
     balanceReport: async function (req, res) {
         let rules = {
             "frmdate": 'required',
@@ -732,7 +773,6 @@ module.exports = {
         //     services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         // }
     },
-
     retentionReport: async function (req, res) {
         let rules = {
             "frmdate": 'required',
@@ -805,7 +845,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
-
     channelRetentionReport: async function (req, res) {
         let rules = {
             "frmdate": 'required',
