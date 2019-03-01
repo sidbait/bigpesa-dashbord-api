@@ -11,7 +11,7 @@
     "debug_db_result": true,
     "db_connectionString": {
       "pg": {
-        "cms": {
+        "public": {
           "user": "root",
           "database": "rmg_dev_db",
           "host": "13.126.241.0",

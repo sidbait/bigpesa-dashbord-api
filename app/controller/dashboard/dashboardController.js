@@ -9,7 +9,7 @@ module.exports = {
     cashSummary: async function (req, res) {
         let days = req.body.days ? req.body.days : 6;
         let _selectQuery = `select
-        created_at::date::string,
+        (created_at + (330 * '1m'::interval))::date as report_date,
         coalesce(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),
         0) as DEPOSIT,
         coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),
@@ -23,11 +23,11 @@ module.exports = {
         tbl_wallet_transaction
     where
         nz_txn_status = 'SUCCESS'
-        and created_at > (now():::timestamptz + (330:::int * '1m':::interval))::date - interval '${days} days'
+        and (created_at + (330 * '1m'::interval))::date > (now() + (330 * '1m'::interval))::date - interval '${days} days'
     group by
-        created_at::date
+        (created_at + (330 * '1m'::interval))::date
     order by
-        created_at desc`;
+        (created_at + (330 * '1m'::interval))::date desc`;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
@@ -88,24 +88,26 @@ module.exports = {
     registeredVerifiedNotPlayedDayWise: async function (req, res) {
         let days = req.body.days ? req.body.days : 7;
         let _selectQuery = `select
-        created_at::date,
+        report_date,
         sum(total_registered) as total_registered,
         sum(total_otp_verified) as total_otp_verified,
         sum(verified_but_not_played) as verified_but_not_played
     from
         (
         select
-            created_at::date,
+            (created_at + (330 * '1m'::interval))::date as report_date,
             count(distinct player_id) as total_registered,
             count(distinct case when phone_number_verified = true then player_id end) as total_otp_verified ,
             0 as verified_but_not_played
         from
             tbl_player
+        where
+            (created_at + (330 * '1m'::interval))::date > (now() + (330 * '1m'::interval))::date - interval '${days} days'
         group by
-            created_at::date
+            (created_at + (330 * '1m'::interval))::date
     union all
         select
-            created_at::date,
+            (created_at + (330 * '1m'::interval))::date as report_date,
             0 as total_registered,
             0 as total_otp_verified,
             count(1) as verified_but_not_played
@@ -116,14 +118,13 @@ module.exports = {
         where
             tbl_contest_players.player_id is null
             and tbl_player.phone_number_verified = true
+            and (created_at + (330 * '1m'::interval))::date > (now() + (330 * '1m'::interval))::date - interval '${days} days'
         group by
-            created_at::date) t_one
-    where
-        created_at::date > (now():::timestamptz + (330:::int * '1m':::interval))::date - interval '${days} days'
+            (created_at + (330 * '1m'::interval))::date ) t_one
     group by
-        created_at::date
+        report_date
     order by
-        created_at::date desc
+        report_date desc
     `;
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
@@ -188,7 +189,7 @@ module.exports = {
         from
             tbl_app_download
         where
-            download_date::date = (now():::timestamptz + (330:::int * '1m':::interval))::date
+            (download_date + (330 * '1m'::interval))::date = (now() + (330 * '1m'::interval))::date
         group by
             agency_source
     union all
@@ -204,7 +205,7 @@ module.exports = {
         from
             tbl_player
         where
-            created_at::date = (now():::timestamptz + (330:::int * '1m':::interval))::date
+            (created_at + (330 * '1m'::interval))::date = (now() + (330 * '1m'::interval))::date
         group by
             source)
     group by
@@ -226,7 +227,7 @@ module.exports = {
     },
 
     todaysCounts: async function (req, res) {
-
+//need to chnage
         let _selectQuery = `select date,
         sum(cash_players_joined) as cash_players_joined, 
         sum(coin_players_joined) as coin_players_joined,
@@ -256,7 +257,7 @@ module.exports = {
         group by date`;
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, 1800)
 
             if (dbResult && dbResult.length > 0) {
                 // console.log(dbResult[0]);
@@ -336,7 +337,7 @@ module.exports = {
     inner join tbl_contest c on cp.contest_id = c.contest_id
     inner join tbl_app a on c.app_id = a.app_id
     where
-        transaction_date::date ${opt} ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '${days} days')::date
+        (transaction_date + (330 * '1m'::interval))::date ${opt} (now() + (330 * '1m'::interval))::date - interval '${days} days'
     group by
         a.app_name
     order by 2 desc`;
@@ -362,25 +363,25 @@ module.exports = {
         let _selectQuery = `select trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
         sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
         from (
-        select created_at::date::string as trans_date, count(player_id) as register_users, 
+        select (created_at + (330 * '1m'::interval))::date::string as trans_date, count(player_id) as register_users, 
         count(case when phone_number_verified = true then 1 end) as verified_users,
         0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
         from tbl_player 
-        where created_at::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '7 days')::date 
-        group by created_at::date::string
+        where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date 
+        group by (created_at + (330 * '1m'::interval))::date::string
         union all
         select transaction_date::date::string as trans_date, 0 as register_users, 0 as verified_users, 
         count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
         from tbl_contest_players
-        where transaction_date::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '7 days')::date
+        where transaction_date::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date
         group by transaction_date::date::string
         union all
-        select created_at::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+        select (created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
         0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
         from tbl_wallet_transaction
-        where created_at::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '30 days')::date and 
+        where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date and 
         nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
-        group by created_at::date::string
+        group by (created_at + (330 * '1m'::interval))::date::string
         ) as active_users
         group by trans_date
         order by trans_date`;
@@ -390,82 +391,82 @@ module.exports = {
                 _selectQuery = `select trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
                 sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
                 from (
-                select created_at::date::string as trans_date, count(player_id) as register_users, 
+                select (created_at + (330 * '1m'::interval))::date::string as trans_date, count(player_id) as register_users, 
                 count(case when phone_number_verified = true then 1 end) as verified_users,
                 0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
                 from tbl_player 
-                where created_at::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '30 days')::date 
-                group by created_at::date::string
+                where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date 
+                group by (created_at + (330 * '1m'::interval))::date::string
                 union all
                 select transaction_date::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
                 from tbl_contest_players
-                where transaction_date::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '30 days')::date
+                where transaction_date::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date
                 group by transaction_date::date::string
                 union all
-                select created_at::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                select (created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
                 from tbl_wallet_transaction
-                where created_at::date > ((now():::timestamptz + (330:::int * '1m':::interval))::date - interval '30 days')::date and 
+                where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date and 
                 nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
-                group by created_at::date::string
+                group by (created_at + (330 * '1m'::interval))::date::string
                 ) as active_users
                 group by trans_date
                 order by trans_date`;
                 break;
             case 'Weekly':
                 _selectQuery = `select trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
-            sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
-            from (
-            select date_trunc('week', created_at)::date::string as trans_date, count(player_id) as register_users, 
-            count(case when phone_number_verified = true then 1 end) as verified_users,
-            0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
-            from tbl_player 
-            where created_at::date > '2019-01-01' 
-            group by date_trunc('week', created_at)::date::string
-            union all
-            select date_trunc('week', transaction_date)::date::string as trans_date, 0 as register_users, 0 as verified_users, 
-            count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
-            from tbl_contest_players
-            where transaction_date::date > '2019-01-01'
-            group by date_trunc('week', transaction_date)::date::string
-            union all
-            select date_trunc('week', created_at)::date::string as trans_date, 0 as register_users, 0 as verified_users, 
-            0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
-            from tbl_wallet_transaction
-            where created_at::date > '2019-01-01' and 
-            nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
-            group by date_trunc('week', created_at)::date::string
-            ) as active_users
-            group by trans_date
-            order by trans_date`
+                sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
+                from (
+                select date_trunc('week', created_at + (330 * '1m'::interval))::date::string as trans_date, count(player_id) as register_users, 
+                count(case when phone_number_verified = true then 1 end) as verified_users,
+                0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                from tbl_player 
+                where created_at::date > '2019-01-01' 
+                group by date_trunc('week', created_at + (330 * '1m'::interval))::date::string
+                union all
+                select date_trunc('week', transaction_date + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                from tbl_contest_players
+                where transaction_date::date > '2019-01-01'
+                group by date_trunc('week', transaction_date + (330 * '1m'::interval))::date::string
+                union all
+                select date_trunc('week', created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
+                from tbl_wallet_transaction
+                where created_at::date > '2019-01-01' and 
+                nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
+                group by date_trunc('week', created_at + (330 * '1m'::interval))::date::string
+                ) as active_users
+                group by trans_date
+                order by trans_date`
                 break;
             case 'Monthly':
                 _selectQuery = `select trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
-            sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
-            from (
-            select date_trunc('month', created_at)::date::string as trans_date, count(player_id) as register_users, 
-            count(case when phone_number_verified = true then 1 end) as verified_users,
-            0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
-            from tbl_player 
-            where created_at::date > '2019-01-01' 
-            group by date_trunc('month', created_at)::date::string
-            union all
-            select date_trunc('month', transaction_date)::date::string as trans_date, 0 as register_users, 0 as verified_users, 
-            count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
-            from tbl_contest_players
-            where transaction_date::date > '2019-01-01'
-            group by date_trunc('month', transaction_date)::date::string
-            union all
-            select date_trunc('month', created_at)::date::string as trans_date, 0 as register_users, 0 as verified_users, 
-            0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
-            from tbl_wallet_transaction
-            where created_at::date > '2019-01-01' and 
-            nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
-            group by date_trunc('month', created_at)::date::string
-            ) as active_users
-            group by trans_date
-            order by trans_date`
+                sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
+                from (
+                select date_trunc('month', created_at + (330 * '1m'::interval))::date::string as trans_date, count(player_id) as register_users, 
+                count(case when phone_number_verified = true then 1 end) as verified_users,
+                0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                from tbl_player 
+                where created_at::date > '2019-01-01' 
+                group by date_trunc('month', created_at + (330 * '1m'::interval))::date::string
+                union all
+                select date_trunc('month', transaction_date + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                from tbl_contest_players
+                where transaction_date::date > '2019-01-01'
+                group by date_trunc('month', transaction_date + (330 * '1m'::interval))::date::string
+                union all
+                select date_trunc('month', created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
+                from tbl_wallet_transaction
+                where created_at::date > '2019-01-01' and 
+                nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
+                group by date_trunc('month', created_at + (330 * '1m'::interval))::date::string
+                ) as active_users
+                group by trans_date
+                order by trans_date`
                 break;
             default:
                 break;
@@ -581,7 +582,7 @@ module.exports = {
     chkEnvironment: function (req, res) {
         console.log('<=======chkEnvironment=======>');
         let environment = ''
-        if (config.db_connectionString.pg.cms.host == '13.126.241.0') {
+        if (config.db_connectionString.pg.public.host == '13.126.241.0') {
             environment = 'Staging' //staging environment
         } else {
             environment = 'Live' //Live environment
