@@ -11,12 +11,10 @@
     "debug_db_result": true,
     "db_connectionString": {
       "pg": {
-        "cms": {
-          "user": "bigpesa",
-          "password": "YP8mhNqxaZBbDtjQrS6m",
-          "host": "cockroach-ef774991a31567cc.elb.ap-south-1.amazonaws.com",
-          "application_name": "admin-api",
-          "database": "rmg_db",
+        "public": {
+          "user": "root",
+          "database": "rmg_dev_db",
+          "host": "13.126.241.0",
           "port": 26257,
           "ssl": true,
           "max": 50,
