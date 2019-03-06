@@ -1,32 +1,42 @@
 {
-    "app": {
-      "host": "0.0.0.0",
-      "port": "3005",
-      "app_key": "yXzLPeD4f3FXHsK33aExnuKyBHAFr8AmxYyWMAvaH2jaMhMTap"
-    },       
-    "logger": {
-      "level": "info",
-      "filename": "bigpesa-dash.log"
-    },
-    "debug_db_result": true,
-    "db_connectionString": {
-      "pg": {
-        "public": {
-          "user": "root",
-          "database": "rmg_dev_db",
-          "host": "13.126.241.0",
-          "port": 26257,
-          "ssl": true,
-          "max": 50,
-          "min": 10,
-          "idleTimeoutMillis": 500000
-        }     
+  "app": {
+    "host": "0.0.0.0",
+    "port": "3005",
+    "app_key": "yXzLPeD4f3FXHsK33aExnuKyBHAFr8AmxYyWMAvaH2jaMhMTap"
+  },
+  "logger": {
+    "level": "info",
+    "filename": "bigpesa-dash.log"
+  },
+  "debug_db_result": true,
+  "db_connectionString": {
+    "pg": {
+      "public": {
+        "user": "root",
+        "database": "rmg_dev_db",
+        "host": "13.126.241.0",
+        "port": 26257,
+        "ssl": true,
+        "max": 50,
+        "min": 10,
+        "idleTimeoutMillis": 500000
+      },
+      "pg_public": {
+        "user": "bigpesa",
+        "password": "YP8mhNqxaZBbDtjQrS6m",
+        "database": "rmg_db_test",
+        "host": "13.126.241.0",
+        "port": 5432,
+        "ssl": true,
+        "max": 50,
+        "min": 10,
+        "idleTimeoutMillis": 500000
       }
-    },
-    "jwt_sessions": {
-      "private_key": "MKMKMXBJ",
-      "expires_in": 300,
-      "refresh_time": 300
     }
+  },
+  "jwt_sessions": {
+    "private_key": "MKMKMXBJ",
+    "expires_in": 300,
+    "refresh_time": 300
   }
-  
+}

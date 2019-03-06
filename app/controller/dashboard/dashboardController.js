@@ -370,11 +370,11 @@ module.exports = {
         where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date 
         group by (created_at + (330 * '1m'::interval))::date::string
         union all
-        select transaction_date::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+        select (created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
         count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
-        from tbl_contest_players
-        where transaction_date::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date
-        group by transaction_date::date::string
+        from tbl_wallet_transaction
+        where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date 
+        group by (created_at + (330 * '1m'::interval))::date::string
         union all
         select (created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
         0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
@@ -398,11 +398,11 @@ module.exports = {
                 where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date 
                 group by (created_at + (330 * '1m'::interval))::date::string
                 union all
-                select transaction_date::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                select (created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
-                from tbl_contest_players
-                where transaction_date::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date
-                group by transaction_date::date::string
+                from tbl_wallet_transaction
+                where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date 
+                group by (created_at + (330 * '1m'::interval))::date::string
                 union all
                 select (created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
@@ -425,11 +425,11 @@ module.exports = {
                 where created_at::date > '2019-01-01' 
                 group by date_trunc('week', created_at + (330 * '1m'::interval))::date::string
                 union all
-                select date_trunc('week', transaction_date + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                select date_trunc('week',(created_at + (330 * '1m'::interval)))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
-                from tbl_contest_players
-                where transaction_date::date > '2019-01-01'
-                group by date_trunc('week', transaction_date + (330 * '1m'::interval))::date::string
+                from tbl_wallet_transaction
+                where (created_at + (330 * '1m'::interval))::date > '2019-01-01'
+                group by date_trunc('week',(created_at + (330 * '1m'::interval)))::date::string
                 union all
                 select date_trunc('week', created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
@@ -452,11 +452,11 @@ module.exports = {
                 where created_at::date > '2019-01-01' 
                 group by date_trunc('month', created_at + (330 * '1m'::interval))::date::string
                 union all
-                select date_trunc('month', transaction_date + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
+                select date_trunc('month',(created_at + (330 * '1m'::interval)))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
-                from tbl_contest_players
-                where transaction_date::date > '2019-01-01'
-                group by date_trunc('month', transaction_date + (330 * '1m'::interval))::date::string
+                from tbl_wallet_transaction
+                where (created_at + (330 * '1m'::interval))::date > '2019-01-01'
+                group by date_trunc('month',(created_at + (330 * '1m'::interval)))::date::string
                 union all
                 select date_trunc('month', created_at + (330 * '1m'::interval))::date::string as trans_date, 0 as register_users, 0 as verified_users, 
                 0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
