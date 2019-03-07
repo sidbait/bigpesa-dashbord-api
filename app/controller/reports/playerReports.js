@@ -492,7 +492,7 @@ module.exports = {
             player.full_name,
             player.email_id,
             amount::decimal,
-            (wallet_transaction.created_at + (330:::int::int * '1m':::interval))::date::string as report_date
+            (wallet_transaction.created_at + (330::int::int * '1m'::interval))::date::text as report_date
             from tbl_wallet_transaction as wallet_transaction
             inner join tbl_player as player on player.player_id = wallet_transaction.player_id
             where nz_txn_status = 'SUCCESS'

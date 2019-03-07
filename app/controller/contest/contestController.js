@@ -135,7 +135,7 @@ module.exports = {
 
             let _selectQuery = `select contest_id,status from tbl_contest
             where contest_id in (${_selectedContests.toString()})
-            AND now():::timestamptz + (330:::int * '1m':::interval) < start_date`
+            AND now()::timestamptz + (330::int * '1m'::interval) < start_date`
             try {
 
                 let isUpComing = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
@@ -374,7 +374,7 @@ module.exports = {
         let _win_amount = req.body.win_amount ? req.body.win_amount : null;
         let _entry_fee = req.body.entry_fee ? req.body.entry_fee : null;
 
-        let _selectQuery = `select case when now():::timestamptz + (330:::int * '1m':::interval) < start_date then true end as Upcoming, tbl_app.app_name,tbl_contest.* from tbl_contest inner join tbl_app on tbl_app.app_id = tbl_contest.app_id WHERE  1=1`
+        let _selectQuery = `select case when now()::timestamptz + (330::int * '1m'::interval) < start_date then true end as Upcoming, tbl_app.app_name,tbl_contest.* from tbl_contest inner join tbl_app on tbl_app.app_id = tbl_contest.app_id WHERE  1=1`
 
         if (_contest_id) {
             _selectQuery += " AND contest_id = " + _contest_id
@@ -427,11 +427,11 @@ module.exports = {
         }
 
         if (_grep && _grep == 'Live') {
-            _selectQuery += ` AND now():::timestamptz + (330:::int * '1m':::interval) between start_date and end_date`
+            _selectQuery += ` AND now()::timestamptz + (330::int * '1m'::interval) between start_date and end_date`
         }
 
         if (_grep && _grep == 'Upcoming') {
-            _selectQuery += ` AND now():::timestamptz + (330:::int * '1m':::interval) < start_date `
+            _selectQuery += ` AND now()::timestamptz + (330::int * '1m'::interval) < start_date `
         }
 
         _selectQuery += ' order by tbl_app.app_name,tbl_contest.start_date'

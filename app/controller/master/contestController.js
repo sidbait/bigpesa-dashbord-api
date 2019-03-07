@@ -48,7 +48,7 @@ module.exports = {
         var todaysDate = new Date()
         var dt = dateFormat(todaysDate, "yyyy-mm-dd");
         let insertquery = `insert into tbl_contest (contest_master_id, app_id, contest_name, contest_type,contest_desc, start_date, end_date, from_time, to_time, max_players, winners, entry_fee, currency, profit_margin, status, debit_type, credit_type, win_amount, css_class, contest_priority, game_conf,created_at,publish_type,channel) 
-        select contest_master_id, app_id, contest_name, contest_type, contest_desc,  (('${dt}' || ' ' || from_time :: string)::timestamptz) ,  (('${dt}' || ' ' || to_time ::string)::timestamptz ),   from_time, to_time, max_players, winners, entry_fee, currency, profit_margin, status, debit_type, credit_type, win_amount, css_class, contest_priority, game_conf,now(),publish_type,channel from tbl_contest_master 
+        select contest_master_id, app_id, contest_name, contest_type, contest_desc,  (('${dt}' || ' ' || from_time ::text)::timestamptz) ,  (('${dt}' || ' ' || to_time ::text)::timestamptz ),   from_time, to_time, max_players, winners, entry_fee, currency, profit_margin, status, debit_type, credit_type, win_amount, css_class, contest_priority, game_conf,now(),publish_type,channel from tbl_contest_master 
         where contest_master_id not in (select contest_master_id from tbl_contest where start_date::DATE = '${dt}' and contest_master_id is not null) 
         and contest_type ='Daily' and status = 'ACTIVE' returning contest_master_id`;
 

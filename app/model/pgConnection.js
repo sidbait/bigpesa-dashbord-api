@@ -68,8 +68,6 @@ function executeQuery_db(dataBase, dbQuery, callback) {
     else
         pool = pool_private;
 
-    console.log(pool);
-
     if (pool == null) {
         callback("DB Pool details not available for dataBase - " + dataBase, null);
     }
