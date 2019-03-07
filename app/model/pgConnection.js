@@ -9,6 +9,7 @@ const redis = require('./redisConnection');
 
 const pool_private = new pg.Pool(config.db_connectionString.pg.private);
 const pool_public = new pg.Pool(config.db_connectionString.pg.public);
+const pool_pg_public = new pg.Pool(config.db_connectionString.pg.pg_public);
 
 module.exports = {
 
@@ -62,6 +63,8 @@ function executeQuery_db(dataBase, dbQuery, callback) {
 
     if (dataBase == "rmg_dev_db" && process.env.DB == 'public')
         pool = pool_public;
+    else if (dataBase == "rmg_dev_db" && process.env.DB == 'pg_public')
+        pool = pool_pg_public;
     else
         pool = pool_private;
 

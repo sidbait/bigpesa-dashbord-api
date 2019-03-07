@@ -486,7 +486,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let queryText = "select created_at::date::string," +
+                let queryText = "select created_at::date::text," +
                     " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " count(distinct case when nz_txn_type = 'DEBIT' then player_id end) as debit_count," +
@@ -499,7 +499,7 @@ module.exports = {
                     " from tbl_wallet_transaction " +
                     " where nz_txn_status = 'SUCCESS'" +
                     " and created_at::date between $1 and $2" +
-                    " group by created_at::date::string" +
+                    " group by created_at::date::text" +
                     " order by 1 desc";
 
                 let valuesArr = [fromDate, toDate]
@@ -537,12 +537,12 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let queryText = "select created_at::date::string, pg_source, nz_txn_status, count(1) as pcount, sum(amount::decimal) as total" +
+                let queryText = "select created_at::date::text, pg_source, nz_txn_status, count(1) as pcount, sum(amount::decimal) as total" +
                     " from tbl_wallet_transaction" +
                     " where nz_txn_type = 'DEPOSIT'" +
                     " and amount ~ '^[0-9\.]+$' = true" +
                     " and created_at::date between $1 and $2" +
-                    " group by created_at::date::string, pg_source, nz_txn_status" +
+                    " group by created_at::date::text, pg_source, nz_txn_status" +
                     " order by 1";
 
                 let valuesArr = [fromDate, toDate]
@@ -692,7 +692,7 @@ module.exports = {
                 let toDate = req.body.todate;
                 let source = req.body.source ? req.body.source : '';
                 queryText = `select
-                created_at::date::string,
+                created_at::date::text,
                  extract(hour from created_at) as hours,
                 count(1) as total_register,
                 count(case phone_number_verified when true then 1 end) as verified
@@ -746,7 +746,7 @@ module.exports = {
             let balance_type = req.body.balance_type ? req.body.balance_type : false;
             let range = req.body.range ? req.body.range : false;
 
-            let query = "select report_date::date::string, balance_type, balance_range, players, amount" + " from tbl_balance_range where 1 = 1";
+            let query = "select report_date::date::text, balance_type, balance_range, players, amount" + " from tbl_balance_range where 1 = 1";
 
             if (balance_type) {
                 query += " and balance_type = '" + balance_type + "'";
@@ -785,7 +785,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let column_name = req.body.column_name;
-                queryText = "select reg_date::string,trans_date::string, total_register, " + column_name +
+                queryText = "select reg_date::text,trans_date::text, total_register, " + column_name +
                     " from tbl_user_funnel" +
                     " where reg_date::date >= '" + fromDate + "'" +
                     " and trans_date::date >= '" + fromDate + "'" +
@@ -859,7 +859,7 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let channel = req.body.channel;
                 let column_name = req.body.column_name;
-                queryText = "select reg_date::string,trans_date::string, total_register, " + column_name +
+                queryText = "select reg_date::text,trans_date::text, total_register, " + column_name +
                     " from tbl_user_funnel_channel" +
                     " where channel = '" + channel + "'" +
                     " and reg_date::date >= '" + fromDate + "'" +

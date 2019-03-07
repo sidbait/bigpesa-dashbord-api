@@ -32,7 +32,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "DB=public NODE_ENV=production nodemon bigpesa_admin_api.js",
-    "test": "DB=public nodemon bigpesa_admin_api.js"
+    "test": "DB=pg_public nodemon bigpesa_admin_api.js"
   },
   "repository": {
     "type": "git",
