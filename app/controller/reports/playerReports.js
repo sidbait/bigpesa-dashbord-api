@@ -71,7 +71,7 @@ module.exports = {
                     " inner join tbl_contest contest on contest_players.contest_id = contest.contest_id" +
                     " inner join tbl_app app on app.app_id = contest.app_id" +
                     " where player_id = $1" +
-                    " order by contest_players.transaction_date desc";
+                    " order by contest_players.transaction_date desc limit 200";
                 valuesArr = [player_id];
 
                 let query = {
@@ -111,7 +111,7 @@ module.exports = {
                 queryText = "select order_id, (amount::decimal + cash_bonus) as amount, created_at, nz_txn_type,nz_txn_status, nz_txn_event_name" +
                     " from tbl_wallet_transaction" +
                     " where player_id = $1" +
-                    " order by created_at desc";
+                    " order by created_at desc limit 200";
                 valuesArr = [player_id];
 
                 let query = {
@@ -151,7 +151,7 @@ module.exports = {
                 queryText = "select event_type, bonus_type, bonus_value, created_at, \"comment\"" +
                     " from tbl_bonus_transaction" +
                     " where player_id = $1" +
-                    " order by created_at desc";
+                    " order by created_at desc limit 200";
                 valuesArr = [player_id];
 
                 let query = {
@@ -328,7 +328,7 @@ module.exports = {
                     " (contest_winner.contest_id = contest.contest_id) and" +
                     " (contest_winner.player_id = contest_players.player_id)" +
                     " where contest_players.player_id = $1" +
-                    " order by winning_date desc";
+                    " order by winning_date desc limit 200";
                 valuesArr = [player_id];
 
                 let query = {
