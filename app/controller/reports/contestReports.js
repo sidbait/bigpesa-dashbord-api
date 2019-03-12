@@ -121,7 +121,7 @@ module.exports = {
             let enddate = req.body.enddate;
             try {
                 queryText = "select app.app_id, app_name, contest_name, entry_fee," +
-                    " players.transaction_date::date::string as start_date," +
+                    " players.transaction_date::date as start_date," +
                     " contest.debit_type, winner.credit_type," +
                     " sum(distinct contest.win_amount) as prize_pool," +
                     " contest.max_players as contest_max_players," +
@@ -150,7 +150,7 @@ module.exports = {
                     valuesArr = [startdate, enddate]
                 }
 
-                queryText += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, players.transaction_date::date::string, contest.debit_type,winner.credit_type" +
+                queryText += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, players.transaction_date::date, contest.debit_type,winner.credit_type" +
                     " order by contest_name";
 
                 let query = {
