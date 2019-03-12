@@ -69,7 +69,7 @@ function executeQuery_db(dataBase, dbQuery, callback) {
         pool = pool_private;
 
     console.log('process.env.DB ==>', process.env.DB);
-    console.log(pool);
+    // console.log(pool);
     
 
     if (pool == null) {
