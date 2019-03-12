@@ -71,6 +71,10 @@ module.exports = {
         }
     },
 
+    insertRankM: function (req, res) {
+        insertContestRankDetails()
+    },
+
     getAll: async function (req, res) {
 
         let _selectQuery = "SELECT * FROM tbl_contest_master ORDER BY 1 DESC LIMIT 10"
@@ -225,6 +229,7 @@ module.exports = {
             let _contest_priority = req.body.contest_priority ? req.body.contest_priority : null;
             let _game_conf = req.body.game_conf ? req.body.game_conf : null;
             let _channel = req.body.channel ? req.body.channel : null;
+            // let _show_upcoming = req.body.show_upcoming ? req.body.show_upcoming : null;
 
             let _query;
             let errMsgType = _contest_master_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
@@ -265,7 +270,7 @@ module.exports = {
                 if (result.length > 0) {
 
                     if (_contest_clone_id) {
-                        cloneRanks(_contest_clone_id,result[0].contest_master_id);
+                        cloneRanks(_contest_clone_id, result[0].contest_master_id);
                     }
 
                     if (req.files != null && req.files.length > 0) {
@@ -765,15 +770,15 @@ async function insertContestRankDetails() {
 }
 
 
-async function cloneRanks(contest_clone_id,contest_master_id) {
+async function cloneRanks(contest_clone_id, contest_master_id) {
 
-    console.log('contest_clone_id',contest_clone_id);
-    console.log('contest_master_id',contest_master_id);
+    console.log('contest_clone_id', contest_clone_id);
+    console.log('contest_master_id', contest_master_id);
 
     let insertBulkRank = `INSERT INTO tbl_contest_rank_master(contest_master_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by)
     select ${contest_master_id},rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by from tbl_contest_rank_master
     where contest_master_id = ${contest_clone_id} RETURNING rank_name`
-    
+
     try {
 
         let result = await pgConnection.executeQuery('rmg_dev_db', insertBulkRank)

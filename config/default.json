@@ -15,17 +15,13 @@
         "user": "root",
         "database": "rmg_dev_db",
         "host": "13.126.241.0",
-        "port": 26257,
-        "ssl": true,
-        "max": 50,
-        "min": 10,
-        "idleTimeoutMillis": 500000
+        "port": 26257
       },
       "pg_public": {
         "user": "bigpesa",
         "password": "YP8mhNqxaZBbDtjQrS6m",
         "database": "rmg_db",
-        "host": "13.126.241.0",
+        "host": "13.233.196.149",
         "port": 5432,
         "ssl": true,
         "max": 50,
