@@ -26,7 +26,8 @@ dashboardRoutes.post('/activeUsersWithCashCoin',dashboardController.activeUsersW
 
 dashboardRoutes.post('/inactiveUsersWithCashCoin',dashboardController.inactiveUsersWithCashCoin);
 
-
 dashboardRoutes.get('/chkEnvironment',dashboardController.chkEnvironment);
+
+dashboardRoutes.get('/getOtp',dashboardController.getOtp);
 
 module.exports = dashboardRoutes;

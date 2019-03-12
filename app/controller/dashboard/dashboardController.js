@@ -3,7 +3,7 @@ const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";
 const customMsgTypeCM = "COMMON_MESSAGE";
-let expiretime = 15*60 // in sec //
+let expiretime = 15 * 60 // in sec //
 module.exports = {
 
     cashSummary: async function (req, res) {
@@ -227,7 +227,7 @@ module.exports = {
     },
 
     todaysCounts: async function (req, res) {
-//need to chnage
+        //need to chnage
         let _selectQuery = `select date,
         sum(cash_players_joined) as cash_players_joined, 
         sum(coin_players_joined) as coin_players_joined,
@@ -595,5 +595,52 @@ module.exports = {
         }
 
         res.send(op)
+    },
+
+    getOtp: async function (req, res) {
+        let rules = {
+            "mobile": 'required'
+        };
+
+        let obj = req.query
+        // deleting null value from req.body
+        Object.keys(obj).forEach(k => (obj[k] === 'null') && delete obj[k]);
+
+        let validation = new services.validator(req.query, rules);
+
+        if (validation.passes()) {
+
+            let _mobile = req.query.mobile ? req.query.mobile : null;
+
+            let _selectQuery = `select tbl_player.phone_number,tbl_otp.otp_pin,tbl_otp.created_at as sent_on from tbl_otp
+        inner join tbl_player on tbl_otp.player_id = tbl_player.player_id where 1=1 `
+
+            if (_mobile) {
+                _selectQuery += `and tbl_player.phone_number = '${_mobile}'`;
+            }
+
+
+            _selectQuery += ` order by tbl_otp.created_at desc limit 1`
+
+
+
+            try {
+                let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+                if (dbResult && dbResult.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+                }
+                else
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        }
+
+        else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+
+        }
     }
 }
