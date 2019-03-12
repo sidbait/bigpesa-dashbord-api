@@ -28,4 +28,6 @@ contestRoutes.get('/contest/rebuildCache', contestController.rebuildCache);
 
 contestRoutes.get('/contest/runContestCron', contestController.runContestCron);
 
+contestRoutes.get('/contest/insertRankM', contestController.insertRankM);
+
 module.exports = contestRoutes;
