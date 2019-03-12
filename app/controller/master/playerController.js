@@ -33,9 +33,9 @@ module.exports = {
                 _selectQuery += " from tbl_wallet_credit_que as que"
             }
 
-            _selectQuery += 
-            "  left join tbl_player as player on que.player_id = player.player_id" +
-            " left join tbl_user as refunded_by on refunded_by.user_id = que.refunded_by" +
+            _selectQuery +=
+                "  left join tbl_player as player on que.player_id = player.player_id" +
+                " left join tbl_user as refunded_by on refunded_by.user_id = que.refunded_by" +
                 " where que.\"status\" = 'PENDING'";
 
             try {
@@ -192,5 +192,44 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
+    getOTP: async function (req, res) {
+        let rules = {
+            "player_id": 'required',
+        };
+
+        let validation = new services.validator(req.body, rules);
+
+        if (validation.passes()) {
+
+            let player_id = req.body.player_id ? req.body.player_id : null;
+
+            let _selectQuery = `select otp_pin as otp,created_at as sent_on from tbl_otp
+         where 1=1 `;
+
+            if (player_id) {
+                _selectQuery += `and player_id = '${player_id}'`;
+            }
+
+            _selectQuery += ` order by created_at desc limit 1`
+
+            try {
+                let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+                if (dbResult && dbResult.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+                }
+                else
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        }
+
+        else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+
+        }
+    }
 
 }
