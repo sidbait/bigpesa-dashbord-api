@@ -50,60 +50,7 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
-    // contestSummaryReport: async function (req, res) {
-
-    //     let rules = {
-    //         "startdate": 'required',
-    //         "enddate": 'required'
-    //     };
-    //     var custom_message = {
-    //         "required.startdate": "Date is mandatory!",
-    //         "required.enddate": "Date is mandatory!"
-    //     };
-    //     let validation = new services.validator(req.body, rules, custom_message);
-    //     if (validation.passes()) {
-    //         let appid = req.body.appid;
-    //         let startdate = req.body.startdate;
-    //         let enddate = req.body.enddate;
-    //         try {
-    //             queryText = "select app_name,contest_name, count(contest_name) as total_contest, start_date, debit_type, credit_type, entry_fee, prize_pool, max_players," +
-    //                 " sum(players_joined) as players_joined," +
-    //                 " sum(max_players) as players_joined_limit," +
-    //                 " (entry_fee * sum(players_joined)) as player_amount," +
-    //                 " (entry_fee * sum(max_players)) as contest_amount," +
-    //                 " sum(win_cash) as win_cash," +
-    //                 " sum(win_coin) as win_coin" +
-    //                 " from vw_admin_contest_summary_report";
-
-    //             if (appid) {
-    //                 queryText += " where app_id = $1 and start_date::Date between $2 and $3";
-    //                 valuesArr = [appid, startdate, enddate];
-    //             } else {
-    //                 queryText += " where start_date::Date between $1 and $2";
-    //                 valuesArr = [startdate, enddate]
-    //             }
-    //             queryText += " group by app_name, contest_name, start_date, debit_type, credit_type, entry_fee, prize_pool, max_players" +
-    //                 " order by players_joined desc";
-
-    //             let query = {
-    //                 text: queryText,
-    //                 values: valuesArr
-    //             };
-
-    //             let result = await pgConnection.executeQuery('rmg_dev_db', query)
-    //             if (result.length > 0) {
-    //                 services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
-    //             } else {
-    //                 services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
-    //             }
-    //         }
-    //         catch (error) {
-    //             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
-    //         }
-    //     } else {
-    //         services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
-    //     }
-    // },
+    
     contestSummaryReport: async function (req, res) {
 
         let rules = {
@@ -116,11 +63,14 @@ module.exports = {
         };
         let validation = new services.validator(req.body, rules, custom_message);
         if (validation.passes()) {
-            let appid = req.body.appid;
+            let appid = req.body.appid ? req.body.appid : false;
+            let debit_type = req.body.debit_type ? req.body.debit_type : false;
+            let credit_type = req.body.credit_type ? req.body.credit_type : false;
+            let entry_fee = req.body.entry_fee ? req.body.entry_fee : false;
             let startdate = req.body.startdate;
             let enddate = req.body.enddate;
             try {
-                queryText = "select app.app_id, app_name, contest_name, entry_fee," +
+                let query = "select app.app_id, app_name, contest_name, entry_fee," +
                     " players.transaction_date::date as start_date," +
                     " contest.debit_type, winner.credit_type," +
                     " sum(distinct contest.win_amount) as prize_pool," +
@@ -132,7 +82,7 @@ module.exports = {
                     " coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end),0) as win_cash," +
                     " (max_players * count(distinct contest.contest_id)) - (count(distinct players.player_id)) as players_required," +
                     " count(distinct players.player_id) * entry_fee as user_debit_amount," +
-                    " (count(distinct players.player_id) * entry_fee) - (coalesce(sum(case when winner.credit_type = 'COIN' then winner.win_amount end), 0) + coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end), 0)) as profit" +
+                    " ((coalesce(count(distinct case when contest.debit_type = 'CASH' then players.player_id end), 0)  * entry_fee) - (coalesce(sum(case when winner.credit_type = 'COIN' then 0 end), 0) + coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end), 0))) as profit" +
                     " from rmg_db.public.tbl_app as app" +
                     " inner join rmg_db.public.tbl_contest as contest on" +
                     " app.app_id = contest.app_id" +
@@ -140,23 +90,26 @@ module.exports = {
                     " contest.contest_id = players.contest_id" +
                     " inner join rmg_db.public.tbl_contest_winner as winner on" +
                     " (winner.contest_id = contest.contest_id) and (winner.player_id = players.player_id)" +
-                    " where 1=1 ";
+                    " where players.transaction_date::date between '" + startdate + "' and '" + enddate + "'";
 
                 if (appid) {
-                    queryText += " and app.app_id = $1 and players.transaction_date::date between $2 and $3";
-                    valuesArr = [appid, startdate, enddate];
-                } else {
-                    queryText += " and players.transaction_date::date between $1 and $2";
-                    valuesArr = [startdate, enddate]
+                    query += " and app.app_id = " + appid;
                 }
 
-                queryText += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, players.transaction_date::date, contest.debit_type,winner.credit_type" +
-                    " order by contest_name";
+                if (debit_type) {
+                    query += " and contest.debit_type = '" + debit_type + "'";
+                }
 
-                let query = {
-                    text: queryText,
-                    values: valuesArr
-                };
+                if (credit_type) {
+                    query += " and winner.credit_type = '" + credit_type + "'";
+                }
+
+                if (entry_fee) {
+                    query += " and entry_fee = " + entry_fee;
+                }
+
+                query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, players.transaction_date::date, contest.debit_type,winner.credit_type" +
+                    " order by contest_name";
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
