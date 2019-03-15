@@ -44,7 +44,7 @@ module.exports = {
                     },
                     Reports: {
                         main: true,
-                        contest: true,
+                        contest: false,
                         contestsummary: true,
                         gamesummary: true,
                         downloadsummary: true,
@@ -123,7 +123,7 @@ module.exports = {
                     },
                     Reports: {
                         main: true,
-                        contest: true,
+                        contest: false,
                         contestsummary: true,
                         gamesummary: true,
                         downloadsummary: true,
@@ -273,7 +273,7 @@ module.exports = {
                     },
                     Reports: {
                         main: true,
-                        contest: true,
+                        contest: false,
                         contestsummary: true,
                         gamesummary: true,
                         downloadsummary: true,
