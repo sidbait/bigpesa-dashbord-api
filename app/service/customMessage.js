@@ -224,6 +224,24 @@ module.exports = {
             message: "Failed to find details!",
             messageCode: "GET_FAILED",
             statusCode: 401
+        },
+        "REMOVE_SUCCESS": {
+            success: true,
+            message: "Details Removed!",
+            messageCode: "REMOVE_SUCCESS",
+            statusCode: 200
+        },
+        "REMOVE_FAILED": {
+            success: false,
+            message: "Failed to Remove details!",
+            messageCode: "REMOVE_FAILED",
+            statusCode: 401
+        },
+        "LEVEL_EXIST": {
+            success: false,
+            message: "Level Already exists",
+            messageCode: "LEVEL_EXIST",
+            statusCode: 401
         }
     },
     "BULKSMS_MESSAGE": {
