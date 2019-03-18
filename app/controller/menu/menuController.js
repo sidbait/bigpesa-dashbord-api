@@ -32,6 +32,10 @@ module.exports = {
                         winnerevent: true,
                         spinwheel: true,
                     },
+                    BannerDetails: {
+                        main: true,
+                        banner: true
+                    },
                     ContestDetails: {
                         main: true,
                         mastercontest: true,
@@ -186,6 +190,10 @@ module.exports = {
                         winnerevent: false,
                         spinwheel: false,
                     },
+                    BannerDetails: {
+                        main: false,
+                        banner: false
+                    },
                     ContestDetails: {
                         main: true,
                         mastercontest: true,
@@ -260,6 +268,10 @@ module.exports = {
                         event: false,
                         winnerevent: false,
                         spinwheel: false,
+                    },
+                    BannerDetails: {
+                        main: false,
+                        banner: false
                     },
                     ContestDetails: {
                         main: false,
@@ -336,6 +348,10 @@ module.exports = {
                         event: false,
                         winnerevent: false,
                         spinwheel: false,
+                    },
+                    BannerDetails: {
+                        main: false,
+                        banner: false
                     },
                     ContestDetails: {
                         main: false,
@@ -417,6 +433,10 @@ module.exports = {
                         event: false,
                         winnerevent: false,
                         spinwheel: false,
+                    },
+                    BannerDetails: {
+                        main: false,
+                        banner: false
                     },
                     ContestDetails: {
                         main: false,
