@@ -582,7 +582,7 @@ module.exports = {
     chkEnvironment: function (req, res) {
         console.log('<=======chkEnvironment=======>');
         let environment = ''
-        if (config.db_connectionString.pg.public.host == '13.126.241.0') {
+        if (process.env.DB == 'pg_stg') {
             environment = 'Staging' //staging environment
         } else {
             environment = 'Live' //Live environment
