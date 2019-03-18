@@ -32,11 +32,15 @@ module.exports = {
                         winnerevent: true,
                         spinwheel: true,
                     },
+                    BannerDetails: {
+                        main: true,
+                        banner: true
+                    },
                     ContestDetails: {
                         main: true,
                         mastercontest: true,
                         contest: true,
-                        previewcontest:true,
+                        previewcontest: true,
                     },
                     FeedbackDetails: {
                         main: true,
@@ -107,11 +111,15 @@ module.exports = {
                         winnerevent: true,
                         spinwheel: true,
                     },
+                    BannerDetails: {
+                        main: true,
+                        banner: true
+                    },
                     ContestDetails: {
                         main: true,
                         mastercontest: true,
                         contest: true,
-                        previewcontest:true,
+                        previewcontest: true,
                     },
                     FeedbackDetails: {
                         main: true,
@@ -161,7 +169,7 @@ module.exports = {
                         TopGameSummary: false,
                         DownloadSummary: false
                     }
-                }                
+                }
                 break;
             case 'Maintainer':
                 limit = {
@@ -182,11 +190,15 @@ module.exports = {
                         winnerevent: false,
                         spinwheel: false,
                     },
+                    BannerDetails: {
+                        main: false,
+                        banner: false
+                    },
                     ContestDetails: {
                         main: true,
                         mastercontest: true,
                         contest: true,
-                        previewcontest:true,
+                        previewcontest: true,
                     },
                     FeedbackDetails: {
                         main: true,
@@ -257,11 +269,15 @@ module.exports = {
                         winnerevent: false,
                         spinwheel: false,
                     },
+                    BannerDetails: {
+                        main: false,
+                        banner: false
+                    },
                     ContestDetails: {
                         main: false,
                         mastercontest: false,
                         contest: false,
-                        previewcontest:false,
+                        previewcontest: false,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -333,11 +349,15 @@ module.exports = {
                         winnerevent: false,
                         spinwheel: false,
                     },
+                    BannerDetails: {
+                        main: false,
+                        banner: false
+                    },
                     ContestDetails: {
                         main: false,
                         mastercontest: false,
                         contest: false,
-                        previewcontest:false,
+                        previewcontest: false,
                     },
                     FeedbackDetails: {
                         main: true,
@@ -414,11 +434,15 @@ module.exports = {
                         winnerevent: false,
                         spinwheel: false,
                     },
+                    BannerDetails: {
+                        main: false,
+                        banner: false
+                    },
                     ContestDetails: {
                         main: false,
                         mastercontest: false,
                         contest: false,
-                        previewcontest:false,
+                        previewcontest: false,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -509,6 +533,15 @@ module.exports = {
                     { path: '/master/manage-event/view-event', title: 'Events', show: limit.EventDetails.event, },
                     { path: '/master/manage-event/view-winner-event', title: 'Winner Event', show: limit.EventDetails.winnerevent, },
                     { path: '/master/manage-event/view-spin-wheel', title: 'Spin Wheel', show: limit.EventDetails.spinwheel, },
+                ]
+            }, {
+                path: '',
+                title: 'Banner Details',
+                type: 'menu__toggle',
+                icontype: 'fa fa-mobile-alt',
+                show: limit.BannerDetails.main,
+                children: [
+                    { path: '/master/manage-banner/view-banner', title: 'Banners', show: limit.BannerDetails.banner, }
                 ]
             }, {
                 path: '',

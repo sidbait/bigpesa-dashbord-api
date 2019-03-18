@@ -97,8 +97,10 @@ module.exports = {
 
         let app_id = req.body.app_id ? req.body.app_id : null;
 
-        let _selectQuery = `select * from tbl_contest_master where 1=1
-        and "status" = 'PENDING' and app_id = ${app_id} order by from_time`
+        let _selectQuery = `select tbl_app.app_name,* from tbl_contest_master 
+        inner join tbl_app on tbl_contest_master.app_id = tbl_app.app_id
+        where 1=1
+        and tbl_contest_master."status" = 'PENDING' and tbl_contest_master.app_id = ${app_id} order by from_time`
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 

@@ -24,4 +24,8 @@ appRoutes.post('/app/search', function(req, res)
     appController.search(req, res);
 });
 
+appRoutes.post('/app/addGameConf', appController.addGameConf);
+appRoutes.post('/app/searchGameConf', appController.searchGameConf);
+appRoutes.post('/app/removeGameConf', appController.removeGameConf);
+
 module.exports = appRoutes;

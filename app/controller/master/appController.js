@@ -10,7 +10,7 @@ module.exports = {
 
     getAll: async function (req, res) {
 
-        let _selectQuery = "Select * From tbl_app"
+        let _selectQuery = "Select * From tbl_app order by app_name"
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
@@ -37,7 +37,7 @@ module.exports = {
         let obj = req.body
         // deleting null value from req.body
         Object.keys(obj).forEach(k => (obj[k] === 'null') && delete obj[k]);
-        
+
         let validation = new services.validator(req.body, rules);
 
         if (validation.passes()) {
@@ -153,6 +153,8 @@ module.exports = {
             _selectQuery += " and islive = " + _islive
         }
 
+        _selectQuery += " order by app_name";
+
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
@@ -166,7 +168,148 @@ module.exports = {
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
-    }
+    },
+
+    addGameConf: async function (req, res) {
+        let rules = {
+            // "conf_id": 'required|numeric',
+            "app_id": 'required|numeric',
+            "level": 'required',
+            "game_conf": 'required',
+        };
+
+        let validation = new services.validator(req.body, rules);
+
+        if (validation.passes()) {
+
+            let _conf_id = req.body.conf_id ? req.body.conf_id : null;
+            let _app_id = req.body.app_id ? req.body.app_id : null;
+            let _level = req.body.level ? req.body.level : null;
+            let _game_conf = req.body.game_conf ? req.body.game_conf : null;
+            let _created_by = req.body.userid ? req.body.userid : null;
+            let _updated_by = req.body.userid ? req.body.userid : null;
+
+            let _query;
+            let _status = 'ACTIVE';
+            let errMsgType = _conf_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
+            let successMsgType = _conf_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
+
+            if (!_conf_id) {
+                let chklevel = `Select * From tbl_game_conf where app_id = ${_app_id} and level = '${_level}' and status != 'REMOVE'`
+
+                try {
+
+                    let result = await pgConnection.executeQuery('rmg_dev_db', chklevel)
+
+                    if (result.length > 0) {
+                        services.sendResponse.sendWithCode(req, res, result, customMsgType, 'LEVEL_EXIST');
+                    } else {
+                        // services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
+                        _query = {
+                            text: "INSERT INTO tbl_game_conf(app_id,level,game_conf,created_by,created_at,status) VALUES ($1,$2,$3,$4,now(),$5) RETURNING *",
+                            values: [
+                                _app_id, _level, _game_conf, _created_by, _status
+                            ]
+                        }
+                    }
+                }
+                catch (error) {
+
+                    services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
+                }
+
+            }
+            else {
+
+                _query = {
+                    text: "UPDATE tbl_game_conf SET conf_id=$1,app_id=$2,level=$3,game_conf=$4,updated_by=$5,updated_at=now() WHERE conf_id=$6 RETURNING *",
+                    values: [
+                        _conf_id, _app_id, _level, _game_conf, _updated_by, _conf_id
+                    ]
+                }
+
+            }
+
+            try {
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', _query)
+
+
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result[0], customMsgType, successMsgType);
+                } else {
+                    services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
+                }
+            }
+            catch (error) {
+
+                services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
+            }
+        }
+
+        else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+
+        }
+    },
+
+    searchGameConf: async function (req, res) {
+
+        let _conf_id = req.body.conf_id ? req.body.conf_id : null;
+        let _app_id = req.body.app_id ? req.body.app_id : null;
+
+        let _selectQuery = 'Select * From tbl_game_conf where 1=1'
+
+        if (_conf_id) {
+            _selectQuery += " and conf_id = " + _conf_id
+        }
+
+        if (_app_id) {
+            _selectQuery += " and app_id = " + _app_id
+        }
+
+        _selectQuery += " and status != 'REMOVE'";
+
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    removeGameConf: async function (req, res) {
+
+        let _conf_id = req.body.conf_id ? req.body.conf_id : null;
+
+        if (_conf_id) {
+
+            let _selectQuery = `UPDATE tbl_game_conf set status = 'REMOVE' where conf_id = ${_conf_id} RETURNING *`
+
+            try {
+                let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+                if (dbResult && dbResult.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "REMOVE_SUCCESS");
+                }
+                else
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "REMOVE_FAILED");
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+
+        } else {
+            services.sendResponse.sendWithCode(req, res, 'error', customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
 
 }
 
