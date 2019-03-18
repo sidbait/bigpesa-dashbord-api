@@ -71,26 +71,17 @@ module.exports = {
             let entry_fee = req.body.entry_fee ? req.body.entry_fee : false;
             let startdate = req.body.startdate;
             let enddate = req.body.enddate;
-            let selectcolumn = '';
-            let whereClause = '';
-            let groupbyClause = '';
             try {
 
-                if (from_time) {
-                    selectcolumn += " from_time, to_time,";
-                    whereClause += " and from_time = '" + from_time + "'";
-                    groupbyClause += " from_time, to_time,";
-                }
-
                 let query = "select app.app_id, app_name, contest_name, entry_fee," +
-                    " players.transaction_date::date as start_date," +
-                    selectcolumn +
-                    " contest.debit_type, winner.credit_type," +
+                    " contest.start_date::date as start_date," +
+                    " from_time, to_time," +
+                    " contest.debit_type, max(winner.credit_type) as credit_type," +
                     " sum(distinct contest.win_amount) as prize_pool," +
                     " contest.max_players as contest_max_players," +
-                    " count(distinct contest.contest_id) as contest_played," +
                     " max_players * count(distinct contest.contest_id) as total_max_players, " +
                     " count(distinct players.player_id) as players_joined," +
+                    " count(winner.player_id) as players_win," +
                     " coalesce(sum(case when winner.credit_type = 'COIN' then winner.win_amount end),0) as win_coin," +
                     " coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end),0) as win_cash," +
                     " (max_players * count(distinct contest.contest_id)) - (count(distinct players.player_id)) as players_required," +
@@ -101,12 +92,21 @@ module.exports = {
                     " app.app_id = contest.app_id" +
                     " inner join rmg_db.public.tbl_contest_players as players on" +
                     " contest.contest_id = players.contest_id" +
-                    " inner join rmg_db.public.tbl_contest_winner as winner on" +
+                    " left join rmg_db.public.tbl_contest_winner as winner on" +
                     " (winner.contest_id = contest.contest_id) and (winner.player_id = players.player_id)" +
-                    " where players.transaction_date::date between '" + startdate + "' and '" + enddate + "'" + whereClause;
+                    " where contest.start_date::date between '" + startdate + "' and '" + enddate + "'" +
+                    " and players.transaction_date::date <= contest.start_date::date";
 
                 if (appid) {
                     query += " and app.app_id = " + appid;
+                }
+
+                if (from_time) {
+                    query += " and from_time = '" + from_time + "'";
+                }
+
+                if (to_time) {
+                    query += " and to_time = '" + to_time + "'";
                 }
 
                 if (debit_type) {
@@ -125,8 +125,8 @@ module.exports = {
                     query += " and entry_fee = " + entry_fee;
                 }
 
-                query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, players.transaction_date::date, " + groupbyClause + "contest.debit_type,winner.credit_type" +
-                    " order by contest_name";
+                query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, contest.start_date::date, from_time, to_time, contest.debit_type" +
+                    " order by profit desc";
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
