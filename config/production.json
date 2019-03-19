@@ -11,31 +11,7 @@
   "debug_db_result": true,
   "db_connectionString": {
     "pg": {
-      "private": {
-        "user": "bigpesa",
-        "password": "YP8mhNqxaZBbDtjQrS6m",
-        "host": "CDB-Internal-2fd7a8cb3bbe9654.elb.ap-south-1.amazonaws.com",
-        "application_name": "admin-api",
-        "database": "rmg_db",
-        "port": 26257,
-        "ssl": true,
-        "max": 50,
-        "min": 10,
-        "idleTimeoutMillis": 500000
-      },
-      "public": {
-        "user": "bigpesa",
-        "password": "YP8mhNqxaZBbDtjQrS6m",
-        "host": "cockroach-ef774991a31567cc.elb.ap-south-1.amazonaws.com",
-        "application_name": "admin-api",
-        "database": "rmg_db",
-        "port": 26257,
-        "ssl": true,
-        "max": 50,
-        "min": 10,
-        "idleTimeoutMillis": 500000
-      },
-      "pg_public": {
+      "pg_private": {
         "user": "bigpesa",
         "password": "YP8mhNqxaZBbDtjQrS6m",
         "database": "rmg_db",
@@ -45,6 +21,24 @@
         "max": 50,
         "min": 10,
         "idleTimeoutMillis": 500000
+      },
+      "pg_public": {
+        "user": "bigpesa",
+        "password": "YP8mhNqxaZBbDtjQrS6m",
+        "database": "rmg_db",
+        "host": "13.126.112.119",
+        "port": 5432,
+        "ssl": true,
+        "max": 50,
+        "min": 10,
+        "idleTimeoutMillis": 500000
+      },
+      "pg_stg": {
+        "user": "bigpesa",
+        "password": "YP8mhNqxaZBbDtjQrS6m",
+        "database": "rmg_db",
+        "host": "13.126.241.0",
+        "port": 5432
       }
     }
   },
