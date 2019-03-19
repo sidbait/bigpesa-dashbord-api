@@ -601,7 +601,7 @@ module.exports = {
     },
     getRefundList: async function (req, res) {
 
-        let _selectQuery = " select que_id, tbl_refund.player_id, phone_number,tbl_refund.\"status\", event_type,amount," +
+        let _selectQuery = " select tbl_refund.transaction_date, que_id, tbl_refund.player_id, phone_number,tbl_refund.\"status\", event_type,amount," +
             " type,\"comment\", refunded_by.username as refunded_by, approved_by.username as approved_by" +
             " from " +
             " (" +
@@ -618,7 +618,7 @@ module.exports = {
             "  left join tbl_player as player on tbl_refund.player_id = player.player_id" +
             "  left join tbl_user as refunded_by on refunded_by.user_id = tbl_refund.refunded_by" +
             "  left join tbl_user as approved_by on approved_by.user_id = tbl_refund.approved_by" + 
-            " order by tbl_refund.transaction_date desc";
+            " order by tbl_refund.transaction_date desc limit 500";
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)

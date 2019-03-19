@@ -135,6 +135,23 @@ module.exports = {
         }
     },
 
+    getEntryFee: async function (req, res) {
+
+        let _selectQuery = `select distinct entry_fee from tbl_contest order by entry_fee`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
     enablePendingContest: async function (req, res) {
 
         let pendingIds = req.body.pendingIds ? req.body.pendingIds : null;
