@@ -30,4 +30,6 @@ contestRoutes.get('/contest/runContestCron', contestController.runContestCron);
 
 contestRoutes.get('/contest/insertRankM', contestController.insertRankM);
 
+contestRoutes.get('/contest/getentryfee', contestController.getEntryFee);
+
 module.exports = contestRoutes;

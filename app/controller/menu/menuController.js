@@ -44,8 +44,8 @@ module.exports = {
                         previewcontest: true,
                     },
                     FeedbackDetails: {
-                        main: true,
-                        feedback: true,
+                        main: false,
+                        feedback: false,
                     },
                     Reports: {
                         main: true,
@@ -60,7 +60,7 @@ module.exports = {
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         userfunnel: true,
-                        summary: true,
+                        summary: false,
                         dailySummary: true,
                         dailyChannelSummary: true,
                         export: true,
@@ -124,8 +124,8 @@ module.exports = {
                         previewcontest: true,
                     },
                     FeedbackDetails: {
-                        main: true,
-                        feedback: true,
+                        main: false,
+                        feedback: false,
                     },
                     Reports: {
                         main: true,
@@ -140,7 +140,7 @@ module.exports = {
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         userfunnel: true,
-                        summary: true,
+                        summary: false,
                         dailySummary: true,
                         dailyChannelSummary: true,
                         export: true,
@@ -204,8 +204,8 @@ module.exports = {
                         previewcontest: true,
                     },
                     FeedbackDetails: {
-                        main: true,
-                        feedback: true,
+                        main: false,
+                        feedback: false,
                     },
                     Reports: {
                         main: true,
@@ -300,7 +300,7 @@ module.exports = {
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         userfunnel: true,
-                        summary: true,
+                        summary: false,
                         dailySummary: true,
                         dailyChannelSummary: true,
                         export: true,
@@ -365,8 +365,8 @@ module.exports = {
                         previewcontest: false,
                     },
                     FeedbackDetails: {
-                        main: true,
-                        feedback: true,
+                        main: false,
+                        feedback: false,
                     },
                     Reports: {
                         main: true,
