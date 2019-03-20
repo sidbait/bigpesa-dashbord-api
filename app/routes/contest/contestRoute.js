@@ -37,6 +37,6 @@ contestRoutes.post('/updateContestStatus', function(req, res)
 contestRoutes.post('/getRank', contestController.getRank);
 contestRoutes.post('/getContestById', contestController.getContestById);
 contestRoutes.post('/getContestLeaderboard', contestController.getContestLeaderboard);
-
+contestRoutes.post('/getConfByAppId', contestController.getConfByAppId);
 
 module.exports = contestRoutes;
