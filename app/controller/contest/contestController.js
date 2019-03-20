@@ -66,6 +66,26 @@ module.exports = {
         }
     },
 
+    getConfByAppId: async function (req, res) {
+
+        let app_id = req.body.app_id ? req.body.app_id : null;
+
+        let _selectQuery = `select * from tbl_game_conf where status = 'ACTIVE' and app_id = ${app_id}`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
     getContestLeaderboard: async function (req, res) {
 
         let contest_id = req.body.contest_id ? req.body.contest_id : null;
@@ -215,7 +235,7 @@ module.exports = {
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
             let _contest_priority = req.body.contest_priority ? req.body.contest_priority : null;
-            let _game_conf = req.body.game_conf ? req.body.game_conf : null;
+            let _game_conf = req.body.game_conf ? req.body.game_conf : '';
             let _channel = req.body.channel ? req.body.channel : null;
             let _show_upcoming = req.body.show_upcoming ? req.body.show_upcoming : null;
 
@@ -377,7 +397,7 @@ module.exports = {
         let _win_amount = req.body.win_amount ? req.body.win_amount : null;
         let _entry_fee = req.body.entry_fee ? req.body.entry_fee : null;
 
-        let _selectQuery = `select case when now()::timestamptz + (330::int * '1m'::interval) < start_date then true end as Upcoming, tbl_app.app_name,tbl_contest.* from tbl_contest inner join tbl_app on tbl_app.app_id = tbl_contest.app_id WHERE  1=1`
+        let _selectQuery = `select case when now()::timestamptz + (330::int * '1m'::interval) < start_date then true end as Upcoming, tbl_app.app_name,tbl_game_conf."level",tbl_contest.* from tbl_contest inner join tbl_app on tbl_app.app_id = tbl_contest.app_id left join tbl_game_conf on tbl_game_conf.game_conf = tbl_contest.game_conf WHERE  1=1`
 
         if (_contest_id) {
             _selectQuery += " AND contest_id = " + _contest_id

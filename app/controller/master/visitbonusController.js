@@ -32,9 +32,10 @@ module.exports = {
             "credit_type": 'required',
             "credit_bonus": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
-            "datetime": 'required',
+            // "datetime": 'required',
             "type": 'required',
         };
+        console.log(req.body);
 
         let validation = new services.validator(req.body, rules);
 
@@ -58,18 +59,18 @@ module.exports = {
             if (!_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_visitbonus_master(id,fromtime,totime,credit_type,credit_bonus,status,datetime,type,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,now()) RETURNING *",
+                    text: "INSERT INTO tbl_visitbonus_master(fromtime,totime,credit_type,credit_bonus,status,datetime,type,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now()) RETURNING *",
                     values: [
-                        _id, _fromtime, _totime, _credit_type, _credit_bonus, _status, _datetime, _type, _created_by
+                        _fromtime, _totime, _credit_type, _credit_bonus, _status, _datetime, _type, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_visitbonus_master SET id=$1,fromtime=$2,totime=$3,credit_type=$4,credit_bonus=$5,status=$6,datetime=$7,type=$8,updated_by=$9,updated_at=now() WHERE id=$10 RETURNING *",
+                    text: "UPDATE tbl_visitbonus_master SET fromtime=$1,totime=$2,credit_type=$3,credit_bonus=$4,status=$5,datetime=$6,type=$7,updated_by=$8,updated_at=now() WHERE id=$9 RETURNING *",
                     values: [
-                        _id, _fromtime, _totime, _credit_type, _credit_bonus, _status, _datetime, _type, _updated_by, _id
+                        _fromtime, _totime, _credit_type, _credit_bonus, _status, _datetime, _type, _updated_by, _id
                     ]
                 }
 
@@ -109,6 +110,27 @@ module.exports = {
             _selectQuery += " AND id = " + _visitbonus_id
         }
 
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+
+    },
+
+    getById: async function (req, res) {
+
+        let _visitbonus_id = req.body.visitbonus_id ? req.body.visitbonus_id : null;
+
+        let _selectQuery = "SELECT * FROM tbl_visitbonus_master WHERE  1=1 AND id = " + _visitbonus_id;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
