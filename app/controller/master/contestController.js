@@ -246,7 +246,7 @@ module.exports = {
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
             let _contest_priority = req.body.contest_priority ? req.body.contest_priority : null;
-            let _game_conf = req.body.game_conf ? req.body.game_conf : null;
+            let _game_conf = req.body.game_conf ? req.body.game_conf : '';
             let _channel = req.body.channel ? req.body.channel : null;
             // let _show_upcoming = req.body.show_upcoming ? req.body.show_upcoming : null;
 
