@@ -317,8 +317,12 @@ module.exports = {
             try {
                 queryText = "select app.app_name, contest.contest_id, contest.contest_name, contest.entry_fee, contest.debit_type," +
                     " contest_players.transaction_date as joined_date," +
-                    " contest_winner.player_rank, contest_winner.total_score, contest_winner.win_amount," +
-                    " contest_winner.credit_type, contest_winner.transaction_date as winning_date" +
+                    // " contest_winner.player_rank, contest_winner.total_score, contest_winner.win_amount, contest_winner.credit_type," +
+                    " coalesce(contest_winner.player_rank::text, '--') as player_rank," +
+                    " coalesce(contest_winner.total_score::text, '--') as total_score," +
+                    " coalesce(contest_winner.win_amount::text, '--') as win_amount," +
+                    " coalesce(contest_winner.credit_type, '--') as credit_type," +
+                    " contest_winner.transaction_date as winning_date" +
                     " from tbl_app as app" +
                     " inner join tbl_contest as contest on" +
                     " app.app_id = contest.app_id" +
@@ -465,7 +469,7 @@ module.exports = {
 
         try {
             queryText = "select phone_number from tbl_player" +
-            " where phone_number_verified = false";
+                " where phone_number_verified = false";
 
             let query = {
                 text: queryText
@@ -617,7 +621,7 @@ module.exports = {
             "  ) as tbl_refund" +
             "  left join tbl_player as player on tbl_refund.player_id = player.player_id" +
             "  left join tbl_user as refunded_by on refunded_by.user_id = tbl_refund.refunded_by" +
-            "  left join tbl_user as approved_by on approved_by.user_id = tbl_refund.approved_by" + 
+            "  left join tbl_user as approved_by on approved_by.user_id = tbl_refund.approved_by" +
             " order by tbl_refund.transaction_date desc limit 500";
 
         try {
