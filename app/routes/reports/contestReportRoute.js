@@ -21,4 +21,5 @@ appRoutes.post('/hourly',contestReports.hourlyReport);
 appRoutes.post('/retentionreport',contestReports.retentionReport);
 appRoutes.post('/channelretentionreport',contestReports.channelRetentionReport);
 appRoutes.post('/balancereport',contestReports.balanceReport);
+appRoutes.get('/totalbalancereport',contestReports.totalBalancereport);
 module.exports = appRoutes;
