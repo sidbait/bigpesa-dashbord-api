@@ -27,6 +27,8 @@ module.exports = {
                     if (err) {
                         services.sendResponse.sendWithCode(req, res, null, "COMMON_MESSAGE", "INVALID_ACCESS_TOKEN");
                     } else {
+                        console.log(decoded.exp,decoded.iat);
+                        
                         req.userDetails = decoded;
                         return next();
                     }
