@@ -442,31 +442,32 @@ module.exports = {
                 order by trans_date`
                 break;
             case 'Monthly':
-                _selectQuery = `select trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
+                _selectQuery = `select og_date,trans_date, sum(register_users) as register_users, sum(verified_users) as verified_users,
                 sum(active_users) as active_users, sum(paid_users) as paid_users, sum(deposit_amount) as deposit_amount
                 from (
-                select date_trunc('month', created_at + (330 * '1m'::interval))::date::text as trans_date, count(player_id) as register_users, 
+                select date_trunc('month',(created_at + (330 * '1m'::interval))) as og_date ,to_char(date_trunc('month',(created_at + (330 * '1m'::interval)))::timestamptz, 'Month') as trans_date, count(player_id) as register_users, 
                 count(case when phone_number_verified = true then 1 end) as verified_users,
                 0 as active_users, 0 as paid_users, 0::decimal as deposit_amount
                 from tbl_player 
-                where created_at::date > '2019-01-01' 
-                group by date_trunc('month', created_at + (330 * '1m'::interval))::date::text
+                where (created_at + (330 * '1m'::interval))::date > '2019-01-01'
+                group by trans_date,og_date
                 union all
-                select date_trunc('month',(created_at + (330 * '1m'::interval)))::date::text as trans_date, 0 as register_users, 0 as verified_users, 
+                select date_trunc('month',(created_at + (330 * '1m'::interval))) as og_date ,to_char(date_trunc('month',(created_at + (330 * '1m'::interval)))::timestamptz, 'Month') as trans_date, 0 as register_users, 0 as verified_users, 
                 count(distinct player_id) as active_users, 0 as paid_users, 0::decimal as deposit_amount
                 from tbl_wallet_transaction
                 where (created_at + (330 * '1m'::interval))::date > '2019-01-01'
-                group by date_trunc('month',(created_at + (330 * '1m'::interval)))::date::text
+                group by trans_date,og_date
                 union all
-                select date_trunc('month', created_at + (330 * '1m'::interval))::date::text as trans_date, 0 as register_users, 0 as verified_users, 
+                select date_trunc('month',(created_at + (330 * '1m'::interval))) as og_date ,to_char(date_trunc('month',(created_at + (330 * '1m'::interval)))::timestamptz, 'Month') as trans_date, 0 as register_users, 0 as verified_users, 
                 0 as active_users, count(distinct player_id) as paid_users, sum(amount::decimal) as deposit_amount
                 from tbl_wallet_transaction
-                where created_at::date > '2019-01-01' and 
+                where (created_at + (330 * '1m'::interval))::date > '2019-01-01' and 
                 nz_txn_status = 'SUCCESS' and nz_txn_type = 'DEPOSIT'
-                group by date_trunc('month', created_at + (330 * '1m'::interval))::date::text
+                group by trans_date,og_date
                 ) as active_users
-                group by trans_date
-                order by trans_date`
+                group by trans_date,og_date
+                order by og_date
+                                `
                 break;
             default:
                 break;
