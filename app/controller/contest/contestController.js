@@ -195,7 +195,7 @@ module.exports = {
             "winners": 'required',
             "entry_fee": 'required',
             "currency": 'required',
-            "profit_margin": 'required',
+            // "profit_margin": 'required',
             "debit_type": 'required',
             "credit_type": 'required',
             "win_amount": 'required',
@@ -239,7 +239,10 @@ module.exports = {
             let _channel = req.body.channel ? req.body.channel : null;
             let _show_upcoming = req.body.show_upcoming ? req.body.show_upcoming : null;
 
-            console.log('_show_upcoming',_show_upcoming);
+            let _show_from_date = req.body.show_from_date ? req.body.show_from_date : null;
+            let _show_from_time = req.body.show_from_time ? req.body.show_from_time : null;
+            let _max_lives = req.body.max_lives ? req.body.max_lives : null;
+            let _min_player = req.body.min_player ? req.body.min_player : null;
 
             let _query;
             let errMsgType = _contest_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
@@ -255,21 +258,28 @@ module.exports = {
             let new_start_date = joinDateTime(_start_date, _from_time);
             let new_end_date = joinDateTime(_end_date, _to_time);
 
+            let show_from = null
+            console.log(_show_from_date, _show_from_time);
+
+            if (_show_from_date && _show_from_time) {
+                show_from = joinDateTime(_show_from_date, _show_from_time);
+            }
+
             if (!_contest_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_contest(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,status,created_by,created_at,publish_type,channel,show_upcoming) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,now(),$23,$24,$25) RETURNING *",
+                    text: "INSERT INTO tbl_contest(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,status,created_by,created_at,publish_type,channel,show_upcoming,show_from,max_lives,min_player) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,now(),$23,$24,$25,$26,$27,$28) RETURNING *",
                     values: [
-                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _created_by, _publish_type, _channel, _show_upcoming
+                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _created_by, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_contest SET app_id=$1,contest_name=$2,contest_type=$3,contest_desc=$4,start_date=$5,end_date=$6,from_time=$7,to_time=$8,max_players=$9,winners=$10,entry_fee=$11,currency=$12,profit_margin=$13,debit_type=$14,credit_type=$15,win_amount=$16,css_class=$17,next_start_date=$18,contest_priority=$19,game_conf=$20,status=$21,updated_by=$22,updated_at=now(),publish_type = $24,channel=$25, show_upcoming=$26 WHERE contest_id=$23 RETURNING *",
+                    text: "UPDATE tbl_contest SET app_id=$1,contest_name=$2,contest_type=$3,contest_desc=$4,start_date=$5,end_date=$6,from_time=$7,to_time=$8,max_players=$9,winners=$10,entry_fee=$11,currency=$12,profit_margin=$13,debit_type=$14,credit_type=$15,win_amount=$16,css_class=$17,next_start_date=$18,contest_priority=$19,game_conf=$20,status=$21,updated_by=$22,updated_at=now(),publish_type = $24,channel=$25, show_upcoming=$26,show_from=$27, max_lives=$28, min_player=$29 WHERE contest_id=$23 RETURNING *",
                     values: [
-                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _updated_by, _contest_id, _publish_type, _channel, _show_upcoming
+                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _updated_by, _contest_id, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player
                     ]
                 }
 
@@ -284,7 +294,7 @@ module.exports = {
                 if (result.length > 0) {
 
                     if (_contest_clone_id) {
-                        cloneRanks(_contest_clone_id,result[0].contest_id);
+                        cloneRanks(_contest_clone_id, result[0].contest_id);
                     }
 
                     if (req.files != null && req.files.length > 0) {
@@ -349,14 +359,43 @@ module.exports = {
 
                     try {
                         const xlsxFilePath = await moveFile(from_path, moveto)
-                        const sheetData = await readSheet(xlsxFilePath)
-                        const queries = await getQueries(sheetData, _app_id)
+                        // console.log(xlsxFilePath);
 
-                        Promise.all(queries.map(async (query) => {
-                            return await pgConnection.executeQuery('rmg_dev_db', query);
+                        const sheetData = await readSheet(xlsxFilePath)
+                        // console.log(sheetData);
+
+                        // console.log(sheetData.rankData[0].contest_uid);
+
+                        const queriesWithId = await getQueriesContestData(sheetData, _app_id)
+                        // console.log(queriesWithId);
+
+                        // for (const querieWithId of queriesWithId) {
+                        Promise.all(queriesWithId.map(async (querieWithId) => {
+                            let query = querieWithId.query
+                            let contest_uid = querieWithId.contest_uid
+
+                            // console.log(query, contest_uid);
+
+                            let contest_id = await pgConnection.executeQuery('rmg_dev_db', query)
+                            // let contest_id = '123'
+                            const queries = await getQueriesRankData(sheetData, contest_uid, contest_id[0].contest_id)
+
+
+                            Promise.all(queries.map(async (query) => {
+                                if (query != false) {
+                                    return await pgConnection.executeQuery('rmg_dev_db', query);
+                                }
+                            })).then((inresults) => {
+                                // console.log(inresults);
+
+                            })
+
+                            return contest_id;
+
                         })).then((results) => {
                             console.log(results);
                             services.sendResponse.sendWithCode(req, res, results, customMsgType, "ADD_SUCCESS");
+
                         })
 
                     } catch (error) {
@@ -366,7 +405,7 @@ module.exports = {
 
                 } else {
                     console.log('Validation failed! Please provide proper xlsx file.');
-                    services.sendResponse.sendWithCode(req, res, null, customMsgType, "ADD_FAILED");
+                    services.sendResponse.sendWithCode(req, res, 'Validation failed! Please provide proper xlsx file.', customMsgType, "ADD_FAILED");
 
                 }
             } else {
@@ -396,12 +435,15 @@ module.exports = {
         let _credit_type = req.body.credit_type ? req.body.credit_type : null;
         let _win_amount = req.body.win_amount ? req.body.win_amount : null;
         let _entry_fee = req.body.entry_fee ? req.body.entry_fee : null;
+        let _max_players = req.body.max_players ? req.body.max_players : null;
+        let _show_upcoming = req.body.show_upcoming ? req.body.show_upcoming : null;
 
         let _selectQuery = `select case when now()::timestamptz + (330::int * '1m'::interval) < start_date then true end as Upcoming, tbl_app.app_name,tbl_game_conf."level",tbl_contest.* from tbl_contest inner join tbl_app on tbl_app.app_id = tbl_contest.app_id left join tbl_game_conf on tbl_game_conf.game_conf = tbl_contest.game_conf WHERE  1=1`
 
         if (_contest_id) {
             _selectQuery += " AND contest_id = " + _contest_id
         }
+
         if (_contest_clone_id) {
             _selectQuery += " AND contest_id = " + _contest_clone_id
         }
@@ -441,6 +483,14 @@ module.exports = {
             _selectQuery += " AND tbl_contest.status = '" + _status + "'"
         }
 
+        if (_max_players) {
+            _selectQuery += " AND max_players = " + _max_players
+        }
+
+        if (_show_upcoming) {
+            _selectQuery += " AND show_upcoming = " + _show_upcoming
+        }
+
         if (_fromDate && _toDate) {
             _fromDate = _fromDate.split(' ');
             _toDate = _toDate.split(' ');
@@ -472,117 +522,50 @@ module.exports = {
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
-    }
+    },
 
-}
+    getPending: async function (req, res) {
+        // console.log(req.body);
 
-function readSheet(xlsxFilePath) {
-    return new Promise((resolve, reject) => {
-        const result = excelToJson({
-            sourceFile: xlsxFilePath,
-            header: {
-                rows: 1 // 2, 3, 4, etc.
-            },
-            columnToKey: {
-                A: 'contest_name',
-                B: 'contest_type',
-                C: 'contest_desc',
-                D: 'start_date',
-                E: 'end_date',
-                F: 'from_time',
-                G: 'to_time',
-                H: 'max_players',
-                I: 'winners',
-                J: 'entry_fee',
-                K: 'currency',
-                L: 'profit_margin',
-                M: 'next_start_date',
-                N: 'status',
-                O: 'debit_type',
-                P: 'credit_type',
-                Q: 'win_amount',
-                R: 'css_class',
-                S: 'contest_priority',
-                T: 'game_conf',
-                U: 'contest_icon',
-                V: 'publish_type',
-                W: 'channel'
+        let app_id = req.body.app_id ? req.body.app_id : null;
+
+        let _selectQuery = `select tbl_app.app_name,tbl_contest.* from tbl_contest 
+        inner join tbl_app on tbl_contest.app_id = tbl_app.app_id
+        where 1=1
+        and tbl_contest."status" = 'PENDING' and tbl_contest.app_id = ${app_id} order by from_time`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
             }
-        });
-        resolve(result)
-    });
-}
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
 
-function getQueries(sheetData, _app_id) {
+    enablePendingContest: async function (req, res) {
 
-    return new Promise((resolve, reject) => {
+        let pendingIds = req.body.pendingIds ? req.body.pendingIds : null;
 
-        let queries = sheetData.Sheet1.map(object => {
+        let _selectQuery = `update tbl_contest set "status"='ACTIVE' where contest_id in (${pendingIds}) returning contest_id`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
-            object['app_id'] = _app_id
-            object['from_time'] = getFormattedTime(object['from_time'])
-            object['to_time'] = getFormattedTime(object['to_time'])
-            let count = 0;
-            let cols = [];
-            let values = [];
-            let dollcount = []
-
-            for (const key in object) {
-                if (object.hasOwnProperty(key)) {
-
-                    const element = object[key];
-
-                    cols.push(key)
-
-                    values.push(element)
-                    count = count + 1;
-
-                    dollcount.push(`$${count}`)
-
-                }
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
             }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
 
-            query = {
-                text: `INSERT INTO tbl_contest(${cols.toString()}) VALUES (${dollcount}) RETURNING contest_id`,
-                values: values
-            }
-
-            return query;
-        })
-
-        resolve(queries)
-    });
-}
-
-function moveFile(from_path, moveto) {
-    return new Promise((resolve, reject) => {
-        mv(from_path, moveto, { mkdirp: true }, function (err) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(moveto)
-            }
-        });
-    });
-}
-
-function getFormattedTime(date) {
-
-    let momentDate = moment(date)
-
-    let hr = momentDate.hours();
-    let min = momentDate.minutes();
-    let sec = momentDate.seconds();
-
-    return hr + ':' + min + ':' + sec;
-}
-
-function add530(date, time) {
-    let new_date = new Date(date + 'T' + time + 'Z');
-    new_date.setHours(new_date.getHours() + 5);
-    new_date.setMinutes(new_date.getMinutes() + 30);
-    return new_date
 }
 
 function joinDateTime(date, time) {
@@ -590,11 +573,11 @@ function joinDateTime(date, time) {
     return new_date
 }
 
-async function uploadBanner(req, contest_master_id) {
+async function uploadBanner(req, contest_id) {
 
     return new Promise((resolve, reject) => {
 
-        let uploadFilepath = `./public/contest/${req.body.app_id}/${contest_master_id}/`;
+        let uploadFilepath = `./public/contest/${req.body.app_id}/${contest_id}/`;
 
         let object = req.files;
         for (const key in object) {
@@ -637,15 +620,186 @@ async function uploadBanner(req, contest_master_id) {
     });
 }
 
-async function cloneRanks(contest_clone_id,contest_id) {
+function readSheet(xlsxFilePath) {
+    return new Promise((resolve, reject) => {
+        const result = excelToJson({
+            sourceFile: xlsxFilePath,
+            sheets: [{
+                name: 'contestData',
+                columnToKey: {
+                    A: 'contest_uid',
+                    B: 'contest_name',
+                    C: 'contest_type',
+                    D: 'contest_desc',
+                    E: 'is_repeat',
+                    F: 'start_date',
+                    G: 'end_date',
+                    H: 'from_time',
+                    I: 'to_time',
+                    J: 'max_players',
+                    K: 'winners',
+                    L: 'entry_fee',
+                    M: 'currency',
+                    N: 'profit_margin',
+                    O: 'next_start_date',
+                    P: 'status',
+                    Q: 'debit_type',
+                    R: 'credit_type',
+                    S: 'win_amount',
+                    T: 'css_class',
+                    U: 'contest_priority',
+                    V: 'game_conf',
+                    W: 'contest_icon',
+                    X: 'publish_type',
+                    Y: 'channel'
+                }
+            }, {
+                name: 'rankData',
+                columnToKey: {
+                    A: 'contest_uid',
+                    B: 'rank_name',
+                    C: 'rank_desc',
+                    D: 'lower_rank',
+                    E: 'upper_rank',
+                    F: 'prize_amount',
+                    G: 'status',
+                    H: 'credit_type'
+                }
+            }],
+            header: {
+                rows: 1 // 2, 3, 4, etc.
+            }
+        });
+        resolve(result)
+    });
+}
 
-    console.log('contest_clone_id',contest_clone_id);
-    console.log('contest_id',contest_id);
+function getQueriesContestData(sheetData, _app_id) {
+
+    return new Promise((resolve, reject) => {
+        if (sheetData && sheetData.contestData) {
+            let queries = sheetData.contestData.map(object => {
+
+                object['app_id'] = _app_id
+                object['from_time'] = getFormattedTime(object['from_time'])
+                object['to_time'] = getFormattedTime(object['to_time'])
+                let count = 0;
+                let cols = [];
+                let values = [];
+                let dollcount = []
+
+                for (const key in object) {
+                    if (object.hasOwnProperty(key) && key != ('contest_uid' || 'is_repeat')) {
+
+                        const element = object[key];
+
+                        cols.push(key)
+
+                        values.push(element)
+                        count = count + 1;
+
+                        dollcount.push(`$${count}`)
+
+                    }
+                }
+
+                query = {
+                    text: `INSERT INTO tbl_contest(${cols.toString()}) VALUES (${dollcount}) RETURNING contest_id`,
+                    values: values
+                }
+                // console.log(query,object['contest_uid']);
+                let contest_uid = object['contest_uid'];
+                let output = {
+                    query,
+                    contest_uid
+                }
+                return output;
+            })
+
+            resolve(queries)
+        } else {
+            reject('wrong sheetData or sheet name')
+        }
+    });
+}
+
+function moveFile(from_path, moveto) {
+    return new Promise((resolve, reject) => {
+        mv(from_path, moveto, { mkdirp: true }, function (err) {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve(moveto)
+            }
+        });
+    });
+}
+
+function getFormattedTime(date) {
+
+    let momentDate = moment(date)
+
+    let hr = momentDate.hours();
+    let min = momentDate.minutes();
+    let sec = momentDate.seconds();
+
+    return hr + ':' + min + ':' + sec;
+}
+
+function getQueriesRankData(sheetData, contest_uid, contest_id) {
+
+    return new Promise((resolve, reject) => {
+
+        let queries = sheetData.rankData.map(object => {
+            if (contest_uid == object['contest_uid']) {
+                object['contest_id'] = contest_id
+
+                let count = 0;
+                let cols = [];
+                let values = [];
+                let dollcount = []
+
+                for (const key in object) {
+                    if (object.hasOwnProperty(key) && key != 'contest_uid') {
+
+                        const element = object[key];
+
+                        cols.push(key)
+
+                        values.push(element)
+                        count = count + 1;
+
+                        dollcount.push(`$${count}`)
+
+                    }
+                }
+
+                query = {
+                    text: `INSERT INTO tbl_contest_rank(${cols.toString()}) VALUES (${dollcount}) RETURNING contest_rank_id`,
+                    values: values
+                }
+
+                return query;
+            } else {
+                return false;
+            }
+
+        })
+
+        resolve(queries)
+    });
+}
+
+async function cloneRanks(contest_clone_id, contest_id) {
+
+    console.log('contest_clone_id', contest_clone_id);
+    console.log('contest_id', contest_id);
 
     let insertBulkRank = `INSERT INTO tbl_contest_rank(contest_id,rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by)
     select ${contest_id},rank_name,rank_desc,lower_rank,upper_rank,prize_amount,credit_type,status,created_by from tbl_contest_rank
     where contest_id = ${contest_clone_id} RETURNING rank_name`
-    
+
     try {
 
         let result = await pgConnection.executeQuery('rmg_dev_db', insertBulkRank)

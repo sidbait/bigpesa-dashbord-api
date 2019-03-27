@@ -38,5 +38,7 @@ contestRoutes.post('/getRank', contestController.getRank);
 contestRoutes.post('/getContestById', contestController.getContestById);
 contestRoutes.post('/getContestLeaderboard', contestController.getContestLeaderboard);
 contestRoutes.post('/getConfByAppId', contestController.getConfByAppId);
+contestRoutes.post('/getPending', contestController.getPending);
+contestRoutes.post('/enablePendingContest', contestController.enablePendingContest);
 
 module.exports = contestRoutes;

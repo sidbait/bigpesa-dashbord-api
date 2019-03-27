@@ -44,7 +44,7 @@
   },
   "jwt_sessions": {
     "private_key": "MKMKMXBJ",
-    "expires_in": 300,
-    "refresh_time": 300
+    "expires_in": 18000,
+    "refresh_time": 18000
   }
 }
