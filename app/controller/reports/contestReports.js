@@ -50,7 +50,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
-
     contestSummaryReport: async function (req, res) {
 
         let rules = {
@@ -74,7 +73,7 @@ module.exports = {
             try {
 
                 let query = "select app.app_id, app_name, contest_name, entry_fee," +
-                    " (contest.start_date + (330 * '1m'::interval))::date::text as start_date," +
+                    " contest.start_date::date::text as start_date," +
                     " from_time, to_time," +
                     " contest.debit_type, coalesce(min(winner.credit_type), 'NR') as credit_type," +
                     " sum(distinct contest.win_amount) as prize_pool," +
@@ -94,8 +93,8 @@ module.exports = {
                     " contest.contest_id = players.contest_id" +
                     " left join rmg_db.public.tbl_contest_winner as winner on" +
                     " (winner.contest_id = contest.contest_id) and (winner.player_id = players.player_id)" +
-                    " where (contest.start_date + (330 * '1m'::interval))::date between '" + startdate + "' and '" + enddate + "'" +
-                    " and (players.transaction_date::date + (330 * '1m'::interval))::date <= (contest.start_date + (330 * '1m'::interval))::date";
+                    " where contest.start_date::date between '" + startdate + "' and '" + enddate + "'" +
+                    " and players.transaction_date::date <= contest.start_date::date";
 
                 if (appid) {
                     query += " and app.app_id = " + appid;
@@ -125,7 +124,7 @@ module.exports = {
                     query += " and entry_fee = " + entry_fee;
                 }
 
-                query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, (contest.start_date + (330 * '1m'::interval))::date::text, from_time, to_time, contest.debit_type" +
+                query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, contest.start_date::date::text, from_time, to_time, contest.debit_type" +
                     " order by profit desc";
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
@@ -157,16 +156,16 @@ module.exports = {
             let startdate = req.body.startdate;
             let enddate = req.body.enddate;
             try {
-                queryText = "select (app_download.download_date + (330 * '1m'::interval))::date::text as download_date, app_download.agency_source," +
+                queryText = "select app_download.download_date::date::text as download_date, app_download.agency_source," +
                     " COUNT(app_download.download_id) AS downloads," +
                     " count(distinct player.player_id) as register," +
                     " count(distinct CASE WHEN player.phone_number_verified = true THEN player.player_id END) AS otp_verified" +
                     " from tbl_app_download app_download" +
                     " left join tbl_player_device player_device on player_device.device_id = app_download.device_id" +
                     " left join tbl_player player on player.player_id = player_device.player_id" +
-                    " where (app_download.download_date + (330 * '1m'::interval))::date between $1 and $2" +
-                    " group by (app_download.download_date + (330 * '1m'::interval))::date::text, app_download.agency_source" +
-                    " order by (app_download.download_date + (330 * '1m'::interval))::date::text desc";
+                    " where app_download.download_date::date between $1 and $2" +
+                    " group by app_download.download_date::date::text, app_download.agency_source" +
+                    " order by app_download.download_date::date::text desc";
                 valuesArr = [startdate, enddate]
 
                 let query = {
@@ -524,7 +523,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let queryText = "select (created_at + (330 * '1m'::interval))::date::text as created_at," +
+                let queryText = "select created_at::date::text as created_at," +
                     " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " count(distinct case when nz_txn_type = 'DEBIT' then player_id end) as debit_count," +
@@ -536,8 +535,8 @@ module.exports = {
                     " sum(amount::decimal) as total" +
                     " from tbl_wallet_transaction " +
                     " where nz_txn_status = 'SUCCESS'" +
-                    " and (created_at + (330 * '1m'::interval))::date between $1 and $2" +
-                    " group by (created_at + (330 * '1m'::interval))::date::text" +
+                    " and created_at::date between $1 and $2" +
+                    " group by created_at::date::text" +
                     " order by 1 desc";
 
                 let valuesArr = [fromDate, toDate]
@@ -575,12 +574,12 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let queryText = "select (created_at + (330 * '1m'::interval))::date::text as created_at, pg_source, nz_txn_status, count(1) as pcount, sum(amount::decimal) as total" +
+                let queryText = "select created_at::date::text as created_at, pg_source, nz_txn_status, count(1) as pcount, sum(amount::decimal) as total" +
                     " from tbl_wallet_transaction" +
                     " where nz_txn_type = 'DEPOSIT'" +
                     " and amount ~ '^[0-9\.]+$' = true" +
-                    " and (created_at + (330 * '1m'::interval))::date between $1 and $2" +
-                    " group by (created_at + (330 * '1m'::interval))::date::text, pg_source, nz_txn_status" +
+                    " and created_at::date between $1 and $2" +
+                    " group by created_at::date::text, pg_source, nz_txn_status" +
                     " order by 1";
 
                 let valuesArr = [fromDate, toDate]
@@ -621,13 +620,13 @@ module.exports = {
                 let status = req.body.status;
                 let source = req.body.source;
                 let date = req.body.date;
-                let queryText = "select (created_at + (330 * '1m'::interval))::date::text as created_at, pg_source, nz_txn_status,player_id, mobile_no, amount from tbl_wallet_transaction" +
+                let queryText = "select created_at::date::text as created_at, pg_source, nz_txn_status,player_id, mobile_no, amount from tbl_wallet_transaction" +
                     " where nz_txn_type = 'DEPOSIT'" +
                     " and amount ~ '^[0-9\.]+$' = true" +
-                    " and (created_at + (330 * '1m'::interval))::date = $1" +
+                    " and created_at::date = $1" +
                     " and pg_source = $2" +
                     " and nz_txn_status = $3" +
-                    " order by (created_at + (330 * '1m'::interval))::date::text";
+                    " order by created_at::date::text";
 
                 let valuesArr = [date, source, status]
                 let query = {
@@ -657,7 +656,7 @@ module.exports = {
             " coalesce( sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal else 0 end),0) as withdraw , " +
             " coalesce( sum(case when nz_txn_type = 'REFUND' then amount::decimal else 0 end),0) as refund " +
             " from tbl_wallet_transaction  " +
-            " where (created_at + (330 * '1m'::interval))::date = (now() + (330 * '1m'::interval))::date  and  nz_txn_status = 'SUCCESS' ";
+            " where created_at::date = (now() + (330 * '1m'::interval))::date  and  nz_txn_status = 'SUCCESS' ";
         let queryTotalPlayer = "select count(*) as count from tbl_player "
         Promise.all([
             pgConnection.executeQuery('rmg_dev_db', queryTotalPlayer),
@@ -730,8 +729,8 @@ module.exports = {
                 let toDate = req.body.todate;
                 let source = req.body.source ? req.body.source : '';
                 queryText = `select
-                (created_at + (330 * '1m'::interval))::date::text as created_at,
-                 extract(hour from (created_at + (330 * '1m'::interval))) as hours,
+                created_at::date::text as created_at,
+                 extract(hour from created_at) as hours,
                 count(1) as total_register,
                 count(case phone_number_verified when true then 1 end) as verified
             from
@@ -739,12 +738,12 @@ module.exports = {
             where
                 1 = 1
                 and source ilike '%` + source + `%'
-                and (created_at + (330 * '1m'::interval))::date between $1 and $2
+                and created_at::date between $1 and $2
             group by
-            (created_at + (330 * '1m'::interval))::date::text,
+            created_at::date::text,
                 extract(hour
             from
-            (created_at + (330 * '1m'::interval)))
+            created_at)
             order by
                 1,
                 2;`;
@@ -810,6 +809,27 @@ module.exports = {
         // catch (error) {
         //     services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         // }
+    },
+    totalBalancereport: async function (req, res) {
+
+        try {
+            queryText = "select sum(winning_balance) as winning_balance, sum(reward_balance) as reward_balance, sum(deposit_balance) as deposit_balance" +
+                " from tbl_wallet_balance";
+
+            let query = {
+                text: queryText
+            };
+
+            let result = await pgConnection.executeQuery('rmg_dev_db', query)
+            if (result.length > 0) {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
     },
     retentionReport: async function (req, res) {
         let rules = {
