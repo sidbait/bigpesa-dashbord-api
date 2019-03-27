@@ -97,7 +97,7 @@ module.exports = {
 
         let app_id = req.body.app_id ? req.body.app_id : null;
 
-        let _selectQuery = `select tbl_app.app_name,* from tbl_contest_master 
+        let _selectQuery = `select tbl_app.app_name,tbl_contest_master.* from tbl_contest_master 
         inner join tbl_app on tbl_contest_master.app_id = tbl_app.app_id
         where 1=1
         and tbl_contest_master."status" = 'PENDING' and tbl_contest_master.app_id = ${app_id} order by from_time`
@@ -205,7 +205,7 @@ module.exports = {
             "winners": 'required',
             "entry_fee": 'required',
             "currency": 'required',
-            "profit_margin": 'required',
+            // "profit_margin": 'required',
             "debit_type": 'required',
             "credit_type": 'required',
             "win_amount": 'required',
@@ -765,7 +765,7 @@ async function insertContestRankDetails() {
                 console.log(element)
 
                 let insertRankdetails = "insert into tbl_contest_rank ( contest_id, rank_name, rank_desc, lower_rank, upper_rank, prize_amount, status, created_at, updated_at, credit_type) " +
-                    " select  " + element.contest_id + ", rank_name, rank_desc,  lower_rank, upper_rank, prize_amount, status, created_at, updated_at,credit_type from tbl_contest_rank_master where contest_master_id =  " + element.contest_master_id +" returning contest_id";
+                    " select  " + element.contest_id + ", rank_name, rank_desc,  lower_rank, upper_rank, prize_amount, status, created_at, updated_at,credit_type from tbl_contest_rank_master where contest_master_id =  " + element.contest_master_id + " returning contest_id";
 
                 console.log('insertRankdetails - ', insertRankdetails);
                 try {
