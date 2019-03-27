@@ -125,7 +125,7 @@ module.exports = {
                 }
 
                 query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, contest.start_date::date::text, from_time, to_time, contest.debit_type" +
-                    " order by profit desc";
+                    " order by contest.start_date::date::text desc";
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
