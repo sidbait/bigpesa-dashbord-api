@@ -1,6 +1,7 @@
 const pgConnection = require('../../model/pgConnection');
 
 const services = require('../../service/service');
+const push = require('../../model/push.js');
 
 const customMsgType = "MASTER_MESSAGE";
 const customMsgTypeCM = "COMMON_MESSAGE";
@@ -182,6 +183,46 @@ module.exports = {
                 console.log(_updateQuery);
 
                 services.sendResponse.sendWithCode(req, res, _updated_id, customMsgType, "UPDATE_SUCCESS");
+            }
+            catch (error) {
+                console.log(error);
+
+                services.sendResponse.sendWithCode(req, res, 'error', customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+    updatePlayerStatus: async function (req, res) {
+
+        let rules = {
+            "player_id": 'required',
+            "status": 'required'
+        }
+
+        let validation = new services.validator(req.body, rules);
+
+        if (validation.passes()) {
+
+            let player_id = req.body.player_id;
+            let status = req.body.status;
+            let _updateQuery = "";
+
+            try {
+
+                _updateQuery = `update tbl_player set status = '${status}' where player_id = ${player_id} returning phone_number`
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
+                console.log(_updateQuery);
+                console.log('_phone_number - ', result[0].phone_number);
+                let _phone_number = result[0].phone_number;
+                if (status == 'BLOCK') {
+                    push.sendNotification(_phone_number, 'Bigpesa Account', 'Your Bigpesa Account has been Blocked. Due to suspicious activity.')
+                } else {
+                    push.sendNotification(_phone_number, 'Bigpesa Account', 'Greetings from Bigpesa!! your account is now activated. start fair-playing and win big.')
+                }
+
+                services.sendResponse.sendWithCode(req, res, result, customMsgType, "UPDATE_SUCCESS");
             }
             catch (error) {
                 console.log(error);
