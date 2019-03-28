@@ -1,6 +1,8 @@
 const pgConnection = require('../../model/pgConnection');
 
 const services = require('../../service/service');
+const push = require('../../model/push.js');
+
 
 const customMsgType = "MASTER_MESSAGE";
 const customMsgTypeCM = "COMMON_MESSAGE";
@@ -8,7 +10,6 @@ const customMsgTypeBULK = "BULKSMS_MESSAGE";
 
 const csv = require('csvtojson');
 const mv = require('mv');
-const request = require('request');
 var fs = require("fs");
 
 module.exports = {
@@ -582,7 +583,7 @@ module.exports = {
                                             data = jsonObj[index];
                                             numbers.push(data.phone_number);
                                         }
-                                        pushSMS(numbers.join(), message);
+                                        push.pushSMS(numbers.join(), message);
                                         services.sendResponse.sendWithCode(req, res, { message: 'File Imported Successfully' }, customMsgTypeBULK, "FILE_IMPORT");
                                     } else {
                                         services.sendResponse.sendWithCode(req, res, { error: "File should have column - phone_number" }, customMsgTypeBULK, "WRONG_HEADER");
@@ -637,27 +638,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     }
-}
-
-function pushSMS(numbers, message) {
-
-    let pushSMSUrl = "http://182.18.143.11/api/mt/SendSMS?user=nazara&password=nazara&senderid=BGPESA&channel=Trans&DCS=0&flashsms=0&number=" + numbers + "&text=" + message + "&route=55";
-    console.log(pushSMSUrl);
-    request(pushSMSUrl, function (error, response, body) {
-        console.log('error:', error); // Print the error if one occurred
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        console.log('body:', body); // Print the HTML for the Google homepage.
-
-        let uploadFilepath = `./public/bulk/sms/report/` + getDateTime() + `.txt`;
-        fs.writeFile(uploadFilepath, body, function (error) {
-            if (error) {
-                console.error("write error:  " + error.message);
-            } else {
-                console.log("Successful Write to " + uploadFilepath);
-            }
-        });
-    });
-
 }
 
 function getDateTime() {
