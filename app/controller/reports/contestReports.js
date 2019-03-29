@@ -70,6 +70,7 @@ module.exports = {
             let entry_fee = req.body.entry_fee ? req.body.entry_fee : false;
             let startdate = req.body.startdate;
             let enddate = req.body.enddate;
+            let pivot = req.body.pivot ? req.body.pivot : false;
             try {
 
                 let query = "select app.app_id, app_name, contest_name, entry_fee," +
@@ -91,7 +92,7 @@ module.exports = {
                     " app.app_id = contest.app_id" +
                     " inner join rmg_db.public.tbl_contest_players as players on" +
                     " contest.contest_id = players.contest_id" +
-                    " left join rmg_db.public.tbl_contest_winner as winner on" +
+                    " inner join rmg_db.public.tbl_contest_winner as winner on" +
                     " (winner.contest_id = contest.contest_id) and (winner.player_id = players.player_id)" +
                     " where contest.start_date::date between '" + startdate + "' and '" + enddate + "'" +
                     " and players.transaction_date::date <= contest.start_date::date";
@@ -106,6 +107,10 @@ module.exports = {
 
                 if (to_time) {
                     query += " and to_time = '" + to_time + "'";
+                }
+
+                if (pivot) {
+                    query += " and contest.debit_type = 'CASH' and winner.credit_type = 'CASH'";
                 }
 
                 if (debit_type) {
@@ -127,9 +132,22 @@ module.exports = {
                 query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, contest.start_date::date::text, from_time, to_time, contest.debit_type" +
                     " order by contest.start_date::date::text desc";
 
-                let result = await pgConnection.executeQuery('rmg_dev_db', query)
-                if (result.length > 0) {
-                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                let result = await pgConnection.executeQuery('rmg_dev_db', query);
+                let l = result.length
+                if (l > 0) {
+                    if (pivot) {
+                        let options = {
+                            row: pivot,
+                            column: "entry_fee",
+                            value: "profit"
+                        };
+                        let output = jsonToPivotjson(result, options);
+
+                        services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
+                    } else {
+
+                        services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                    }
                 } else {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
                 }
