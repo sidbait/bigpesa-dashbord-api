@@ -65,7 +65,8 @@ module.exports = {
                         dailyChannelSummary: true,
                         export: true,
                         hourly: true,
-                        splitWiseReport: true
+                        splitWiseReport: true,
+                        pixel:true,
                     },
                     UserReports: {
                         main: true,
@@ -145,6 +146,7 @@ module.exports = {
                         dailyChannelSummary: true,
                         export: true,
                         hourly: true,
+                        pixel:true,
                         splitWiseReport: true
                     },
                     UserReports: {
@@ -225,6 +227,7 @@ module.exports = {
                         dailyChannelSummary: false,
                         export: true,
                         hourly: false,
+                        pixel:true,
                         splitWiseReport: true
                     },
                     UserReports: {
@@ -305,6 +308,7 @@ module.exports = {
                         dailyChannelSummary: true,
                         export: true,
                         hourly: true,
+                        pixel:true,
                         splitWiseReport: true
                     },
                     UserReports: {
@@ -386,6 +390,7 @@ module.exports = {
                         dailyChannelSummary: false,
                         export: true,
                         hourly: false,
+                        pixel:false,
                         splitWiseReport: false
                     },
                     UserReports: {
@@ -472,6 +477,7 @@ module.exports = {
                         dailyChannelSummary: false,
                         export: false,
                         hourly: false,
+                        pixel:false,
                         splitWiseReport: false
                     },
                     UserReports: {
@@ -594,7 +600,8 @@ module.exports = {
                     { path: '/reports/dailychannelwisesummary', title: 'Daily channelwise Summary', show: limit.Reports.dailyChannelSummary, },
                     { path: '/reports/export', title: 'Export & Bulk SMS', show: limit.Reports.export, },
                     { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, },
-                    { path: '/reports/splitwisebalance', title: 'Splitwise Balance Report', show: limit.Reports.splitWiseReport, }
+                    { path: '/reports/splitwisebalance', title: 'Splitwise Balance Report', show: limit.Reports.splitWiseReport, },
+                    { path: '/reports/pixel', title: 'Pixel Report', show: limit.Reports.pixel, }
                 ]
             },
 

@@ -18,6 +18,7 @@ const loginRoute = require('../routes/loginRoute');
 const masterRoutes = require('../routes/master/masterRoutes');
 const contestReportRoute = require('../routes/reports/contestReportRoute');
 const contestRoutes = require('../routes/contest/contestRoute');
+const pixelRoutes = require('../routes/pixel/pixelRoute');
 const rankRoutes = require('../routes/rank/rankRoute');
 const userRoutes = require('../routes/users/userRoute');
 const roleRoutes = require('../routes/users/roleRoute');
@@ -37,6 +38,7 @@ app.use(middleware.injectMiddleware(
     [
         apiRoutes_user.use('/master', masterRoutes),
         apiRoutes_user.use('/contest', contestRoutes),
+        apiRoutes_user.use('/pixel', pixelRoutes),
         apiRoutes_user.use('/rank', rankRoutes),
         apiRoutes_user.use('/user', userRoutes),
         apiRoutes_user.use('/role', roleRoutes),
