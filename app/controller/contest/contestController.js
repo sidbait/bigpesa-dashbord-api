@@ -695,6 +695,7 @@ function getQueriesContestData(sheetData, _app_id) {
 
                 object['end_date'] = joinDateTime(object['end_date'], object['to_time']);
                 if (object['show_from_date'] && object['show_from_time']) {
+                    object['show_from_time'] = getFormattedTime(object['show_from_time']);
                     object['show_from'] = joinDateTime(object['show_from_date'], object['show_from_time'])
                 }
 
