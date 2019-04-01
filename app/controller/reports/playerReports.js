@@ -10,7 +10,6 @@ const customMsgTypeBULK = "BULKSMS_MESSAGE";
 
 const csv = require('csvtojson');
 const mv = require('mv');
-var fs = require("fs");
 
 module.exports = {
     playerReport: async function (req, res) {
@@ -638,11 +637,4 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     }
-}
-
-function getDateTime() {
-    let current_datetime = new Date();
-    let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + "T" + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds();
-    return formatted_date;
-
 }

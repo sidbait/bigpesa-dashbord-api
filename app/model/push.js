@@ -3,6 +3,8 @@ var https = require('https');
 const config = require('config');
 const request = require('request');
 
+var fs = require("fs");
+
 module.exports = {
     sendNotification: function (mobile, title, message) {
 
@@ -70,6 +72,15 @@ module.exports = {
             console.log('error:', error); // Print the error if one occurred
             console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
             console.log('body:', body); // Print the HTML for the Google homepage.
+
+            let uploadFilepath = `./public/bulk/sms/report/` + getDateTime() + `.txt`;
+            fs.writeFile(uploadFilepath, body, function (error) {
+                if (error) {
+                    console.error("write error:  " + error.message);
+                } else {
+                    console.log("Successful Write to " + uploadFilepath);
+                }
+            });
         });
     }
 
@@ -94,4 +105,11 @@ module.exports = {
     //     });
 
     // }
+}
+
+function getDateTime() {
+    let current_datetime = new Date();
+    let formatted_date = current_datetime.getFullYear() + "-" + (current_datetime.getMonth() + 1) + "-" + current_datetime.getDate() + "T" + current_datetime.getHours() + ":" + current_datetime.getMinutes() + ":" + current_datetime.getSeconds();
+    return formatted_date;
+
 }
