@@ -92,7 +92,7 @@ module.exports = {
                     " app.app_id = contest.app_id" +
                     " inner join rmg_db.public.tbl_contest_players as players on" +
                     " contest.contest_id = players.contest_id" +
-                    " inner join rmg_db.public.tbl_contest_winner as winner on" +
+                    " left join rmg_db.public.tbl_contest_winner as winner on" +
                     " (winner.contest_id = contest.contest_id) and (winner.player_id = players.player_id)" +
                     " where contest.start_date::date between '" + startdate + "' and '" + enddate + "'" +
                     " and players.transaction_date::date <= contest.start_date::date";
