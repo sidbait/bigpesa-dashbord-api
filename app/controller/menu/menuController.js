@@ -65,6 +65,7 @@ module.exports = {
                         dailySummary: true,
                         dailyChannelSummary: true,
                         export: true,
+                        bulkNotification:true,
                         hourly: true,
                         splitWiseReport: true,
                         pixel:true,
@@ -147,6 +148,7 @@ module.exports = {
                         dailySummary: true,
                         dailyChannelSummary: true,
                         export: true,
+                        bulkNotification:true,
                         hourly: true,
                         pixel:true,
                         splitWiseReport: true
@@ -229,6 +231,7 @@ module.exports = {
                         dailySummary: false,
                         dailyChannelSummary: false,
                         export: true,
+                        bulkNotification:true,
                         hourly: false,
                         pixel:true,
                         splitWiseReport: true
@@ -311,6 +314,7 @@ module.exports = {
                         dailySummary: true,
                         dailyChannelSummary: true,
                         export: true,
+                        bulkNotification:true,
                         hourly: true,
                         pixel:true,
                         splitWiseReport: true
@@ -394,6 +398,7 @@ module.exports = {
                         dailySummary: false,
                         dailyChannelSummary: false,
                         export: true,
+                        bulkNotification:true,
                         hourly: false,
                         pixel:false,
                         splitWiseReport: false
@@ -482,6 +487,7 @@ module.exports = {
                         dailySummary: false,
                         dailyChannelSummary: false,
                         export: false,
+                        bulkNotification:false,
                         hourly: false,
                         pixel:false,
                         splitWiseReport: false
@@ -605,7 +611,8 @@ module.exports = {
                     { path: '/reports/summary', title: 'Summary', show: limit.Reports.summary, },
                     { path: '/reports/dailysummary', title: 'Daily Summary', show: limit.Reports.dailySummary, },
                     { path: '/reports/dailychannelwisesummary', title: 'Daily channelwise Summary', show: limit.Reports.dailyChannelSummary, },
-                    { path: '/reports/export', title: 'Export & Bulk SMS', show: limit.Reports.export, },
+                    { path: '/reports/export', title: 'Export', show: limit.Reports.export, },
+                    { path: '/reports/bulknotification', title: 'Bulk SMS Notification', show: limit.Reports.bulkNotification, },
                     { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, },
                     { path: '/reports/splitwisebalance', title: 'Splitwise Balance Report', show: limit.Reports.splitWiseReport, },
                     { path: '/reports/pixel', title: 'Pixel Report', show: limit.Reports.pixel, }

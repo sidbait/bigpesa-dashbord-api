@@ -70,6 +70,7 @@ module.exports = {
             let entry_fee = req.body.entry_fee ? req.body.entry_fee : false;
             let startdate = req.body.startdate;
             let enddate = req.body.enddate;
+            let pivot = req.body.pivot ? req.body.pivot : false;
             try {
 
                 let query = "select app.app_id, app_name, contest_name, entry_fee," +
@@ -85,7 +86,7 @@ module.exports = {
                     " coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end),0) as win_cash," +
                     " (max_players * count(distinct contest.contest_id)) - (count(distinct players.player_id)) as players_required," +
                     " count(distinct players.player_id) * entry_fee as user_debit_amount," +
-                    " ((coalesce(count(distinct case when contest.debit_type = 'CASH' then players.player_id end), 0)  * entry_fee) - (coalesce(sum(case when winner.credit_type = 'COIN' then 0 end), 0) + coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end), 0))) as profit" +
+                    " ((coalesce(count(distinct case when contest.debit_type = 'CASH' then players.player_id end), 0)  * entry_fee) - coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end), 0)) as profit" +
                     " from rmg_db.public.tbl_app as app" +
                     " inner join rmg_db.public.tbl_contest as contest on" +
                     " app.app_id = contest.app_id" +
@@ -108,6 +109,10 @@ module.exports = {
                     query += " and to_time = '" + to_time + "'";
                 }
 
+                if (pivot) {
+                    query += " and contest.debit_type = 'CASH' and winner.credit_type = 'CASH'";
+                }
+
                 if (debit_type) {
                     query += " and contest.debit_type = '" + debit_type + "'";
                 }
@@ -127,9 +132,22 @@ module.exports = {
                 query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, contest.start_date::date::text, from_time, to_time, contest.debit_type" +
                     " order by contest.start_date::date::text desc";
 
-                let result = await pgConnection.executeQuery('rmg_dev_db', query)
-                if (result.length > 0) {
-                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                let result = await pgConnection.executeQuery('rmg_dev_db', query);
+                let l = result.length
+                if (l > 0) {
+                    if (pivot) {
+                        let options = {
+                            row: pivot,
+                            column: "entry_fee",
+                            value: "profit"
+                        };
+                        let output = jsonToPivotjson(result, options);
+
+                        services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
+                    } else {
+
+                        services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                    }
                 } else {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
                 }
