@@ -110,7 +110,7 @@ module.exports = {
                 }
 
                 if (pivot) {
-                    query += " and contest.debit_type = 'CASH' and winner.credit_type = 'CASH'";
+                    query += " and contest.debit_type = 'CASH' and contest.credit_type = 'CASH'";
                 }
 
                 if (debit_type) {
@@ -541,7 +541,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let queryText = "select created_at::date::text as created_at," +
+                let queryText = "select (created_at + 330::double precision * '00:01:00'::interval)::date::text as created_at," +
                     " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " count(distinct case when nz_txn_type = 'DEBIT' then player_id end) as debit_count," +
@@ -553,8 +553,8 @@ module.exports = {
                     " sum(amount::decimal) as total" +
                     " from tbl_wallet_transaction " +
                     " where nz_txn_status = 'SUCCESS'" +
-                    " and created_at::date between $1 and $2" +
-                    " group by created_at::date::text" +
+                    " and (created_at + 330::double precision * '00:01:00'::interval)::date between $1 and $2" +
+                    " group by (created_at + 330::double precision * '00:01:00'::interval)::date::text" +
                     " order by 1 desc";
 
                 let valuesArr = [fromDate, toDate]
