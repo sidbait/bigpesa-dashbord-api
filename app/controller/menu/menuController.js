@@ -31,6 +31,7 @@ module.exports = {
                         event: true,
                         winnerevent: true,
                         spinwheel: true,
+                        scoreValidation: true,
                         visitbonus: true
                     },
                     BannerDetails: {
@@ -113,6 +114,7 @@ module.exports = {
                         event: true,
                         winnerevent: true,
                         spinwheel: true,
+                        scoreValidation: true,
                         visitbonus: true
                     },
                     BannerDetails: {
@@ -195,6 +197,7 @@ module.exports = {
                         event: false,
                         winnerevent: false,
                         spinwheel: false,
+                        scoreValidation: false,
                         visitbonus: false
                     },
                     BannerDetails: {
@@ -277,6 +280,7 @@ module.exports = {
                         event: false,
                         winnerevent: false,
                         spinwheel: false,
+                        scoreValidation: false,
                         visitbonus: false
                     },
                     BannerDetails: {
@@ -360,6 +364,7 @@ module.exports = {
                         event: false,
                         winnerevent: false,
                         spinwheel: false,
+                        scoreValidation: false,
                         visitbonus: false
                     },
                     BannerDetails: {
@@ -448,6 +453,7 @@ module.exports = {
                         event: false,
                         winnerevent: false,
                         spinwheel: false,
+                        scoreValidation: false,
                         visitbonus: false
                     },
                     BannerDetails: {
@@ -552,6 +558,7 @@ module.exports = {
                     { path: '/master/manage-event/view-winner-event', title: 'Winner Event', show: limit.EventDetails.winnerevent, },
                     { path: '/master/manage-event/view-spin-wheel', title: 'Spin Wheel', show: limit.EventDetails.spinwheel, },
                     { path: '/master/manage-event/view-visit-bonus', title: 'Visit Bonus', show: limit.EventDetails.visitbonus, },
+                    { path: '/master/manage-event/score-validation', title: 'Score Validation', show: limit.EventDetails.scoreValidation, },
                 ]
             }, {
                 path: '',

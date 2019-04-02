@@ -437,7 +437,7 @@ module.exports = {
         let _win_amount = req.body.win_amount ? req.body.win_amount : null;
         let _entry_fee = req.body.entry_fee ? req.body.entry_fee : null;
 
-        let _selectQuery = 'SELECT * FROM tbl_contest_master WHERE  1=1'
+        let _selectQuery = `select tbl_app.app_name,tbl_contest_master.* from tbl_contest_master inner join tbl_app on tbl_contest_master.app_id = tbl_app.app_id WHERE  1=1`
 
         if (_contest_master_id) {
             _selectQuery += " AND contest_master_id = '" + _contest_master_id + "'"
@@ -448,7 +448,7 @@ module.exports = {
         }
 
         if (_app_id) {
-            _selectQuery += " AND app_id = '" + _app_id + "'"
+            _selectQuery += " AND tbl_contest_master.app_id = '" + _app_id + "'"
         }
 
         if (_contestname) {
@@ -477,7 +477,7 @@ module.exports = {
         }
 
         if (_status) {
-            _selectQuery += " AND status = '" + _status + "'"
+            _selectQuery += " AND tbl_contest_master.status = '" + _status + "'"
         }
 
         if (_fromDate && _toDate) {

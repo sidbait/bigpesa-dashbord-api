@@ -1,7 +1,4 @@
 const pgConnection = require('../../model/pgConnection');
-const mv = require('mv');
-const excelToJson = require('convert-excel-to-json');
-const moment = require('moment')
 const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";
@@ -9,32 +6,13 @@ const customMsgTypeCM = "COMMON_MESSAGE";
 
 module.exports = {
 
-    x: async function (req, res) {
-
-        let _selectQuery = `select source, count(1), created_at::DATE from tbl_pixel_fire_log
-        group by source, created_at::DATE order by created_at;`;
-
-        try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
-
-            if (dbResult && dbResult.length > 0) {
-                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
-            }
-            else
-                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
-        }
-        catch (error) {
-            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
-        }
-    },
-
     getpixelReport: async function (req, res) {
 
         let fromDate = req.body.frmdate;
         let toDate = req.body.todate;
         let source = req.body.source ? req.body.source : '';
 
-        let _selectQuery = 'select source, count(1), created_at::DATE from tbl_pixel_fire_log where 1=1'
+        let _selectQuery = 'select source, event_name, count(1), status, created_at::DATE from tbl_pixel_fire_log where 1=1'
 
         if (fromDate && toDate) {
             _selectQuery += ` and (created_at + (330 * '1m'::interval))::date between '${fromDate}' and '${toDate}'`
@@ -43,7 +21,7 @@ module.exports = {
             _selectQuery += ` AND source = '${source}'`
         }
 
-        _selectQuery += "  group by source, created_at::DATE order by created_at ";
+        _selectQuery += "  group by source, event_name, created_at::DATE, status order by created_at desc; ";
 
 
         try {
