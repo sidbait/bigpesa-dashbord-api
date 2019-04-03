@@ -64,10 +64,24 @@ module.exports = {
             count(1) as verified_but_not_played
         from
             tbl_player
-        left join tbl_contest_players on
-            tbl_player.player_id = tbl_contest_players.player_id
+        left join (
+            select
+                player_id
+            from
+                tbl_contest_players
+        union all
+            select
+                player_id
+            from
+                tbl_contest_players_backup
+        union all
+            select
+                player_id
+            from
+                tbl_player_contest_25_02_2019) as contest_players on
+            tbl_player.player_id = contest_players.player_id
         where
-            tbl_contest_players.player_id is null
+            contest_players.player_id is null
             and tbl_player.phone_number_verified = true ) t_one
     `;
 
