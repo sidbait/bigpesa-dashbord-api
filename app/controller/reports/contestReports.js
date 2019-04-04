@@ -73,10 +73,10 @@ module.exports = {
             let pivot = req.body.pivot ? req.body.pivot : false;
             try {
 
-                let query = "select app.app_id, app_name, contest_name, entry_fee," +
+                let query = "select app.app_id, app_name, contest_name," +
                     " contest.start_date::date::text as start_date," +
                     " from_time, to_time," +
-                    " contest.debit_type, coalesce(min(winner.credit_type), 'NR') as credit_type," +
+                    " contest.debit_type, contest.credit_type,  entry_fee," +
                     " sum(distinct contest.win_amount) as prize_pool," +
                     " contest.max_players as contest_max_players," +
                     // " max_players * count(distinct contest.contest_id) as total_max_players, " +
@@ -86,7 +86,7 @@ module.exports = {
                     " coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end),0) as win_cash," +
                     " (max_players * count(distinct contest.contest_id)) - (count(distinct players.player_id)) as players_required," +
                     " count(distinct players.player_id) * entry_fee as user_debit_amount," +
-                    " ((coalesce(count(distinct case when contest.debit_type = 'CASH' then players.player_id end), 0)  * entry_fee) - coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end), 0)) as profit" +
+                    " ((coalesce(count(distinct case when contest.debit_type = 'CASH' then players.player_id end), 0) * entry_fee) - (coalesce(sum(case when winner.credit_type = 'COIN' then 0 end), 0) + coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end), 0))) as profit" +
                     " from rmg_db.public.tbl_app as app" +
                     " inner join rmg_db.public.tbl_contest as contest on" +
                     " app.app_id = contest.app_id" +
@@ -110,7 +110,7 @@ module.exports = {
                 }
 
                 if (pivot) {
-                    query += " and contest.debit_type = 'CASH' and winner.credit_type = 'CASH'";
+                    query += " and contest.debit_type = 'CASH' and contest.credit_type = 'CASH'";
                 }
 
                 if (debit_type) {
@@ -118,7 +118,7 @@ module.exports = {
                 }
 
                 if (credit_type) {
-                    query += " and winner.credit_type = '" + credit_type + "'";
+                    query += " and contest.credit_type = '" + credit_type + "'";
                 }
 
                 if (to_time) {
@@ -129,7 +129,7 @@ module.exports = {
                     query += " and entry_fee = " + entry_fee;
                 }
 
-                query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, contest.start_date::date::text, from_time, to_time, contest.debit_type" +
+                query += " group by app.app_id, app_name, contest_name, entry_fee,contest.max_players, contest.start_date::date::text, from_time, to_time, contest.debit_type, contest.credit_type" +
                     " order by contest.start_date::date::text desc";
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query);
@@ -541,7 +541,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                let queryText = "select created_at::date::text as created_at," +
+                let queryText = "select (created_at + 330::double precision * '00:01:00'::interval)::date::text as created_at," +
                     " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " count(distinct case when nz_txn_type = 'DEBIT' then player_id end) as debit_count," +
@@ -553,8 +553,8 @@ module.exports = {
                     " sum(amount::decimal) as total" +
                     " from tbl_wallet_transaction " +
                     " where nz_txn_status = 'SUCCESS'" +
-                    " and created_at::date between $1 and $2" +
-                    " group by created_at::date::text" +
+                    " and (created_at + 330::double precision * '00:01:00'::interval)::date between $1 and $2" +
+                    " group by (created_at + 330::double precision * '00:01:00'::interval)::date::text" +
                     " order by 1 desc";
 
                 let valuesArr = [fromDate, toDate]
