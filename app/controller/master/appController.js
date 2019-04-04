@@ -134,6 +134,8 @@ module.exports = {
         let _app_name = req.body.app_name ? req.body.app_name : null;
         let _app_type = req.body.app_type ? req.body.app_type : null;
         let _islive = req.body.islive ? req.body.islive : null;
+        let _status = req.body.status ? req.body.status : null;
+        let _orderBy = req.body.orderBy ? req.body.orderBy : 'app_name';
 
         let _selectQuery = 'Select * From tbl_app where 1=1'
 
@@ -153,7 +155,11 @@ module.exports = {
             _selectQuery += " and islive = " + _islive
         }
 
-        _selectQuery += " order by app_name";
+        if (_status) {
+            _selectQuery += " and status = '" + _status + "'"
+        }
+
+        _selectQuery += " order by " + _orderBy;
 
 
         try {
@@ -311,6 +317,24 @@ module.exports = {
         }
     },
 
+    setAppOrder: async function (req, res) {
+        // console.log(req.body);
+
+        let appOrder = req.body.appOrder ? req.body.appOrder : null;
+
+        let updateQueries = await getUpdateQuerie(appOrder);
+
+        // console.log(updateQueries);
+
+        Promise.all(updateQueries.map(async (query) => {
+            return await pgConnection.executeQuery('rmg_dev_db', query);
+        })).then((inresults) => {
+            // console.log(inresults);
+            res.send({ "ok": inresults })
+        })
+
+    },
+
 }
 
 async function uploadAppIcon(req, app_id) {
@@ -357,5 +381,25 @@ async function uploadAppIcon(req, app_id) {
             else
                 reject("error - hasOwnProperty error")
         }
+    });
+}
+
+async function getUpdateQuerie(appOrder) {
+
+    return new Promise((resolve, reject) => {
+        let updateQuerie = []
+
+        for (let i = 0; i < appOrder.length; i++) {
+            const x = appOrder[i].split("-");
+            const priority = i;
+
+            x[1] = x[1] ? x[1] : false;
+
+            let _query = `update tbl_app set app_priority = ${priority},fixed_priority = ${x[1]} where app_id =${x[0]} RETURNING app_name,app_priority`;
+
+            updateQuerie.push(_query)
+        }
+
+        resolve(updateQuerie)
     });
 }
