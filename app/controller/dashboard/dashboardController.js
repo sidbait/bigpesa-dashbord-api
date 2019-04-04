@@ -12,12 +12,15 @@ module.exports = {
         (created_at + (330 * '1m'::interval))::date as report_date,
         coalesce(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),
         0) as DEPOSIT,
-        coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),
-        0) as DEBIT,
-        coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),
-        0) as CREDIT,
+        coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) as debit,
+        coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit,
+        coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount,
+        coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then cash_bonus end), 0) as reward_win_amount,
         coalesce(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),
         0) as WITHDRAW,
+        coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DEPOSITBONUS' then cash_bonus end), 0) as depositbonus,
+        coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DAILY-BONUS' then cash_bonus end),0) as daily_bonus,
+        (coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0)) as pl,
         sum(amount::decimal) as total
     from
         tbl_wallet_transaction
@@ -127,10 +130,24 @@ module.exports = {
             count(1) as verified_but_not_played
         from
             tbl_player
-        left join tbl_contest_players on
-            tbl_player.player_id = tbl_contest_players.player_id
+        left join (
+            select
+                player_id
+            from
+                tbl_contest_players
+        union all
+            select
+                player_id
+            from
+                tbl_contest_players_backup
+        union all
+            select
+                player_id
+            from
+                tbl_player_contest_25_02_2019) as contest_players on
+            tbl_player.player_id = contest_players.player_id
         where
-            tbl_contest_players.player_id is null
+            contest_players.player_id is null
             and tbl_player.phone_number_verified = true
             and (created_at + (330 * '1m'::interval))::date > (now() + (330 * '1m'::interval))::date - interval '${days} days'
         group by
@@ -160,8 +177,8 @@ module.exports = {
     totalCashSummary: async function (req, res) {
 
         let _selectQuery = `select COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as total_cash_deposit,
-        COALESCE(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),0) as total_cash_debit,
-        COALESCE(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),0) as total_cash_credit,
+        coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) as total_cash_debit,
+        coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as total_cash_credit,
         COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as total_cash_withdraw
         from tbl_wallet_transaction 
         where nz_txn_status = 'SUCCESS'`;
@@ -292,9 +309,9 @@ module.exports = {
         count(case when nz_txn_type = 'DEPOSIT' then 1 end) as deposit_count,
         COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT,
         count(case when nz_txn_type = 'DEBIT' then 1 end) as DEBIT_count,
-        COALESCE(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),0) as DEBIT,
+        coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) DEBIT,
         count(case when nz_txn_type = 'CREDIT' then 1 end) as CREDIT_count,
-        COALESCE(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),0) as CREDIT,
+        coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as CREDIT,
         count(case when nz_txn_type = 'WITHDRAW' then 1 end) as WITHDRAW_count,
         COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW
         from tbl_wallet_transaction 
@@ -510,8 +527,8 @@ module.exports = {
         sum(winning_balance) as winning_cash, sum(reward_balance) as reward_cash,
         sum(deposit_balance) as deposit_cash, sum(bonus) as coin
         from tbl_player as player
-        left join tbl_wallet_balance as cash on player.player_id = cash.player_id 
-        left join tbl_bonus as coin on player.player_id = coin.player_id
+        inner join tbl_wallet_balance as cash on player.player_id = cash.player_id 
+        inner join tbl_bonus as coin on player.player_id = coin.player_id
         where phone_number_verified = true`;
 
 
@@ -542,8 +559,8 @@ module.exports = {
         from (
         select distinct player_id
         from tbl_contest_players) as player 
-        left join tbl_wallet_balance as cash on player.player_id = cash.player_id 
-        left join tbl_bonus as coin on player.player_id = coin.player_id`;
+        inner join tbl_wallet_balance as cash on player.player_id = cash.player_id 
+        inner join tbl_bonus as coin on player.player_id = coin.player_id`;
 
 
         try {
@@ -570,10 +587,24 @@ module.exports = {
         sum(reward_balance) as reward_cash,
         sum(deposit_balance) as deposit_cash,
         sum(bonus) as coin
-        from tbl_player as player         
-        left join tbl_contest_players as contest_players on player.player_id = contest_players.player_id
-        left join tbl_wallet_balance as cash on player.player_id = cash.player_id 
-        left join tbl_bonus as coin on player.player_id = coin.player_id
+        from tbl_player as player
+        inner join tbl_wallet_balance as cash on player.player_id = cash.player_id 
+        inner join tbl_bonus as coin on player.player_id = coin.player_id         
+        left join (
+            select
+                player_id
+            from
+                tbl_contest_players
+        union all
+            select
+                player_id
+            from
+                tbl_contest_players_backup
+        union all
+            select
+                player_id
+            from
+                tbl_player_contest_25_02_2019) as contest_players on player.player_id = contest_players.player_id
         where
         contest_players.player_id is null
         and phone_number_verified = true`;
