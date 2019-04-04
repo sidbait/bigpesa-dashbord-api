@@ -66,6 +66,115 @@ module.exports = {
         }
     },
 
+    getLiveContest: async function (req, res) {
+
+        let app_id = req.body.app_id ? req.body.app_id : null;
+
+        // let _selectQuery = `select contest_name,contest_id,entry_fee,debit_type from tbl_contest where app_id = ${app_id} AND now()::timestamptz + (330::int * '1m'::interval) between start_date and end_date order by contest_priority`;
+
+        let _selectQuery = `select
+        case
+            when count(tbl_contest_leader_board.player_id) = max_players then 'full'
+            else concat (count(tbl_contest_leader_board.player_id),
+            '/',
+            max_players)
+        end as joined,
+        contest_name,
+        tbl_contest.contest_id,
+        entry_fee,
+        debit_type
+    from
+        tbl_contest
+    left join tbl_contest_leader_board on
+        tbl_contest.contest_id = tbl_contest_leader_board.contest_id
+    where
+        tbl_contest.app_id = ${app_id}
+        and tbl_contest.status = 'ACTIVE'
+        and now()::timestamptz + (330::int * '1m'::interval) between start_date and end_date
+    group by
+        contest_name,
+        tbl_contest.contest_id
+    order by
+        contest_priority,
+        contest_id`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    setLiveContestOrder: async function (req, res) {
+        // res.send({ "ok": "inresults" })
+
+        // console.log(req.body);
+
+        let liveContestOrder = req.body.liveContestOrder ? req.body.liveContestOrder : null;
+
+        let updateQueries = await getUpdateQuerie(liveContestOrder);
+
+        // console.log(updateQueries);
+
+        Promise.all(updateQueries.map(async (query) => {
+            return await pgConnection.executeQuery('rmg_dev_db', query);
+        })).then((inresults) => {
+            // console.log(inresults);
+            res.send({ "ok": inresults })
+        })
+
+    },
+
+    getAllContest: async function (req, res) {
+
+        // let app_id = req.body.app_id ? req.body.app_id : null;
+
+        let _selectQuery = `select distinct entry_fee,debit_type from tbl_contest
+        where status = 'ACTIVE'
+        group by entry_fee,debit_type
+        order by debit_type ,entry_fee desc`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    setAllContestOrder: async function (req, res) {
+        // res.send({ "ok": "inresults" })
+
+        // console.log(req.body);
+
+        let allContestOrder = req.body.allContestOrder ? req.body.allContestOrder : null;
+
+        let updateQueries = await getUpdateQueriesContestOrder(allContestOrder);
+
+        console.log(updateQueries);
+
+        Promise.all(updateQueries.map(async (query) => {
+            return await pgConnection.executeQuery('rmg_dev_db', query);
+        })).then((inresults) => {
+            // console.log(inresults);
+            res.send({ "ok": inresults })
+        })
+
+    },
+
     getConfByAppId: async function (req, res) {
 
         let app_id = req.body.app_id ? req.body.app_id : null;
@@ -836,3 +945,40 @@ async function cloneRanks(contest_clone_id, contest_id) {
         console.log(error);
     }
 }
+
+async function getUpdateQuerie(liveContestOrder) {
+
+    return new Promise((resolve, reject) => {
+        let updateQuerie = []
+
+        for (let i = 0; i < liveContestOrder.length; i++) {
+            const contest_id = liveContestOrder[i];
+            const priority = i;
+
+            let _query = `update tbl_contest set contest_priority = ${priority} where contest_id =${contest_id} RETURNING contest_name,contest_priority`;
+
+            updateQuerie.push(_query)
+        }
+
+        resolve(updateQuerie)
+    });
+}
+
+async function getUpdateQueriesContestOrder(allContestOrder) {
+
+    return new Promise((resolve, reject) => {
+        let updateQuerie = []
+
+        for (let i = 0; i < allContestOrder.length; i++) {
+            const x = allContestOrder[i].split("-");
+            const priority = i;
+
+            let _query = `update tbl_contest set contest_priority = ${priority} where entry_fee =${x[0]} and debit_type='${x[1]}'`;
+
+            updateQuerie.push(_query)
+        }
+
+        resolve(updateQuerie)
+    });
+}
+

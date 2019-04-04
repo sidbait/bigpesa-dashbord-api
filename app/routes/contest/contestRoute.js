@@ -41,4 +41,10 @@ contestRoutes.post('/getConfByAppId', contestController.getConfByAppId);
 contestRoutes.post('/getPending', contestController.getPending);
 contestRoutes.post('/enablePendingContest', contestController.enablePendingContest);
 
+contestRoutes.post('/getLiveContest', contestController.getLiveContest);
+contestRoutes.post('/setLiveContestOrder', contestController.setLiveContestOrder);
+
+contestRoutes.post('/getAllContest', contestController.getAllContest);
+contestRoutes.post('/setAllContestOrder', contestController.setAllContestOrder);
+
 module.exports = contestRoutes;

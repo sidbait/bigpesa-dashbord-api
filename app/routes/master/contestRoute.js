@@ -32,4 +32,7 @@ contestRoutes.get('/contest/insertRankM', contestController.insertRankM);
 
 contestRoutes.get('/contest/getentryfee', contestController.getEntryFee);
 
+contestRoutes.post('/contest/getAllContest', contestController.getAllContest);
+contestRoutes.post('/contest/setAllContestOrder', contestController.setAllContestOrder);
+
 module.exports = contestRoutes;
