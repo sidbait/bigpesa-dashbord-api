@@ -749,7 +749,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                queryText = "select created_at::date::text," +
+                queryText = "select (created_at + (330 * '1m'::interval))::date::text," +
                     " coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) as debit," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount," +
@@ -762,8 +762,8 @@ module.exports = {
                     " (coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0)) as pl" +
                     " from tbl_wallet_transaction" +
                     " where nz_txn_status = 'SUCCESS'" +
-                    " and created_at::date between $1 and $2" +
-                    " group by created_at::date::text" +
+                    " and (created_at + (330 * '1m'::interval))::date between $1 and $2" +
+                    " group by (created_at + (330 * '1m'::interval))::date::text" +
                     " order by 1";
 
                 valuesArr = [fromDate, toDate]
