@@ -545,9 +545,9 @@ module.exports = {
                     " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " count(distinct case when nz_txn_type = 'DEBIT' then player_id end) as debit_count," +
-                    " COALESCE(sum(case when nz_txn_type = 'DEBIT' then amount::decimal end),0) as DEBIT," +
+                    " coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) as DEBIT," +
                     " count(distinct case when nz_txn_type = 'CREDIT' then player_id end) as credit_count," +
-                    " COALESCE(sum(case when nz_txn_type = 'CREDIT' then amount::decimal end),0) as CREDIT," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as CREDIT," +
                     " count(distinct case when nz_txn_type = 'WITHDRAW' then player_id end) as withdraw_count," +
                     " COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW," +
                     " sum(amount::decimal) as total" +
@@ -733,6 +733,60 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+    cashFlowSummary: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required'
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                queryText = "select created_at::date::text," +
+                    " coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) as debit," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then cash_bonus end), 0) as reward_win_amount," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REFUND' then amount::decimal + cash_bonus end), 0) as refund," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DEPOSITBONUS' then cash_bonus end), 0) as depositbonus," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REGISTRATION' then cash_bonus end), 0) as registration," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REFERRER' then cash_bonus end), 0) as referrer," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DAILY-BONUS' then cash_bonus end),0) as daily_bonus," +
+                    " (coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0)) as pl" +
+                    " from tbl_wallet_transaction" +
+                    " where nz_txn_status = 'SUCCESS'" +
+                    " and created_at::date between $1 and $2" +
+                    " group by created_at::date::text" +
+                    " order by 1";
+
+                valuesArr = [fromDate, toDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
     hourlyReport: async function (req, res) {
         let rules = {
             "frmdate": 'required',
@@ -831,8 +885,10 @@ module.exports = {
     totalBalancereport: async function (req, res) {
 
         try {
-            queryText = "select sum(winning_balance) as winning_balance, sum(reward_balance) as reward_balance, sum(deposit_balance) as deposit_balance" +
-                " from tbl_wallet_balance";
+            queryText = "select sum(winning_balance) as winning_balance, sum(reward_balance) as reward_balance, sum(deposit_balance) as deposit_balance, sum(bonus) as coin" +
+                " from tbl_wallet_balance" +
+                " inner join tbl_bonus" +
+                " on tbl_wallet_balance.player_id = tbl_bonus.player_id";
 
             let query = {
                 text: queryText
