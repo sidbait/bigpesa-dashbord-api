@@ -42,6 +42,7 @@ module.exports = {
                         main: true,
                         mastercontest: true,
                         contest: true,
+                        ContestPriority:true,
                         previewcontest: true,
                     },
                     FeedbackDetails: {
@@ -126,6 +127,7 @@ module.exports = {
                         main: true,
                         mastercontest: true,
                         contest: true,
+                        ContestPriority:true,
                         previewcontest: true,
                     },
                     FeedbackDetails: {
@@ -210,6 +212,7 @@ module.exports = {
                         main: true,
                         mastercontest: true,
                         contest: true,
+                        ContestPriority:true,
                         previewcontest: true,
                     },
                     FeedbackDetails: {
@@ -294,6 +297,7 @@ module.exports = {
                         main: false,
                         mastercontest: false,
                         contest: false,
+                        ContestPriority:false,
                         previewcontest: false,
                     },
                     FeedbackDetails: {
@@ -379,6 +383,7 @@ module.exports = {
                         main: false,
                         mastercontest: false,
                         contest: false,
+                        ContestPriority:false,
                         previewcontest: false,
                     },
                     FeedbackDetails: {
@@ -469,6 +474,7 @@ module.exports = {
                         main: false,
                         mastercontest: false,
                         contest: false,
+                        ContestPriority:false,
                         previewcontest: false,
                     },
                     FeedbackDetails: {
@@ -585,6 +591,7 @@ module.exports = {
                     { path: '/master/manage-master-contest/view-master-contest', title: 'Master Contest', show: limit.ContestDetails.mastercontest },
                     { path: '/master/manage-contest/view-contest', title: 'Contest', show: limit.ContestDetails.contest },
                     { path: '/master/manage-contest/preview-contest', title: 'Preview Contest', show: limit.ContestDetails.previewcontest },
+                    { path: '/master/manage-contest/contest-priority', title: 'Contest Priority', show: limit.ContestDetails.ContestPriority },
                 ]
             }, {
                 path: '',
