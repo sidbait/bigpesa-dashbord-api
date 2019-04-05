@@ -24,6 +24,7 @@ module.exports = {
                     AppDetails: {
                         main: true,
                         app: true,
+                        BulkGameConf: false,
                         appversion: true,
                     },
                     EventDetails: {
@@ -109,6 +110,7 @@ module.exports = {
                     AppDetails: {
                         main: true,
                         app: true,
+                        BulkGameConf: false,
                         appversion: true,
                     },
                     EventDetails: {
@@ -194,6 +196,7 @@ module.exports = {
                     AppDetails: {
                         main: true,
                         app: true,
+                        BulkGameConf: false,
                         appversion: true,
                     },
                     EventDetails: {
@@ -279,6 +282,7 @@ module.exports = {
                     AppDetails: {
                         main: false,
                         app: false,
+                        BulkGameConf: false,
                         appversion: false,
                     },
                     EventDetails: {
@@ -365,6 +369,7 @@ module.exports = {
                     AppDetails: {
                         main: false,
                         app: false,
+                        BulkGameConf: false,
                         appversion: false,
                     },
                     EventDetails: {
@@ -456,6 +461,7 @@ module.exports = {
                     AppDetails: {
                         main: false,
                         app: false,
+                        BulkGameConf: false,
                         appversion: false,
                     },
                     EventDetails: {
@@ -558,6 +564,7 @@ module.exports = {
                 children: [
                     { path: '/master/manage-app/view-app', title: 'App', show: limit.AppDetails.app },
                     { path: '/master/manage-app/app-version', title: 'App Version', show: limit.AppDetails.appversion },
+                    { path: '/master/manage-app/bulk-game-conf', title: 'Bulk GameConf', show: limit.AppDetails.BulkGameConf },
                 ]
             }, {
                 path: '',

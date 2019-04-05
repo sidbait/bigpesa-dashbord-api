@@ -25,6 +25,34 @@ module.exports = {
         }
     },
 
+    bulkUpdateGameConf: async function (req, res) {
+
+        let selectedGamesId = req.body.selectedGamesId ? req.body.selectedGamesId : null;
+
+        let level = req.body.level ? req.body.level : null;
+
+        let updateQueries = await getbulkUpdateGameConfQueries(selectedGamesId, level);
+
+        let updateMasterQueries = await getbulkUpdateGameConfMasterQueries(selectedGamesId, level);
+
+        // console.log(updateMasterQueries);
+
+        Promise.all(updateQueries.map(async (query) => {
+            return await pgConnection.executeQuery('rmg_dev_db', query);
+        })).then((inresults) => {
+            Promise.all(updateMasterQueries.map(async (query) => {
+                return await pgConnection.executeQuery('rmg_dev_db', query);
+            })).then((inresults) => {
+                // console.log(inresults);
+                services.sendResponse.sendWithCode(req, res, inresults, customMsgType, "ADD_SUCCESS");
+            }).catch((err)=> console.log(err))
+            // services.sendResponse.sendWithCode(req, res, inresults, customMsgType, "ADD_SUCCESS");
+        }).catch((err)=> console.log(err))
+
+        // res.send({'ok':'ok'})
+
+    },
+
     add: async function (req, res) {
 
         let rules = {
@@ -401,5 +429,39 @@ async function getUpdateQuerie(appOrder) {
         }
 
         resolve(updateQuerie)
+    });
+}
+
+async function getbulkUpdateGameConfQueries(selectedGamesId, level) {
+
+    return new Promise((resolve, reject) => {
+        let updateQueries = []
+
+        for (let i = 0; i < selectedGamesId.length; i++) {
+            const app_id = selectedGamesId[i];
+
+            let _query = `update tbl_contest set game_conf = tbl_game_conf.game_conf from tbl_game_conf where tbl_contest.app_id = tbl_game_conf.app_id and tbl_contest.app_id = ${app_id} and tbl_game_conf.level = '${level}' AND start_date > now() RETURNING tbl_contest.app_id,contest_id;`;
+
+            updateQueries.push(_query)
+        }
+
+        resolve(updateQueries)
+    });
+}
+
+async function getbulkUpdateGameConfMasterQueries(selectedGamesId, level) {
+
+    return new Promise((resolve, reject) => {
+        let updateQueries = []
+
+        for (let i = 0; i < selectedGamesId.length; i++) {
+            const app_id = selectedGamesId[i];
+
+            let _query = `update tbl_contest_master set game_conf = tbl_game_conf.game_conf from tbl_game_conf where tbl_contest_master.app_id = tbl_game_conf.app_id and tbl_contest_master.app_id = ${app_id} and tbl_game_conf.level = '${level}' RETURNING tbl_contest_master.app_id,contest_master_id;`;
+
+            updateQueries.push(_query)
+        }
+
+        resolve(updateQueries)
     });
 }
