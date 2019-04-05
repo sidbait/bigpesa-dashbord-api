@@ -17,6 +17,7 @@ appRoutes.post('/cashreport',contestReports.cashReport);
 appRoutes.post('/paymentgatewayreport',contestReports.paymentgatewayReport);
 appRoutes.post('/paymentgatewaydetailreport',contestReports.paymentgatewayDetailReport);
 appRoutes.post('/topgamesummary',contestReports.topGameSummary);
+appRoutes.post('/cashflowsummary',contestReports.cashFlowSummary);
 appRoutes.post('/hourly',contestReports.hourlyReport);
 appRoutes.post('/retentionreport',contestReports.retentionReport);
 appRoutes.post('/channelretentionreport',contestReports.channelRetentionReport);
