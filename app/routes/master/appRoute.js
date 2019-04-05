@@ -28,4 +28,6 @@ appRoutes.post('/app/addGameConf', appController.addGameConf);
 appRoutes.post('/app/searchGameConf', appController.searchGameConf);
 appRoutes.post('/app/removeGameConf', appController.removeGameConf);
 appRoutes.post('/app/setAppOrder', appController.setAppOrder);
+appRoutes.post('/app/bulkUpdateGameConf', appController.bulkUpdateGameConf);
+
 module.exports = appRoutes;
