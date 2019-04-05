@@ -30,7 +30,7 @@ module.exports = {
     group by
         (created_at + (330 * '1m'::interval))::date
     order by
-        (created_at + (330 * '1m'::interval))::date desc`;
+        1`;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)

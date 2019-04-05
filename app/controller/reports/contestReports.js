@@ -749,7 +749,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                queryText = "select (created_at + (330 * '1m'::interval))::date::text as created_at," +
+                queryText = "select (created_at + (330 * '1m'::interval))::date as created_at," +
                     " coalesce(sum(case when nz_txn_type = 'DEBIT' then amount::decimal + cash_bonus end),0) as debit," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount," +
@@ -763,7 +763,7 @@ module.exports = {
                     " from tbl_wallet_transaction" +
                     " where nz_txn_status = 'SUCCESS'" +
                     " and (created_at + (330 * '1m'::interval))::date between $1 and $2" +
-                    " group by (created_at + (330 * '1m'::interval))::date::text" +
+                    " group by (created_at + (330 * '1m'::interval))::date" +
                     " order by 1";
 
                 valuesArr = [fromDate, toDate]
@@ -1052,5 +1052,98 @@ module.exports = {
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
-    }
+    },
+    sourceRetentionReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "source": 'required',
+            "column_name": 'required'
+        };
+
+        let validation = new services.validator(req.body, rules);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let source = req.body.source;
+                let column_name = req.body.column_name;
+                queryText = "select reg_date::text,trans_date::text, total_register, " + column_name +
+                    " from tbl_user_funnel_source" +
+                    " where source = '" + source + "'" +
+                    " and reg_date::date >= '" + fromDate + "'" +
+                    " and trans_date::date >= '" + fromDate + "'" +
+                    " order by 1,2";
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', queryText)
+
+                const rlength = result.length;
+                var element = null;
+                let total_register = [];
+                for (let i = 0; i < rlength; i++) {
+                    if (result[i].reg_date == result[i].trans_date) {
+                        element = result[i];
+                        total_register.push(element.total_register);
+                    }
+                }
+
+                if (rlength > 0) {
+                    let options = {
+                        row: "reg_date",
+                        column: "trans_date",
+                        value: column_name
+                    };
+                    let output = jsonToPivotjson(result, options);
+
+                    let count = 0;
+                    let finalout = [];
+                    output.forEach(element => {
+                        let out = {}
+                        let isadded = false;
+                        for (var k in element) {
+                            //console.log(k)
+                            if (k == "reg_date") {
+                                out[k] = element[k]
+                            } else {
+                                if (!isadded) {
+                                    isadded = true;
+                                    out['total_register'] = total_register[count];
+                                    out[k] = element[k]
+                                } else {
+                                    out[k] = element[k]
+                                }
+                            }
+                        }
+                        finalout.push(out)
+                        count = count + 1;
+                    });
+
+                    services.sendResponse.sendWithCode(req, res, finalout, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    getAllSource: async function (req, res) {
+
+        let _selectQuery = `select distinct source from tbl_user_funnel_source order by 1`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
 }

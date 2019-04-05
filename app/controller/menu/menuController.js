@@ -82,7 +82,8 @@ module.exports = {
                         UserContestReport: true,
                         ActiveUserReport: true,
                         UserRetention: true,
-                        ChannelRetention: true
+                        ChannelRetention: true,
+                        sourceRetention: true
                     },
                     AcquisitionReports: {
                         main: true,
@@ -168,7 +169,8 @@ module.exports = {
                         UserContestReport: false,
                         ActiveUserReport: false,
                         UserRetention: true,
-                        ChannelRetention: true
+                        ChannelRetention: true,
+                        sourceRetention: true
                     },
                     AcquisitionReports: {
                         main: false,
@@ -254,7 +256,8 @@ module.exports = {
                         UserContestReport: false,
                         ActiveUserReport: false,
                         UserRetention: true,
-                        ChannelRetention: true
+                        ChannelRetention: true,
+                        sourceRetention: true
                     },
                     AcquisitionReports: {
                         main: false,
@@ -340,7 +343,8 @@ module.exports = {
                         UserContestReport: false,
                         ActiveUserReport: false,
                         UserRetention: false,
-                        ChannelRetention: false
+                        ChannelRetention: false,
+                        sourceRetention: false
                     },
                     AcquisitionReports: {
                         main: false,
@@ -427,7 +431,8 @@ module.exports = {
                         UserContestReport: false,
                         ActiveUserReport: false,
                         UserRetention: false,
-                        ChannelRetention: false
+                        ChannelRetention: false,
+                        sourceRetention: false
                     },
                     AcquisitionReports: {
                         main: false,
@@ -519,7 +524,8 @@ module.exports = {
                         UserContestReport: false,
                         ActiveUserReport: false,
                         UserRetention: false,
-                        ChannelRetention: false
+                        ChannelRetention: false,
+                        sourceRetention: false
                     },
                     AcquisitionReports: {
                         main: false,
@@ -654,7 +660,8 @@ module.exports = {
                     { path: '/reports/gamesummary', title: 'User Contest Report', show: limit.UserReports.UserContestReport, },
                     { path: '/reports/downloadsummary', title: 'Active User Report', show: limit.UserReports.ActiveUserReport, },
                     { path: '/reports/retention', title: 'User Retention', show: limit.UserReports.UserRetention, },
-                    { path: '/reports/channelretention', title: 'Channel Retention', show: limit.UserReports.ChannelRetention, }
+                    { path: '/reports/channelretention', title: 'Channel Retention', show: limit.UserReports.ChannelRetention, },
+                    { path: '/reports/sourceretention', title: 'Source Retention', show: limit.UserReports.sourceRetention, }
                 ]
             },
 
