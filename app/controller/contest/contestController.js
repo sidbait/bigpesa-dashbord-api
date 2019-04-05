@@ -353,6 +353,7 @@ module.exports = {
             let _max_lives = req.body.max_lives ? req.body.max_lives : null;
             let _min_player = req.body.min_player ? req.body.min_player : null;
             let _rank_desc = req.body.rank_desc ? req.body.rank_desc : null;
+            let _contest_icon_url = req.body.contest_icon_url ? req.body.contest_icon_url : null
 
             let _query;
             let errMsgType = _contest_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
@@ -378,18 +379,18 @@ module.exports = {
             if (!_contest_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_contest(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,status,created_by,created_at,publish_type,channel,show_upcoming,show_from,max_lives,min_player,rank_desc) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,now(),$23,$24,$25,$26,$27,$28,$29) RETURNING *",
+                    text: "INSERT INTO tbl_contest(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,status,created_by,created_at,publish_type,channel,show_upcoming,show_from,max_lives,min_player,rank_desc,contest_icon) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,now(),$23,$24,$25,$26,$27,$28,$29,$30) RETURNING *",
                     values: [
-                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _created_by, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player, _rank_desc
+                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _created_by, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player, _rank_desc , _contest_icon_url
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_contest SET app_id=$1,contest_name=$2,contest_type=$3,contest_desc=$4,start_date=$5,end_date=$6,from_time=$7,to_time=$8,max_players=$9,winners=$10,entry_fee=$11,currency=$12,profit_margin=$13,debit_type=$14,credit_type=$15,win_amount=$16,css_class=$17,next_start_date=$18,contest_priority=$19,game_conf=$20,status=$21,updated_by=$22,updated_at=now(),publish_type = $24,channel=$25, show_upcoming=$26,show_from=$27, max_lives=$28, min_player=$29, rank_desc=$30 WHERE contest_id=$23 RETURNING *",
+                    text: "UPDATE tbl_contest SET app_id=$1,contest_name=$2,contest_type=$3,contest_desc=$4,start_date=$5,end_date=$6,from_time=$7,to_time=$8,max_players=$9,winners=$10,entry_fee=$11,currency=$12,profit_margin=$13,debit_type=$14,credit_type=$15,win_amount=$16,css_class=$17,next_start_date=$18,contest_priority=$19,game_conf=$20,status=$21,updated_by=$22,updated_at=now(),publish_type = $24,channel=$25, show_upcoming=$26,show_from=$27, max_lives=$28, min_player=$29, rank_desc=$30, contest_icon=$31 WHERE contest_id=$23 RETURNING *",
                     values: [
-                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _updated_by, _contest_id, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player, _rank_desc
+                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _updated_by, _contest_id, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player, _rank_desc , _contest_icon_url
                     ]
                 }
 
@@ -547,6 +548,7 @@ module.exports = {
         let _entry_fee = req.body.entry_fee ? req.body.entry_fee : null;
         let _max_players = req.body.max_players ? req.body.max_players : null;
         let _show_upcoming = req.body.show_upcoming ? req.body.show_upcoming : null;
+        let _repeat_mode = req.body.repeat_mode ? req.body.repeat_mode : null;
 
         let _selectQuery = `select case when now()::timestamptz + (330::int * '1m'::interval) < start_date then true end as Upcoming, tbl_app.app_name,tbl_game_conf."level",tbl_contest.* from tbl_contest inner join tbl_app on tbl_app.app_id = tbl_contest.app_id left join tbl_game_conf on tbl_game_conf.game_conf = tbl_contest.game_conf WHERE  1=1`
 
@@ -599,6 +601,10 @@ module.exports = {
 
         if (_show_upcoming) {
             _selectQuery += " AND show_upcoming = " + _show_upcoming
+        }
+
+        if (_repeat_mode) {
+            _selectQuery += " AND contest_type != 'Daily'"
         }
 
         if (_fromDate && _toDate) {
