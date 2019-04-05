@@ -300,6 +300,49 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
+    playerContestSummary: async function (req, res) {
+
+        let rules = {
+            "player_id": 'required',
+        };
+
+        var custom_message = {
+            "required.player_id": "Player Id is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+
+            let player_id = req.body.player_id;
+            try {
+                queryText = "select app_name, COALESCE(total_contest_played, 0) total_contest_played,  COALESCE(cash_contest_played, 0) cash_contest_played, COALESCE(coin_contest_played, 0) coin_contest_played, COALESCE(free_contest_played, 0) free_contest_played, COALESCE(win_cash_count, 0) win_cash_count, COALESCE(win_cash_amount, 0) win_cash_amount, COALESCE(win_coin_count, 0) win_coin_count, COALESCE(win_coin_amount, 0) win_coin_amount, COALESCE(coin_used, 0) coin_used, COALESCE(cash_used, 0) cash_used" +
+                    " from tbl_player_contest_summary" +
+                    " inner join tbl_app " +
+                    " on tbl_app.app_id = tbl_player_contest_summary.app_id" +
+                    " where player_id = $1 and total_contest_played > 0" +
+                    " order by total_contest_played desc";
+
+                valuesArr = [player_id];
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
     playerContestReport: async function (req, res) {
 
         let rules = {
@@ -544,18 +587,27 @@ module.exports = {
 
         let uploadFilepath = `./public/bulk/SMS/`;
         var data = null;
-        var numbers = [];
+        //var numbers = [];
 
         let rules = {
+            "title": 'required',
+            "event": 'required',
+            "push_type": 'required',
             "message": 'required'
         };
 
         var custom_message = {
+            "required.title": "Title is mandatory!",
+            "required.event": "Event is mandatory!",
+            "required.push_type": "Push Type is mandatory!",
             "required.message": "Message is mandatory!"
         };
 
         let validation = new services.validator(req.body, rules, custom_message);
         if (validation.passes()) {
+            let title = req.body.title;
+            let event = req.body.event;
+            let push_type = req.body.push_type;
             let message = req.body.message;
             if (req.files.length > 0) {
                 var from_path = req.files[0].destination + req.files[0].filename;
@@ -580,9 +632,11 @@ module.exports = {
                                     if (jsonObj[0].hasOwnProperty('phone_number')) {
                                         for (let index = 0; index < jsonObj.length; index++) {
                                             data = jsonObj[index];
-                                            numbers.push(data.phone_number);
+                                            //numbers.push(data.phone_number);
+                                            insertPushMessage(data.phone_number, title, event.toUpperCase(), message, push_type)
                                         }
-                                        push.pushSMS(numbers.join(), message);
+                                        //push.pushSMS(numbers.join(), message);
+
                                         services.sendResponse.sendWithCode(req, res, { message: 'File Imported Successfully' }, customMsgTypeBULK, "FILE_IMPORT");
                                     } else {
                                         services.sendResponse.sendWithCode(req, res, { error: "File should have column - phone_number" }, customMsgTypeBULK, "WRONG_HEADER");
@@ -637,4 +691,18 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     }
+}
+
+function insertPushMessage(phone_number, title, event, message, push_type) {
+
+    let queryPushMessage = `insert into tbl_push_notification(player_id, phone_number, title, event, message, status, push_type) values(${phone_number},'${phone_number}','${title}', '${event}', '${message}','ACTIVE','${push_type}')`;
+
+    let dbResult = pgConnection.executeQuery('rmg_dev_db', queryPushMessage)
+
+    if (dbResult && dbResult.length > 0) {
+        console.log(dbResult);
+        console.log('PushMessage Inserted Successfully');
+    }
+    else
+        console.log(dbResult);
 }
