@@ -358,7 +358,7 @@ module.exports = {
 
             let player_id = req.body.player_id;
             try {
-                queryText = "select app.app_name, contest.contest_id, contest.contest_name, contest.entry_fee, contest.debit_type," +
+                queryText = "select app.app_name,contest.contest_id,contest.from_time, contest.to_time, contest.contest_name, contest.entry_fee, contest.debit_type," +
                     " contest_players.transaction_date as joined_date," +
                     // " contest_winner.player_rank, contest_winner.total_score, contest_winner.win_amount, contest_winner.credit_type," +
                     " coalesce(contest_winner.player_rank::text, '--') as player_rank," +
@@ -375,7 +375,7 @@ module.exports = {
                     " (contest_winner.contest_id = contest.contest_id) and" +
                     " (contest_winner.player_id = contest_players.player_id)" +
                     " where contest_players.player_id = $1" +
-                    " order by winning_date desc limit 200";
+                    " order by contest.start_date desc limit 200";
                 valuesArr = [player_id];
 
                 let query = {
@@ -693,16 +693,19 @@ module.exports = {
     }
 }
 
-function insertPushMessage(phone_number, title, event, message, push_type) {
+async function insertPushMessage(phone_number, title, event, message, push_type) {
 
     let queryPushMessage = `insert into tbl_push_notification(player_id, phone_number, title, event, message, status, push_type) values(${phone_number},'${phone_number}','${title}', '${event}', '${message}','ACTIVE','${push_type}')`;
+    try {
+        let dbResult = await pgConnection.executeQuery('rmg_dev_db', queryPushMessage)
 
-    let dbResult = pgConnection.executeQuery('rmg_dev_db', queryPushMessage)
-
-    if (dbResult && dbResult.length > 0) {
-        console.log(dbResult);
-        console.log('PushMessage Inserted Successfully');
+        if (dbResult && dbResult.length > 0) {
+            console.log(dbResult);
+            console.log('PushMessage Inserted Successfully');
+        }
+        else
+            console.log(dbResult);
+    } catch (error) {
+        console.log(error);
     }
-    else
-        console.log(dbResult);
 }
