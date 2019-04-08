@@ -206,7 +206,9 @@ module.exports = {
 
             let player_id = req.body.player_id;
             let status = req.body.status;
+            let _insertQuery = "";
             let _updateQuery = "";
+            let _deleteQuery = "";
 
             try {
 
@@ -218,8 +220,25 @@ module.exports = {
                 let _phone_number = result[0].phone_number;
                 if (status == 'BLOCK') {
                     push.sendNotification(_phone_number, 'Bigpesa Account', 'Your Bigpesa Account has been Blocked. Due to suspicious activity.')
+                    _insertQuery = `insert into tbl_player_block_device(device_id, blocked_at, reason)
+                    select distinct device_id, NOW(), 'Found Playing with GameGuardian' from tbl_player_device d
+                    join tbl_player p on p.player_id = d.player_id
+                    where p.player_id = ${player_id}`
+
+                    let insertresult = await pgConnection.executeQuery('rmg_dev_db', _insertQuery)
+                    console.log(_insertQuery);
+                    console.log(insertresult);
+
                 } else {
                     push.sendNotification(_phone_number, 'Bigpesa Account', 'Greetings from Bigpesa!! your account is now activated. start fair-playing and win big.')
+
+                    _deleteQuery = `delete from tbl_player_block_device where device_id in(select device_id from tbl_player_device d
+                        join tbl_player p on p.player_id = d.player_id
+                        where p.player_id = ${player_id})`;
+
+                    let deleteresult = await pgConnection.executeQuery('rmg_dev_db', _deleteQuery)
+                    console.log(_deleteQuery);
+                    console.log(deleteresult);
                 }
 
                 services.sendResponse.sendWithCode(req, res, result, customMsgType, "UPDATE_SUCCESS");
