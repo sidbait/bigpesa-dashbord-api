@@ -751,15 +751,17 @@ module.exports = {
                 let toDate = req.body.todate;
                 queryText = "select (created_at + (330 * '1m'::interval))::date as created_at," +
                     " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) as debit," +
+                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'EXPIRED' then amount::decimal + cash_bonus end),0) as expired," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount," +
+                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-REFUND' then amount::decimal end), 0) as contest_refund_amount," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then cash_bonus end), 0) as reward_win_amount," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REFUND' then amount::decimal + cash_bonus end), 0) as refund," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DEPOSITBONUS' then cash_bonus end), 0) as depositbonus," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REGISTRATION' then cash_bonus end), 0) as registration," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REFERRER' then cash_bonus end), 0) as referrer," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DAILY-BONUS' then cash_bonus end),0) as daily_bonus," +
-                    " (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0)) as pl" +
+                    " (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event in('CONTEST-WIN','CONTEST-REFUND') then amount::decimal end), 0)) as pl" +
                     " from tbl_wallet_transaction" +
                     " where nz_txn_status = 'SUCCESS'" +
                     " and (created_at + (330 * '1m'::interval))::date between $1 and $2" +
@@ -1141,6 +1143,49 @@ module.exports = {
             }
             else
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    uniquePlayersJoined: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required'
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                queryText = "select count(distinct players.player_id) as unique_players" +
+                    " from tbl_contest_players players " +
+                    " join tbl_contest contest on " +
+                    " contest.contest_id = players.contest_id" +
+                    " where contest.start_date::date between $1 and $2";
+                valuesArr = [fromDate, toDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
         }
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
