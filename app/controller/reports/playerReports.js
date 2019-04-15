@@ -358,7 +358,7 @@ module.exports = {
 
             let player_id = req.body.player_id;
             try {
-                queryText = "select app.app_name,contest.contest_id,contest.from_time, contest.to_time, contest.contest_name, contest.entry_fee, contest.debit_type," +
+                queryText = "select app.app_name,contest.contest_id,split_part(contest.from_time::text, '.', 1) as from_time , split_part(contest.to_time::text, '.', 1) as to_time, contest.contest_name, contest.entry_fee, contest.debit_type," +
                     " contest_players.transaction_date as joined_date," +
                     // " contest_winner.player_rank, contest_winner.total_score, contest_winner.win_amount, contest_winner.credit_type," +
                     " coalesce(contest_winner.player_rank::text, '--') as player_rank," +
@@ -659,7 +659,7 @@ module.exports = {
     },
     getRefundList: async function (req, res) {
 
-        let _selectQuery = " select tbl_refund.transaction_date, que_id, tbl_refund.player_id, phone_number,tbl_refund.\"status\", event_type,amount," +
+        let _selectQuery = " select (tbl_refund.transaction_date + (330 * '1m'::interval)) as transaction_date, que_id, tbl_refund.player_id, phone_number,tbl_refund.\"status\", event_type,amount," +
             " type,\"comment\", refunded_by.username as refunded_by, approved_by.username as approved_by" +
             " from " +
             " (" +
@@ -676,7 +676,7 @@ module.exports = {
             "  left join tbl_player as player on tbl_refund.player_id = player.player_id" +
             "  left join tbl_user as refunded_by on refunded_by.user_id = tbl_refund.refunded_by" +
             "  left join tbl_user as approved_by on approved_by.user_id = tbl_refund.approved_by" +
-            " order by tbl_refund.transaction_date desc limit 500";
+            " order by (tbl_refund.transaction_date + (330 * '1m'::interval)) desc limit 500";
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
