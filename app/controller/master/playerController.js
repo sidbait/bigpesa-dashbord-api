@@ -120,7 +120,7 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
-    refundApproved: async function (req, res) {
+    refundRejectApproved: async function (req, res) {
 
         let rules = {
             "selectedContests": 'required',
