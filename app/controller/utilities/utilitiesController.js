@@ -11,10 +11,13 @@ module.exports = {
 
         let fromDate = req.body.frmdate;
         let toDate = req.body.todate;
-        let source = req.body.source ? req.body.source : '';
-        let extraTime = ` + (330 * '1m'::interval)`
+        let que_type = req.body.que_type ? req.body.que_type : '';
+        let extraTime = ` + (330 * '1m'::interval)`;
+        let _selectQuery = '';
 
-        let _selectQuery = `select (add_date ${extraTime})::date as add_date, status, 
+
+        if (que_type == 'CASH_WALLET_QUEUE') {
+            _selectQuery = `select 'CASH_WALLET_QUEUE' as que_type,(add_date ${extraTime})::date as add_date, status, 
         count(1) as total_queue,
         count(case when is_credit = true then 1 end) as credited,
         sum(case when is_credit = true then amount end) as credited_amount,
@@ -23,15 +26,30 @@ module.exports = {
         from tbl_wallet_credit_que 
         where 1 =1 `
 
-        if (fromDate && toDate) {
-            _selectQuery += ` and (add_date ${extraTime})::date between '${fromDate}' and '${toDate}'`
-        }
-        if (source) {
-            _selectQuery += ` AND source = '${source}'`
-        }
+            if (fromDate && toDate) {
+                _selectQuery += ` and (add_date ${extraTime})::date between '${fromDate}' and '${toDate}'`
+            }
 
-        _selectQuery += `  group by (add_date ${extraTime})::date, status order by 1 desc `;
+            _selectQuery += `  group by (add_date ${extraTime})::date, status order by 1 desc `;
 
+        } else if (que_type == 'COIN_WALLET_QUEUE') {
+
+            _selectQuery = `select 'COIN_WALLET_QUEUE' as que_type,(add_date ${extraTime})::date as add_date, status, 
+            count(1) as total_queue,
+            count(case when is_credit = true then 1 end) as credited,
+            sum(case when is_credit = true then amount end) as credited_amount,
+            count(case when is_credit = false then 1 end) as pending,
+            sum(case when is_credit = false then amount end) as pending_amount
+            from tbl_bonus_credit_que 
+            where 1 =1 `
+
+            if (fromDate && toDate) {
+                _selectQuery += ` and (add_date ${extraTime})::date between '${fromDate}' and '${toDate}'`
+            }
+
+            _selectQuery += `  group by (add_date ${extraTime})::date, status order by 1 desc `;
+
+        }
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
@@ -51,11 +69,15 @@ module.exports = {
 
         let date = req.body.date;
         let status = req.body.status;
+        let que_type = req.body.que_type ? req.body.que_type : '';
+        let _selectQuery = '';
 
         let extraTime = ` + (330 * '1m'::interval)`
-
-        let _selectQuery = `select * from tbl_wallet_credit_que
-        where add_date::date = '${date}' and status = '${status}'`
+        if (que_type == 'CASH_WALLET_QUEUE') {
+            _selectQuery = `select * from tbl_wallet_credit_que where add_date::date = '${date}' and status = '${status}' and is_credit = false`;
+        } else if (que_type == 'COIN_WALLET_QUEUE') {
+            _selectQuery = `select * from tbl_bonus_credit_que where add_date::date = '${date}' and status = '${status}' and is_credit = false`
+        }
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
