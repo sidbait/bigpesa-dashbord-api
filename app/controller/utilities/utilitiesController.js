@@ -148,7 +148,7 @@ module.exports = {
 
         if (_run === false) {
             try {
-                let dbResult = await pgConnection.executeQuery('rmg_dev_db', sql_query)
+                let dbResult = await pgConnection.executeQuery('rmg_dev_db', sql_query,false,0,true)
 
                 if (dbResult && dbResult.length > 0) {
                     services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
