@@ -4,6 +4,10 @@ var utilitiesController = require('../../controller/utilities/utilitiesControlle
 
 utilitiesRoutes.post('/searchQueue', utilitiesController.searchQueue);
 utilitiesRoutes.post('/getPendingData', utilitiesController.getPendingData);
+utilitiesRoutes.post('/chgStatus', utilitiesController.chgStatus);
+utilitiesRoutes.post('/runSQL', utilitiesController.runSQL);
+utilitiesRoutes.post('/getWalletMatrix', utilitiesController.getWalletMatrix);
+utilitiesRoutes.post('/updateMatrix', utilitiesController.updateMatrix);
 
 
 module.exports = utilitiesRoutes;
