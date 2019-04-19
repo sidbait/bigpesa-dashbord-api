@@ -13,7 +13,7 @@ const pool_pg_stg = new pg.Pool(config.db_connectionString.pg.pg_stg);
 
 const pool_pg_readonly = new pg.Pool({
     "user": "support",
-    "password": "Support@1234",
+    "password": "Support@123",
     "database": "rmg_db",
     "host": "192.168.5.121",
     "port": 5432,
