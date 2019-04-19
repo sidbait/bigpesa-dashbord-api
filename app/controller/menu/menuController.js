@@ -41,7 +41,9 @@ module.exports = {
                     },
                     Utilities: {
                         main: true,
-                        QueueReports: true
+                        QueueReports: true,
+                        RunSql: true,
+                        WalletMatrix: true
                     },
                     ContestDetails: {
                         main: true,
@@ -132,7 +134,9 @@ module.exports = {
                     },
                     Utilities: {
                         main: true,
-                        QueueReports: true
+                        QueueReports: true,
+                        RunSql: true,
+                        WalletMatrix: true
                     },
                     ContestDetails: {
                         main: true,
@@ -223,7 +227,9 @@ module.exports = {
                     },
                     Utilities: {
                         main: false,
-                        QueueReports: false
+                        QueueReports: false,
+                        RunSql: false,
+                        WalletMatrix: false
                     },
                     ContestDetails: {
                         main: true,
@@ -314,7 +320,9 @@ module.exports = {
                     },
                     Utilities: {
                         main: false,
-                        QueueReports: false
+                        QueueReports: false,
+                        RunSql: false,
+                        WalletMatrix: false
                     },
                     ContestDetails: {
                         main: false,
@@ -406,7 +414,9 @@ module.exports = {
                     },
                     Utilities: {
                         main: false,
-                        QueueReports: false
+                        QueueReports: false,
+                        RunSql: false,
+                        WalletMatrix: false
                     },
                     ContestDetails: {
                         main: false,
@@ -503,7 +513,9 @@ module.exports = {
                     },
                     Utilities: {
                         main: false,
-                        QueueReports: false
+                        QueueReports: false,
+                        RunSql: false,
+                        WalletMatrix: false
                     },
                     ContestDetails: {
                         main: false,
@@ -625,7 +637,9 @@ module.exports = {
                 icontype: 'fa fa-mobile-alt',
                 show: limit.Utilities.main,
                 children: [
-                    { path: '/utilities/queue-reports', title: 'QueueReports', show: limit.Utilities.QueueReports, }
+                    { path: '/utilities/queue-reports', title: 'QueueReports', show: limit.Utilities.QueueReports, },
+                    { path: '/utilities/run-sql', title: 'Run Sql', show: limit.Utilities.RunSql, },
+                    { path: '/utilities/wallet-matrix', title: 'Wallet Matrix', show: limit.Utilities.WalletMatrix, }
                 ]
             }, {
                 path: '',
