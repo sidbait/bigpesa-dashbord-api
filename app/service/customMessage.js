@@ -299,5 +299,20 @@ module.exports = {
             messageCode: "on_success",
             statusCode: 200
         },
+    },
+    "insertRankM": {
+        "on_failed": {
+            success: false,
+            message: "No Ranks to Insert",
+            messageCode: "on_failed",
+            statusCode: 401
+        },
+        "on_success": {
+            success: true,
+            message: " Contests Ranks Inserted",
+            messageCode: "on_success",
+            statusCode: 200
+        },
     }
+
 }
