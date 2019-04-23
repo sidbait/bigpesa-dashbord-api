@@ -39,11 +39,17 @@ module.exports = {
                         main: true,
                         banner: true
                     },
+                    Utilities: {
+                        main: true,
+                        QueueReports: true,
+                        RunSql: true,
+                        WalletMatrix: true
+                    },
                     ContestDetails: {
                         main: true,
                         mastercontest: true,
                         contest: true,
-                        ContestPriority:true,
+                        ContestPriority: true,
                         previewcontest: true,
                     },
                     FeedbackDetails: {
@@ -58,7 +64,7 @@ module.exports = {
                         downloadsummary: true,
                         userreport: true,
                         cash: true,
-                        cashFlowSummary:true,
+                        cashFlowSummary: true,
                         paymentgateway: true,
                         acquisitionsummary: true,
                         channelAcquisitionsummary: true,
@@ -68,10 +74,10 @@ module.exports = {
                         dailySummary: true,
                         dailyChannelSummary: true,
                         export: true,
-                        bulkNotification:true,
+                        bulkNotification: true,
                         hourly: true,
                         splitWiseReport: true,
-                        pixel:true,
+                        pixel: true,
                     },
                     UserReports: {
                         main: true,
@@ -126,11 +132,17 @@ module.exports = {
                         main: true,
                         banner: true
                     },
+                    Utilities: {
+                        main: true,
+                        QueueReports: true,
+                        RunSql: true,
+                        WalletMatrix: true
+                    },
                     ContestDetails: {
                         main: true,
                         mastercontest: true,
                         contest: true,
-                        ContestPriority:true,
+                        ContestPriority: true,
                         previewcontest: true,
                     },
                     FeedbackDetails: {
@@ -145,7 +157,7 @@ module.exports = {
                         downloadsummary: true,
                         userreport: true,
                         cash: true,
-                        cashFlowSummary:true,
+                        cashFlowSummary: true,
                         paymentgateway: true,
                         acquisitionsummary: true,
                         channelAcquisitionsummary: true,
@@ -155,9 +167,9 @@ module.exports = {
                         dailySummary: true,
                         dailyChannelSummary: true,
                         export: true,
-                        bulkNotification:true,
+                        bulkNotification: true,
                         hourly: true,
-                        pixel:true,
+                        pixel: true,
                         splitWiseReport: true
                     },
                     UserReports: {
@@ -213,11 +225,17 @@ module.exports = {
                         main: false,
                         banner: false
                     },
+                    Utilities: {
+                        main: false,
+                        QueueReports: false,
+                        RunSql: false,
+                        WalletMatrix: false
+                    },
                     ContestDetails: {
                         main: true,
                         mastercontest: true,
                         contest: true,
-                        ContestPriority:true,
+                        ContestPriority: true,
                         previewcontest: true,
                     },
                     FeedbackDetails: {
@@ -232,7 +250,7 @@ module.exports = {
                         downloadsummary: false,
                         userreport: true,
                         cash: false,
-                        cashFlowSummary:false,
+                        cashFlowSummary: false,
                         paymentgateway: false,
                         acquisitionsummary: false,
                         channelAcquisitionsummary: false,
@@ -242,9 +260,9 @@ module.exports = {
                         dailySummary: false,
                         dailyChannelSummary: false,
                         export: true,
-                        bulkNotification:true,
+                        bulkNotification: true,
                         hourly: false,
-                        pixel:true,
+                        pixel: true,
                         splitWiseReport: true
                     },
                     UserReports: {
@@ -300,11 +318,17 @@ module.exports = {
                         main: false,
                         banner: false
                     },
+                    Utilities: {
+                        main: false,
+                        QueueReports: false,
+                        RunSql: false,
+                        WalletMatrix: false
+                    },
                     ContestDetails: {
                         main: false,
                         mastercontest: false,
                         contest: false,
-                        ContestPriority:false,
+                        ContestPriority: false,
                         previewcontest: false,
                     },
                     FeedbackDetails: {
@@ -319,7 +343,7 @@ module.exports = {
                         downloadsummary: true,
                         userreport: true,
                         cash: true,
-                        cashFlowSummary:true,
+                        cashFlowSummary: true,
                         paymentgateway: true,
                         acquisitionsummary: true,
                         channelAcquisitionsummary: true,
@@ -329,9 +353,9 @@ module.exports = {
                         dailySummary: true,
                         dailyChannelSummary: true,
                         export: true,
-                        bulkNotification:true,
+                        bulkNotification: true,
                         hourly: true,
-                        pixel:true,
+                        pixel: true,
                         splitWiseReport: true
                     },
                     UserReports: {
@@ -388,11 +412,17 @@ module.exports = {
                         main: false,
                         banner: false
                     },
+                    Utilities: {
+                        main: false,
+                        QueueReports: false,
+                        RunSql: false,
+                        WalletMatrix: false
+                    },
                     ContestDetails: {
                         main: false,
                         mastercontest: false,
                         contest: false,
-                        ContestPriority:false,
+                        ContestPriority: false,
                         previewcontest: false,
                     },
                     FeedbackDetails: {
@@ -407,7 +437,7 @@ module.exports = {
                         downloadsummary: false,
                         userreport: true,
                         cash: false,
-                        cashFlowSummary:false,
+                        cashFlowSummary: false,
                         paymentgateway: false,
                         acquisitionsummary: false,
                         channelAcquisitionsummary: false,
@@ -417,9 +447,9 @@ module.exports = {
                         dailySummary: false,
                         dailyChannelSummary: false,
                         export: true,
-                        bulkNotification:true,
+                        bulkNotification: true,
                         hourly: false,
-                        pixel:false,
+                        pixel: false,
                         splitWiseReport: false
                     },
                     UserReports: {
@@ -481,11 +511,17 @@ module.exports = {
                         main: false,
                         banner: false
                     },
+                    Utilities: {
+                        main: false,
+                        QueueReports: false,
+                        RunSql: false,
+                        WalletMatrix: false
+                    },
                     ContestDetails: {
                         main: false,
                         mastercontest: false,
                         contest: false,
-                        ContestPriority:false,
+                        ContestPriority: false,
                         previewcontest: false,
                     },
                     FeedbackDetails: {
@@ -500,7 +536,7 @@ module.exports = {
                         downloadsummary: false,
                         userreport: false,
                         cash: false,
-                        cashFlowSummary:false,
+                        cashFlowSummary: false,
                         paymentgateway: false,
                         acquisitionsummary: false,
                         channelAcquisitionsummary: false,
@@ -510,9 +546,9 @@ module.exports = {
                         dailySummary: false,
                         dailyChannelSummary: false,
                         export: false,
-                        bulkNotification:false,
+                        bulkNotification: false,
                         hourly: false,
-                        pixel:false,
+                        pixel: false,
                         splitWiseReport: false
                     },
                     UserReports: {
@@ -593,6 +629,17 @@ module.exports = {
                 show: limit.BannerDetails.main,
                 children: [
                     { path: '/master/manage-banner/view-banner', title: 'Banners', show: limit.BannerDetails.banner, }
+                ]
+            }, {
+                path: '',
+                title: 'Utilities',
+                type: 'menu__toggle',
+                icontype: 'fa fa-mobile-alt',
+                show: limit.Utilities.main,
+                children: [
+                    { path: '/utilities/queue-reports', title: 'QueueReports', show: limit.Utilities.QueueReports, },
+                    { path: '/utilities/run-sql', title: 'Run Sql', show: limit.Utilities.RunSql, },
+                    { path: '/utilities/wallet-matrix', title: 'Wallet Matrix', show: limit.Utilities.WalletMatrix, }
                 ]
             }, {
                 path: '',

@@ -71,8 +71,14 @@ module.exports = {
         }
     },
 
-    insertRankM: function (req, res) {
+    runRankCron: async function (req, res) {
         insertContestRankDetails()
+            .then((r) => {
+                services.sendResponse.sendWithCode(req, res, r, 'insertRankM', "on_success");
+            })
+            .catch((e) => {
+                services.sendResponse.sendWithCode(req, res, e, 'insertRankM', "on_failed");
+            })
     },
 
     getAll: async function (req, res) {
@@ -808,41 +814,55 @@ function getQueriesRankData(sheetData, contest_uid, contest_master_id) {
 }
 
 async function insertContestRankDetails() {
+    return new Promise(async (resolve, reject) => {
+        // let pendingContestRank = 'select distinct contest_id, contest_master_id from ' +
+        //     ' tbl_contest where created_at::Date = now()::date and ' +
+        //     ' contest_id not in (select distinct contest_id from tbl_contest_rank) order by contest_id'
 
-    let pendingContestRank = 'select distinct contest_id, contest_master_id from ' +
-        ' tbl_contest where created_at::Date = now()::date and ' +
-        ' contest_id not in (select distinct contest_id from tbl_contest_rank) order by contest_id'
+        let pendingContestRank = `select distinct contest_id, contest_master_id from tbl_contest  where created_at > (now() - (7 * interval '1 Day')) and status = 'ACTIVE' and contest_master_id is not null and  contest_id not in (select distinct contest_id from tbl_contest_rank) order by contest_id`
 
-    try {
-        let dbResult = await pgConnection.executeQuery('rmg_dev_db', pendingContestRank);
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', pendingContestRank);
 
-        if (dbResult != null) {
-            dbResult.forEach(async element => {
+            if (dbResult && dbResult.length > 0) {
 
-                console.log(element)
+                resolve(dbResult.length)
 
-                let insertRankdetails = "insert into tbl_contest_rank ( contest_id, rank_name, rank_desc, lower_rank, upper_rank, prize_amount, status, created_at, updated_at, credit_type) " +
-                    " select  " + element.contest_id + ", rank_name, rank_desc,  lower_rank, upper_rank, prize_amount, status, created_at, updated_at,credit_type from tbl_contest_rank_master where contest_master_id =  " + element.contest_master_id + " returning contest_id";
+                dbResult.forEach(async element => {
 
-                console.log('insertRankdetails - ', insertRankdetails);
-                try {
+                    console.log(element)
 
-                    let dbResult = await pgConnection.executeQuery('rmg_dev_db', insertRankdetails);
+                    let insertRankdetails = "insert into tbl_contest_rank ( contest_id, rank_name, rank_desc, lower_rank, upper_rank, prize_amount, status, created_at, updated_at, credit_type) " +
+                        " select  " + element.contest_id + ", rank_name, rank_desc,  lower_rank, upper_rank, prize_amount, status, created_at, updated_at,credit_type from tbl_contest_rank_master where contest_master_id =  " + element.contest_master_id + " returning contest_id";
 
-                    console.log(dbResult);
+                    // console.log('insertRankdetails - ', insertRankdetails);
+                    if (element.contest_id && element.contest_master_id) {
+                        try {
 
-                } catch (error) {
-                    console.log(error);
-                }
+                            let dbResult = await pgConnection.executeQuery('rmg_dev_db', insertRankdetails);
+                            // resolve(dbResult)
+                            console.log(dbResult);
 
-            });
+                        } catch (error) {
+                            // reject(error)
+                            console.log(error);
+                        }
+                    } else {
+                        // reject('Error In distinct')
+                        console.log('no contest_master_id');
+                    }
+                });
+            }
+            else {
+                reject('Error In distinct')
+                console.log('Error In distinct');
+            }
         }
-        else
-            console.log('Error In distinct');
-    }
-    catch (error) {
-        console.log('Error In distinct', error);
-    }
+        catch (error) {
+            reject(error)
+            console.log('Error In distinct', error);
+        }
+    });
 }
 
 

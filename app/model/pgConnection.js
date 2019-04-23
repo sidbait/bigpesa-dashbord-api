@@ -11,9 +11,21 @@ const pool_pg_public = new pg.Pool(config.db_connectionString.pg.pg_public);
 const pool_pg_private = new pg.Pool(config.db_connectionString.pg.pg_private);
 const pool_pg_stg = new pg.Pool(config.db_connectionString.pg.pg_stg);
 
+const pool_pg_readonly = new pg.Pool({
+    "user": "support",
+    "password": "Support@123",
+    "database": "rmg_db",
+    "host": "192.168.5.121",
+    "port": 5432,
+    "ssl": true,
+    "max": 50,
+    "min": 10,
+    "idleTimeoutMillis": 500000
+})
+
 module.exports = {
 
-    executeQuery: function (dataBase, dbQuery, isRedis = false, expiretime = 0) {
+    executeQuery: function (dataBase, dbQuery, isRedis = false, expiretime = 0, isReadOnly = false) {
 
         perf.start();
 
@@ -23,7 +35,7 @@ module.exports = {
                     console.log('getting value from redis');
                     resolve(redisResult);
                 }).catch(async x => {
-                    executeQuery_db(dataBase, dbQuery, function (dbError, dbResult) {
+                    executeQuery_db(dataBase, dbQuery, isReadOnly, function (dbError, dbResult) {
 
                         let timeToExecute = perf.stop();
 
@@ -40,7 +52,7 @@ module.exports = {
                     });
                 });
             } else {
-                executeQuery_db(dataBase, dbQuery, function (dbError, dbResult) {
+                executeQuery_db(dataBase, dbQuery, isReadOnly, function (dbError, dbResult) {
 
                     let timeToExecute = perf.stop();
 
@@ -57,7 +69,7 @@ module.exports = {
     },
 }
 
-function executeQuery_db(dataBase, dbQuery, callback) {
+function executeQuery_db(dataBase, dbQuery, isReadOnly, callback) {
 
     var pool = null;
 
@@ -69,6 +81,9 @@ function executeQuery_db(dataBase, dbQuery, callback) {
         pool = pool_pg_stg;
     else
         pool = pool_private;
+
+    if (isReadOnly)
+        pool = pool_pg_readonly;
 
     console.log('process.env.DB ==>', process.env.DB);
     // console.log(pool);
