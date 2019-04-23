@@ -789,6 +789,120 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
+    getWithdrawDepositReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required'
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                let player_id = req.body.player_id
+                let phone_number = req.body.phone_number;
+                let full_name = req.body.full_name;
+                let range = req.body.range;
+                let query = `SELECT
+                wallet_transaction.created_at,
+                wallet_transaction.player_id,
+                tbl_player.phone_number,
+                full_name,
+                SUM(deposit) as deposit,
+                SUM(withdraw) as withdraw,
+                SUM(cash_bonus) cash_bonus
+            FROM
+                (
+                SELECT
+                    (created_at + (330 * '1m'::INTERVAL))::DATE AS created_at,
+                    player_id,
+                    0 AS deposit,
+                    0 AS withdraw,
+                    cash_bonus
+                FROM
+                    tbl_wallet_transaction
+                WHERE
+                    nz_txn_type = 'CREDIT'
+                    AND UPPER(nz_txn_event) = 'DEPOSITBONUS'
+            UNION ALL
+                SELECT
+                    (created_at + (330 * '1m'::INTERVAL))::DATE AS created_at,
+                    player_id,
+                    amount::DECIMAL AS deposit,
+                    0 AS withdraw,
+                    0 AS cash_bonus
+                FROM
+                    tbl_wallet_transaction
+                WHERE
+                    nz_txn_status = 'SUCCESS'
+                    AND nz_txn_type = 'DEPOSIT'
+            UNION ALL
+                SELECT
+                    (created_at + (330 * '1m'::INTERVAL))::DATE AS created_at,
+                    player_id,
+                    0 AS deposit,
+                    amount::DECIMAL AS withdraw,
+                    0 AS cash_bonus
+                FROM
+                    tbl_wallet_transaction
+                WHERE
+                    nz_txn_status = 'SUCCESS'
+                    AND nz_txn_type = 'WITHDRAW' ) wallet_transaction
+            INNER JOIN tbl_player ON
+                wallet_transaction.player_id = tbl_player.player_id
+            WHERE 1 = 1`;
+                if (player_id) {
+                    query += ` and tbl_player.player_id = ${player_id}`;
+                }
+                if (phone_number) {
+                    query += ` and tbl_player.phone_number = '${phone_number}'`;
+                }
+                if (full_name) {
+                    query += ` and tbl_player.full_name ilike '%${full_name}%'`;
+                }
+                if (range) {
+                    switch (range) {
+                        case "1":
+                            opt = '< 100';
+                            break;
+                        case "2":
+                            opt = 'between 100 and 499';
+                            break;
+                        case "3":
+                            opt = '>= 500';
+                            break;
+                        default:
+                            break;
+                    }
+                    query += ` and deposit ${opt}`;
+                }
+                query += ` and wallet_transaction.created_at between '${fromDate}' and '${toDate}'
+                    GROUP BY
+                        wallet_transaction.created_at,
+                        wallet_transaction.player_id,
+                        tbl_player.phone_number,
+                        full_name`;
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
     hourlyReport: async function (req, res) {
         let rules = {
             "frmdate": 'required',

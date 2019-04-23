@@ -23,7 +23,9 @@ appRoutes.post('/hourly',contestReports.hourlyReport);
 appRoutes.post('/retentionreport',contestReports.retentionReport);
 appRoutes.post('/channelretentionreport',contestReports.channelRetentionReport);
 appRoutes.post('/sourceretentionreport',contestReports.sourceRetentionReport);
-appRoutes.get('/getallsource',contestReports.getAllSource);
+appRoutes.post('/getwithdrawdepositreport',contestReports.getWithdrawDepositReport);
 appRoutes.post('/balancereport',contestReports.balanceReport);
+appRoutes.get('/getallsource',contestReports.getAllSource);
 appRoutes.get('/totalbalancereport',contestReports.totalBalancereport);
+
 module.exports = appRoutes;
