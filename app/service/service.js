@@ -5,7 +5,7 @@ var services = {
    consoleLog: require('./consoleLog.js'),
    customMessage: require('./customMessage.js'),
    sendMail: require('./sendMail.js'),
-   abc:"MAMAMA"
+   s3:require('./S3'),
 };
 
 module.exports = services;

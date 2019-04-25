@@ -47,7 +47,12 @@
     "expires_in": 18000,
     "refresh_time": 18000
   },
-  "oneSignalAppId":"8a205a4c-49ec-435a-a8ab-f33dfe9faa55",
+  "s3_auth": {
+    "secretAccessKey": "kSoGtJvARexB8are0jnaeezfYGXsUNwKfvqMll1/",
+    "accessKeyId": "AKIAIR5WFEWX433MIGCA",
+    "region": "ap-south-1"
+  },
+  "oneSignalAppId": "8a205a4c-49ec-435a-a8ab-f33dfe9faa55",
   "Authorization": "OTg3N2VlYjYtMGE2Ni00OTBhLTg3M2ItMzU0NmNkNmUzNTVl",
   "iconUrl": "https://bigpesa.in/assets/img/logo.png"
 }

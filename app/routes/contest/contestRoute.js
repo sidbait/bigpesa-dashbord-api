@@ -47,4 +47,6 @@ contestRoutes.post('/setLiveContestOrder', contestController.setLiveContestOrder
 contestRoutes.post('/getAllContest', contestController.getAllContest);
 contestRoutes.post('/setAllContestOrder', contestController.setAllContestOrder);
 
+contestRoutes.post('/getMatrixCode', contestController.getMatrixCode);
+
 module.exports = contestRoutes;
