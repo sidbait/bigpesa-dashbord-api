@@ -18,5 +18,6 @@ appRoutes.get('/notverifiedplayerdata',  playerReports.notVerifiedPlayerData);
 appRoutes.get('/withdrawreport',  playerReports.withdrawReport);
 appRoutes.get('/verifiedbutnotplayedplayerdata',  playerReports.verifiedButNotPlayedPlayerData);
 appRoutes.post('/bulksmsnotification',  playerReports.bulkSMSNotification);
+appRoutes.post('/getwalletbalancelog',playerReports.getWalletBalanceLog);
 appRoutes.get('/getrefundlist', playerReports.getRefundList);
 module.exports = appRoutes;

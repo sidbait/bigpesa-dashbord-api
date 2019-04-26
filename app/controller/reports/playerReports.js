@@ -343,6 +343,48 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
+    getWalletBalanceLog: async function (req, res) {
+
+        let rules = {
+            "player_id": 'required',
+        };
+
+        var custom_message = {
+            "required.player_id": "Player Id is mandatory!"
+        };
+
+        let validation = new services.validator(req.body, rules, custom_message);
+        if (validation.passes()) {
+
+            let player_id = req.body.player_id;
+            try {
+                queryText = "select txn_id, txn_type, winning_balance, reward_balance, deposit_balance, amount, " +
+                " (winning_balance + reward_balance + deposit_balance ) total, created_at " +
+                " from tbl_wallet_balance_log " +
+                " where player_id = $1" + 
+                " order by txn_id desc, created_at desc limit 100";
+
+                valuesArr = [player_id];
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
     playerContestReport: async function (req, res) {
 
         let rules = {
