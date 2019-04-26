@@ -13,6 +13,7 @@ module.exports = {
         coalesce(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),
         0) as DEPOSIT,
         coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) as debit,
+        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'RE-JOIN CONTEST' then amount::decimal + cash_bonus end),0) as re_join,
         coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit,
         coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount,
         coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-REFUND' then amount::decimal end), 0) as contest_refund_amount,
