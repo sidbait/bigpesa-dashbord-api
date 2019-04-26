@@ -45,9 +45,9 @@ module.exports = {
             })).then((inresults) => {
                 // console.log(inresults);
                 services.sendResponse.sendWithCode(req, res, inresults, customMsgType, "ADD_SUCCESS");
-            }).catch((err)=> console.log(err))
+            }).catch((err) => console.log(err))
             // services.sendResponse.sendWithCode(req, res, inresults, customMsgType, "ADD_SUCCESS");
-        }).catch((err)=> console.log(err))
+        }).catch((err) => console.log(err))
 
         // res.send({'ok':'ok'})
 
@@ -121,16 +121,18 @@ module.exports = {
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', _query)
 
-                console.log(result);
+                // console.log(result);
 
                 if (result.length > 0) {
                     if (req.files != null && req.files.length > 0) {
-                        let movePath = await uploadAppIcon(req, result[0].app_id);
+                        // let movePath = await uploadAppIcon(req, result[0].app_id);
+                        
+                        let s3Path = await services.s3.upload(req, 'app_icon');
 
                         let mvQuery = {
-                            text: "UPDATE tbl_app set app_icon = $1 WHERE app_id= $2 RETURNING *",
+                            text: "UPDATE tbl_app set app_icon = $1 WHERE app_id= $2 RETURNING app_icon",
                             values: [
-                                movePath.replace('./public', ''),
+                                s3Path,
                                 result[0].app_id
                             ]
                         }
@@ -138,6 +140,7 @@ module.exports = {
                         let mvResult = await pgConnection.executeQuery('rmg_dev_db', mvQuery)
 
                         console.log(mvResult);
+
                     }
                     services.sendResponse.sendWithCode(req, res, result[0], customMsgType, successMsgType);
                 } else {

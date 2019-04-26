@@ -346,25 +346,27 @@ module.exports = {
             let _contest_priority = req.body.contest_priority ? req.body.contest_priority : null;
             let _game_conf = req.body.game_conf ? req.body.game_conf : '';
             let _channel = req.body.channel ? req.body.channel : null;
-            let _show_upcoming = req.body.show_upcoming ? req.body.show_upcoming : null;
+            let _show_upcoming = req.body.show_upcoming ? req.body.show_upcoming : false;
 
             let _show_from_date = req.body.show_from_date ? req.body.show_from_date : null;
             let _show_from_time = req.body.show_from_time ? req.body.show_from_time : null;
             let _max_lives = req.body.max_lives ? req.body.max_lives : null;
             let _min_player = req.body.min_player ? req.body.min_player : null;
             let _rank_desc = req.body.rank_desc ? req.body.rank_desc : null;
-            let _contest_icon_url = req.body.contest_icon_url ? req.body.contest_icon_url : null
+            let _contest_icon_url = req.body.contest_icon_url ? req.body.contest_icon_url : null;
+            let _matrix_code = req.body.matrix_code ? req.body.matrix_code : null;
+            let _infinite_users = req.body.infinite_users ? req.body.infinite_users : false;
 
             let _query;
             let errMsgType = _contest_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
             let successMsgType = _contest_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
 
             let _contest_icon;
-            if (req.files.length > 0) {
-                _contest_icon = req.files[0].path.replace('public', '')
-                console.log(_contest_icon);
+            // if (req.files.length > 0) {
+            //     _contest_icon = req.files[0].path.replace('public', '')
+            //     console.log(_contest_icon);
 
-            }
+            // }
 
             let new_start_date = joinDateTime(_start_date, _from_time);
             let new_end_date = joinDateTime(_end_date, _to_time);
@@ -379,18 +381,18 @@ module.exports = {
             if (!_contest_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_contest(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,status,created_by,created_at,publish_type,channel,show_upcoming,show_from,max_lives,min_player,rank_desc,contest_icon) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,now(),$23,$24,$25,$26,$27,$28,$29,$30) RETURNING *",
+                    text: "INSERT INTO tbl_contest(app_id,contest_name,contest_type,contest_desc,start_date,end_date,from_time,to_time,max_players,winners,entry_fee,currency,profit_margin,debit_type,credit_type,win_amount,css_class,next_start_date,contest_priority,game_conf,status,created_by,created_at,publish_type,channel,show_upcoming,show_from,max_lives,min_player,rank_desc,contest_icon,matrix_code,infinite_users) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,now(),$23,$24,$25,$26,$27,$28,$29,$30,$31,$32) RETURNING *",
                     values: [
-                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _created_by, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player, _rank_desc , _contest_icon_url
+                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _created_by, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player, _rank_desc, _contest_icon, _matrix_code, _infinite_users
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_contest SET app_id=$1,contest_name=$2,contest_type=$3,contest_desc=$4,start_date=$5,end_date=$6,from_time=$7,to_time=$8,max_players=$9,winners=$10,entry_fee=$11,currency=$12,profit_margin=$13,debit_type=$14,credit_type=$15,win_amount=$16,css_class=$17,next_start_date=$18,contest_priority=$19,game_conf=$20,status=$21,updated_by=$22,updated_at=now(),publish_type = $24,channel=$25, show_upcoming=$26,show_from=$27, max_lives=$28, min_player=$29, rank_desc=$30, contest_icon=$31 WHERE contest_id=$23 RETURNING *",
+                    text: "UPDATE tbl_contest SET app_id=$1,contest_name=$2,contest_type=$3,contest_desc=$4,start_date=$5,end_date=$6,from_time=$7,to_time=$8,max_players=$9,winners=$10,entry_fee=$11,currency=$12,profit_margin=$13,debit_type=$14,credit_type=$15,win_amount=$16,css_class=$17,next_start_date=$18,contest_priority=$19,game_conf=$20,status=$21,updated_by=$22,updated_at=now(),publish_type = $24,channel=$25, show_upcoming=$26,show_from=$27, max_lives=$28, min_player=$29, rank_desc=$30, contest_icon=$31, matrix_code=$32, infinite_users=$33 WHERE contest_id=$23 RETURNING *",
                     values: [
-                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _updated_by, _contest_id, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player, _rank_desc , _contest_icon_url
+                        _app_id, _contest_name, _contest_type, _contest_desc, new_start_date, new_end_date, _from_time, _to_time, _max_players, _winners, _entry_fee, _currency, _profit_margin, _debit_type, _credit_type, _win_amount, _css_class, _next_start_date, _contest_priority, _game_conf, _status, _updated_by, _contest_id, _publish_type, _channel, _show_upcoming, show_from, _max_lives, _min_player, _rank_desc, _contest_icon, _matrix_code, _infinite_users
                     ]
                 }
 
@@ -409,12 +411,12 @@ module.exports = {
                     }
 
                     if (req.files != null && req.files.length > 0) {
-                        let movePath = await uploadBanner(req, result[0].contest_id);
-
+                        // let movePath = await uploadBanner(req, result[0].contest_id);
+                        let s3Path = await services.s3.upload(req, 'contest_icon');
                         let mvQuery = {
-                            text: "UPDATE tbl_contest set contest_icon = $1 WHERE contest_id= $2 RETURNING *",
+                            text: "UPDATE tbl_contest set contest_icon = $1 WHERE contest_id= $2 RETURNING contest_icon",
                             values: [
-                                movePath.replace('./public', ''),
+                                s3Path,
                                 result[0].contest_id
                             ]
                         }
@@ -668,6 +670,30 @@ module.exports = {
         let pendingIds = req.body.pendingIds ? req.body.pendingIds : null;
 
         let _selectQuery = `update tbl_contest set "status"='ACTIVE' where contest_id in (${pendingIds}) returning contest_id`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    getMatrixCode: async function (req, res) {
+
+        let status = req.body.status ? req.body.status : null;
+
+        let _selectQuery = `select * from tbl_wallet_debit_matrix where 1 = 1 `
+
+        if (status) {
+            _selectQuery += `and status = '${status}'`;
+        }
+
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
