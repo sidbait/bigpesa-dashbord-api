@@ -544,8 +544,8 @@ module.exports = {
                 let queryText = "select (created_at + 330::double precision * '00:01:00'::interval)::date::text as created_at," +
                     " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
-                    " count(distinct case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then player_id end) as debit_count," +
-                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) as DEBIT," +
+                    " count(distinct case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then player_id end) as debit_count," +
+                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) as DEBIT," +
                     " count(distinct case when nz_txn_type = 'CREDIT' then player_id end) as credit_count," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as CREDIT," +
                     " count(distinct case when nz_txn_type = 'WITHDRAW' then player_id end) as withdraw_count," +
@@ -668,7 +668,7 @@ module.exports = {
     },
     dashboardReport: async function (req, res) {
         let queryCashDetails = "select  " +
-            " coalesce( sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal else 0 end),0) as debit," +
+            " coalesce( sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal else 0 end),0) as debit," +
             " coalesce( sum(case when nz_txn_type = 'CREDIT' then amount::decimal else 0 end ),0) as credit, " +
             " coalesce( sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal else 0 end),0) as deposit, " +
             " coalesce( sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal else 0 end),0) as withdraw , " +
@@ -750,7 +750,7 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 queryText = "select (created_at + (330 * '1m'::interval))::date as created_at," +
-                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) as debit," +
+                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) as debit," +
                     " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'EXPIRED' then amount::decimal + cash_bonus end),0) as expired," +
                     " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'RE-JOIN CONTEST' then amount::decimal + cash_bonus end),0) as re_join," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit," +
@@ -762,7 +762,7 @@ module.exports = {
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REGISTRATION' then cash_bonus end), 0) as registration," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REFERRER' then cash_bonus end), 0) as referrer," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DAILY-BONUS' then cash_bonus end),0) as daily_bonus," +
-                    " (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event in('CONTEST-WIN','CONTEST-REFUND') then amount::decimal end), 0)) as pl" +
+                    " (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event in('CONTEST-WIN','CONTEST-REFUND') then amount::decimal end), 0)) as pl" +
                     " from tbl_wallet_transaction" +
                     " where nz_txn_status = 'SUCCESS'" +
                     " and (created_at + (330 * '1m'::interval))::date between $1 and $2" +
