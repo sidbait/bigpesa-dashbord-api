@@ -12,7 +12,8 @@ module.exports = {
         (created_at + (330 * '1m'::interval))::date as report_date,
         coalesce(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),
         0) as DEPOSIT,
-        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) as debit,
+        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) as debit,
+        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'RE-JOIN CONTEST' then amount::decimal + cash_bonus end),0) as re_join,
         coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit,
         coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount,
         coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-REFUND' then amount::decimal end), 0) as contest_refund_amount,
@@ -21,7 +22,7 @@ module.exports = {
         0) as WITHDRAW,
         coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DEPOSITBONUS' then cash_bonus end), 0) as depositbonus,
         coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DAILY-BONUS' then cash_bonus end),0) as daily_bonus,
-        (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event in('CONTEST-WIN','CONTEST-REFUND') then amount::decimal end), 0)) as pl,
+        (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event in('CONTEST-WIN','CONTEST-REFUND') then amount::decimal end), 0)) as pl,
         sum(amount::decimal) as total
     from
         tbl_wallet_transaction
@@ -178,7 +179,7 @@ module.exports = {
     totalCashSummary: async function (req, res) {
 
         let _selectQuery = `select COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as total_cash_deposit,
-        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) as total_cash_debit,
+        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) as total_cash_debit,
         coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as total_cash_credit,
         COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as total_cash_withdraw
         from tbl_wallet_transaction 
@@ -309,8 +310,8 @@ module.exports = {
         let _selectQuery = `select created_at::date::text,
         count(case when nz_txn_type = 'DEPOSIT' then 1 end) as deposit_count,
         COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT,
-        count(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then 1 end) as DEBIT_count,
-        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) DEBIT,
+        count(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then 1 end) as DEBIT_count,
+        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) DEBIT,
         count(case when nz_txn_type = 'CREDIT' then 1 end) as CREDIT_count,
         coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as CREDIT,
         count(case when nz_txn_type = 'WITHDRAW' then 1 end) as WITHDRAW_count,
@@ -403,7 +404,7 @@ module.exports = {
         group by (created_at + (330 * '1m'::interval))::date::text
         union all
         select (created_at + (330 * '1m'::interval))::date::text as trans_date, 0 as register_users, 0 as verified_users, 
-        count(distinct case when nz_txn_event != 'EXPIRED' then player_id end) as active_users, 0 as paid_users, 0::decimal as deposit_amount
+        count(distinct case when nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then player_id end) as active_users, 0 as paid_users, 0::decimal as deposit_amount
         from tbl_wallet_transaction
         where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date 
         group by (created_at + (330 * '1m'::interval))::date::text
@@ -431,7 +432,7 @@ module.exports = {
                 group by (created_at + (330 * '1m'::interval))::date::text
                 union all
                 select (created_at + (330 * '1m'::interval))::date::text as trans_date, 0 as register_users, 0 as verified_users, 
-                count(distinct case when nz_txn_event != 'EXPIRED' then player_id end) as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                count(distinct case when nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then player_id end) as active_users, 0 as paid_users, 0::decimal as deposit_amount
                 from tbl_wallet_transaction
                 where (created_at + (330 * '1m'::interval))::date > ((now() + (330 * '1m'::interval))::date - interval '30 days')::date 
                 group by (created_at + (330 * '1m'::interval))::date::text
@@ -458,7 +459,7 @@ module.exports = {
                 group by date_trunc('week', created_at + (330 * '1m'::interval))::date::text
                 union all
                 select date_trunc('week',(created_at + (330 * '1m'::interval)))::date::text as trans_date, 0 as register_users, 0 as verified_users, 
-                count(distinct case when nz_txn_event != 'EXPIRED' then player_id end) as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                count(distinct case when nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then player_id end) as active_users, 0 as paid_users, 0::decimal as deposit_amount
                 from tbl_wallet_transaction
                 where (created_at + (330 * '1m'::interval))::date > '2019-01-01'
                 group by date_trunc('week',(created_at + (330 * '1m'::interval)))::date::text
@@ -485,7 +486,7 @@ module.exports = {
                 group by trans_date,og_date
                 union all
                 select date_trunc('month',(created_at + (330 * '1m'::interval))) as og_date ,to_char(date_trunc('month',(created_at + (330 * '1m'::interval)))::timestamptz, 'Month') as trans_date, 0 as register_users, 0 as verified_users, 
-                count(distinct case when nz_txn_event != 'EXPIRED' then player_id end) as active_users, 0 as paid_users, 0::decimal as deposit_amount
+                count(distinct case when nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then player_id end) as active_users, 0 as paid_users, 0::decimal as deposit_amount
                 from tbl_wallet_transaction
                 where (created_at + (330 * '1m'::interval))::date > '2019-01-01'
                 group by trans_date,og_date

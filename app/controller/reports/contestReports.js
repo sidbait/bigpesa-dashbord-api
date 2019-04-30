@@ -75,7 +75,7 @@ module.exports = {
 
                 let query = "select app.app_id, app_name, contest_name," +
                     " contest.start_date::date::text as start_date," +
-                    " from_time, to_time," +
+                    " split_part(contest.from_time::text, '.', 1) as from_time , split_part(contest.to_time::text, '.', 1) as to_time," +
                     " contest.debit_type, contest.credit_type,  entry_fee," +
                     " sum(distinct contest.win_amount) as prize_pool," +
                     " contest.max_players as contest_max_players," +
@@ -544,8 +544,8 @@ module.exports = {
                 let queryText = "select (created_at + 330::double precision * '00:01:00'::interval)::date::text as created_at," +
                     " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
-                    " count(distinct case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then player_id end) as debit_count," +
-                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) as DEBIT," +
+                    " count(distinct case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then player_id end) as debit_count," +
+                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) as DEBIT," +
                     " count(distinct case when nz_txn_type = 'CREDIT' then player_id end) as credit_count," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as CREDIT," +
                     " count(distinct case when nz_txn_type = 'WITHDRAW' then player_id end) as withdraw_count," +
@@ -668,7 +668,7 @@ module.exports = {
     },
     dashboardReport: async function (req, res) {
         let queryCashDetails = "select  " +
-            " coalesce( sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal else 0 end),0) as debit," +
+            " coalesce( sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal else 0 end),0) as debit," +
             " coalesce( sum(case when nz_txn_type = 'CREDIT' then amount::decimal else 0 end ),0) as credit, " +
             " coalesce( sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal else 0 end),0) as deposit, " +
             " coalesce( sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal else 0 end),0) as withdraw , " +
@@ -750,8 +750,9 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 queryText = "select (created_at + (330 * '1m'::interval))::date as created_at," +
-                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) as debit," +
+                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) as debit," +
                     " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'EXPIRED' then amount::decimal + cash_bonus end),0) as expired," +
+                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'RE-JOIN CONTEST' then amount::decimal + cash_bonus end),0) as re_join," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-REFUND' then amount::decimal end), 0) as contest_refund_amount," +
@@ -761,7 +762,7 @@ module.exports = {
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REGISTRATION' then cash_bonus end), 0) as registration," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REFERRER' then cash_bonus end), 0) as referrer," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DAILY-BONUS' then cash_bonus end),0) as daily_bonus," +
-                    " (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event != 'EXPIRED' then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event in('CONTEST-WIN','CONTEST-REFUND') then amount::decimal end), 0)) as pl" +
+                    " (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event in('CONTEST-WIN','CONTEST-REFUND') then amount::decimal end), 0)) as pl" +
                     " from tbl_wallet_transaction" +
                     " where nz_txn_status = 'SUCCESS'" +
                     " and (created_at + (330 * '1m'::interval))::date between $1 and $2" +
@@ -808,19 +809,22 @@ module.exports = {
                 let player_id = req.body.player_id
                 let phone_number = req.body.phone_number;
                 let full_name = req.body.full_name;
-                let range = req.body.range;
-                let query = `SELECT
-                wallet_transaction.created_at,
+                let type = req.body.type;
+                let query = ''
+
+                if (type == 'Deposit') {
+
+                    query = `SELECT
+                wallet_transaction.created_at::text,
                 wallet_transaction.player_id,
                 tbl_player.phone_number,
                 full_name,
                 SUM(deposit) as deposit,
-                SUM(withdraw) as withdraw,
                 SUM(cash_bonus) cash_bonus
             FROM
                 (
                 SELECT
-                    (created_at + (330 * '1m'::INTERVAL))::DATE AS created_at,
+                    (created_at + (330 * '1m'::INTERVAL))::date AS created_at,
                     player_id,
                     0 AS deposit,
                     0 AS withdraw,
@@ -832,7 +836,7 @@ module.exports = {
                     AND UPPER(nz_txn_event) = 'DEPOSITBONUS'
             UNION ALL
                 SELECT
-                    (created_at + (330 * '1m'::INTERVAL))::DATE AS created_at,
+                    (created_at + (330 * '1m'::INTERVAL))::date AS created_at,
                     player_id,
                     amount::DECIMAL AS deposit,
                     0 AS withdraw,
@@ -841,22 +845,25 @@ module.exports = {
                     tbl_wallet_transaction
                 WHERE
                     nz_txn_status = 'SUCCESS'
-                    AND nz_txn_type = 'DEPOSIT'
-            UNION ALL
-                SELECT
-                    (created_at + (330 * '1m'::INTERVAL))::DATE AS created_at,
-                    player_id,
-                    0 AS deposit,
-                    amount::DECIMAL AS withdraw,
-                    0 AS cash_bonus
-                FROM
-                    tbl_wallet_transaction
-                WHERE
-                    nz_txn_status = 'SUCCESS'
-                    AND nz_txn_type = 'WITHDRAW' ) wallet_transaction
+                    AND nz_txn_type = 'DEPOSIT' ) wallet_transaction
             INNER JOIN tbl_player ON
                 wallet_transaction.player_id = tbl_player.player_id
             WHERE 1 = 1`;
+                } else {
+                    query = `SELECT
+                    (wallet_transaction.created_at + (330 * '1m'::INTERVAL)) AS created_at,
+                    wallet_transaction.player_id,
+                    tbl_player.phone_number,
+                    full_name,
+                    amount::DECIMAL AS withdraw
+                FROM
+                    tbl_wallet_transaction wallet_transaction
+                    INNER JOIN tbl_player ON
+                wallet_transaction.player_id = tbl_player.player_id
+                WHERE
+                    nz_txn_status = 'SUCCESS'
+                    AND nz_txn_type = 'WITHDRAW'`;
+                }
                 if (player_id) {
                     query += ` and tbl_player.player_id = ${player_id}`;
                 }
@@ -866,28 +873,15 @@ module.exports = {
                 if (full_name) {
                     query += ` and tbl_player.full_name ilike '%${full_name}%'`;
                 }
-                if (range) {
-                    switch (range) {
-                        case "1":
-                            opt = '< 100';
-                            break;
-                        case "2":
-                            opt = 'between 100 and 499';
-                            break;
-                        case "3":
-                            opt = '>= 500';
-                            break;
-                        default:
-                            break;
-                    }
-                    query += ` and deposit ${opt}`;
-                }
-                query += ` and wallet_transaction.created_at between '${fromDate}' and '${toDate}'
-                    GROUP BY
+                query += ` and wallet_transaction.created_at::date between '${fromDate}' and '${toDate}'`;
+
+                if (type == 'Deposit') {
+                    query += ` GROUP BY
                         wallet_transaction.created_at,
                         wallet_transaction.player_id,
                         tbl_player.phone_number,
                         full_name`;
+                }
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
