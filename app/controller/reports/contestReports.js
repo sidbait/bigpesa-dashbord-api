@@ -95,7 +95,7 @@ module.exports = {
                     " left join rmg_db.public.tbl_contest_winner as winner on" +
                     " (winner.contest_id = contest.contest_id) and (winner.player_id = players.player_id)" +
                     " where contest.start_date::date between '" + startdate + "' and '" + enddate + "'" +
-                    " and players.transaction_date::date <= contest.start_date::date";
+                    " and players.transaction_date::date <= contest.end_date::date";
 
                 if (appid) {
                     query += " and app.app_id = " + appid;
@@ -542,13 +542,15 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 let queryText = "select (created_at + 330::double precision * '00:01:00'::interval)::date::text as created_at," +
-                    " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
+                    " count(case when nz_txn_type = 'DEPOSIT' then player_id end) as deposit_count," +
+                    " count(distinct case when nz_txn_type = 'DEPOSIT' then player_id end) as unique_deposit_count," +
                     " COALESCE(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),0) as DEPOSIT," +
                     " count(distinct case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then player_id end) as debit_count," +
                     " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) as DEBIT," +
                     " count(distinct case when nz_txn_type = 'CREDIT' then player_id end) as credit_count," +
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as CREDIT," +
-                    " count(distinct case when nz_txn_type = 'WITHDRAW' then player_id end) as withdraw_count," +
+                    " count(case when nz_txn_type = 'WITHDRAW' then player_id end) as withdraw_count," +
+                    " count(distinct case when nz_txn_type = 'WITHDRAW' then player_id end) as unique_withdraw_count," +
                     " COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW," +
                     " sum(amount::decimal) as total" +
                     " from tbl_wallet_transaction " +
