@@ -55,6 +55,38 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
+    getPendingPlayerList: async function (req, res) {
+
+        let app_id = req.body.app_id;
+
+        let _selectQuery = "select que_id,tbl_app.app_id, tbl_app.app_name,tbl_contest.contest_name, player.player_id, phone_number, event_type,amount" +
+            " from tbl_wallet_credit_que as que" +
+            " inner join tbl_contest " +
+            " on tbl_contest.contest_id = que.event_id::bigint" +
+            " inner join tbl_app" +
+            " on tbl_contest.app_id = tbl_app.app_id" +
+            " left join tbl_player as player on que.player_id = player.player_id" +
+            " where que.is_claim = 'false'";
+
+            if(app_id){
+                _selectQuery += " and tbl_app.app_id = " + app_id;
+            }
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+
+        
+    },
     refundPlayer: async function (req, res) {
 
         let rules = {
@@ -147,6 +179,41 @@ module.exports = {
                 } else if (_credit_type == "COIN") {
                     _updateQuery = `update tbl_bonus_credit_que set status = '${_status}', approved_by = '${_approved_by}' where que_id in (${_selectedContests.toString()}) returning que_id`
                 }
+
+                let _updated_id = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
+                console.log(_updateQuery);
+
+                services.sendResponse.sendWithCode(req, res, _updated_id, customMsgType, "UPDATE_SUCCESS");
+            }
+            catch (error) {
+                console.log(error);
+
+                services.sendResponse.sendWithCode(req, res, 'error', customMsgTypeCM, "DB_ERROR");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+    playerRejectApproved: async function (req, res) {
+
+        let rules = {
+            "selectedContests": 'required',
+            "approved_by": 'required',
+            "status": 'required'
+        }
+
+        let validation = new services.validator(req.body, rules);
+
+        if (validation.passes()) {
+
+            let _selectedContests = req.body.selectedContests ? req.body.selectedContests : null;
+            let _approved_by = req.body.approved_by ? req.body.approved_by : null;
+            let _status = req.body.status ? req.body.status : null;
+            let _updateQuery = "";
+
+            try {
+
+                _updateQuery = `update tbl_wallet_credit_que set status = '${_status}', approved_by = '${_approved_by}', is_claim = 'true' where que_id in (${_selectedContests.toString()}) returning que_id`
 
                 let _updated_id = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
                 console.log(_updateQuery);
