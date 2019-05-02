@@ -116,27 +116,31 @@ module.exports = {
 
     search: async function (req, res) {
         let _id = req.body.id ? req.body.id : null;
-        let _spintext = req.body.spintext ? req.body.spintext : null;
+        let _spin_text = req.body.spin_text ? req.body.spin_text : null;
         let _credittype = req.body.credittype ? req.body.credittype : null;
         let _status = req.body.status ? req.body.status : null;
         let _isvalid = req.body.isvalid ? req.body.isvalid : null;
+        let _channel = req.body.channel ? req.body.channel : null;
 
         let _selectQuery = 'SELECT * FROM tbl_dailybonus_spin_master WHERE  1=1'
 
         if (_id) {
             _selectQuery += " AND id = " + _id
         }
-        if (_spintext) {
-            _selectQuery += " AND spintext = " + _spintext
+        if (_spin_text) {
+            _selectQuery += " AND spin_text ilike '%" + _spin_text + "%'"
         }
         if (_credittype) {
-            _selectQuery += " AND credittype = " + _credittype
+            _selectQuery += " AND credittype = '" + _credittype + "'"
         }
         if (_status) {
-            _selectQuery += " AND status = " + _status
+            _selectQuery += " AND status = '" + _status + "'"
         }
         if (_isvalid) {
             _selectQuery += " AND isvalid = " + _isvalid
+        }
+        if (_channel) {
+            _selectQuery += " AND channel = '" + _channel + "'"
         }
 
         try {
@@ -185,7 +189,7 @@ async function uploadBanner(req, uploadFilepath) {
                     mv(fromPath, movePath, { mkdirp: true }, function (err) {
 
                         if (err) {
-                            
+
                             reject(err);
                         }
                         else
