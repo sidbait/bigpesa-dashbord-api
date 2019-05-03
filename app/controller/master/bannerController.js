@@ -137,6 +137,8 @@ module.exports = {
     search: async function (req, res) {
 
         let _banner_id = req.body.banner_id ? req.body.banner_id : null;
+        let _status = req.body.status ? req.body.status : null;
+        let _banner_type = req.body.banner_type ? req.body.banner_type : null;
 
         let _selectQuery = 'SELECT * FROM tbl_banner WHERE  1=1'
 
@@ -144,9 +146,13 @@ module.exports = {
             _selectQuery += " AND banner_id = " + _banner_id
         }
 
-        // if (_status) {
-        //     _selectQuery += " AND status = " + _status
-        // }
+        if (_status) {
+            _selectQuery += " AND status = '" + _status + "'"
+        }
+
+        if (_banner_type) {
+            _selectQuery += " AND banner_type = '" + _banner_type + "'"
+        }
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
