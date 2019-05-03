@@ -86,7 +86,8 @@ module.exports = {
                     " coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end),0) as win_cash," +
                     " (max_players * count(distinct contest.contest_id)) - (count(distinct players.player_id)) as players_required," +
                     " count(distinct players.player_id) * entry_fee as user_debit_amount," +
-                    " ((coalesce(count(distinct case when contest.debit_type = 'CASH' then players.player_id end), 0) * entry_fee) - (coalesce(sum(case when winner.credit_type = 'COIN' then 0 end), 0) + coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end), 0))) as profit" +
+                    // " ((coalesce(count(distinct case when contest.debit_type = 'CASH' then players.player_id end), 0) * entry_fee) - (coalesce(sum(case when winner.credit_type = 'COIN' then 0 end), 0) + coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end), 0))) as profit" +
+                    " (COALESCE( CASE WHEN count(winner.player_id) > 0 THEN ((COALESCE(COUNT(DISTINCT CASE WHEN contest.debit_type = 'CASH' THEN players.player_id END),0) * entry_fee) - (COALESCE(SUM(CASE WHEN winner.credit_type = 'CASH' THEN winner.win_amount END),0))) END,0)) AS profit" +
                     " from rmg_db.public.tbl_app as app" +
                     " inner join rmg_db.public.tbl_contest as contest on" +
                     " app.app_id = contest.app_id" +
