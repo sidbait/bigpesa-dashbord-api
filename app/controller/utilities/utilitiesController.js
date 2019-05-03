@@ -101,10 +101,20 @@ module.exports = {
         let _selectQuery = '';
 
         if (que_type == 'CASH_WALLET_QUEUE' && status == 'PROCESSING') {
+
+            chkTransTbl = await chkTransTbl(date);
+
+            console.log('chkTransTbl result:', chkTransTbl);
+
+
             _updateQuery = `update tbl_wallet_credit_que set status = 'ACTIVE' where status = '${status}' and is_credit = false and add_date::date = '${date}' returning que_id`;
+
         } else if (que_type == 'COIN_WALLET_QUEUE' && status == 'PROCESSING') {
+
             _updateQuery = `update tbl_bonus_credit_que set status = 'ACTIVE' where status = '${status}' and is_credit = false and add_date::date = '${date}' returning que_id`;
+
         } else {
+
             services.sendResponse.sendWithCode(req, res, 'status must be PROCESSING', customMsgType, "GET_FAILED");
         }
 
@@ -148,7 +158,7 @@ module.exports = {
 
         if (_run === false) {
             try {
-                let dbResult = await pgConnection.executeQuery('rmg_dev_db', sql_query,false,0,true)
+                let dbResult = await pgConnection.executeQuery('rmg_dev_db', sql_query, false, 0, true)
 
                 if (dbResult && dbResult.length > 0) {
                     services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
@@ -275,4 +285,36 @@ module.exports = {
         }
     }
 
+}
+
+async function chkTransTbl(date) {
+
+    return new Promise(async (resolve, reject) => {
+
+        let _query = `update tbl_wallet_credit_que
+        set is_credit = true , status = 'SUCCESS' , transaction_id = tbl_wallet_transaction.order_id
+        from tbl_wallet_transaction
+        where tbl_wallet_credit_que.event_id = tbl_wallet_transaction.nz_txn_event_id
+        and tbl_wallet_credit_que.player_id = tbl_wallet_transaction.player_id
+        and tbl_wallet_transaction.nz_txn_status = 'SUCCESS'
+        and tbl_wallet_transaction.nz_txn_type = 'CREDIT'
+        and tbl_wallet_credit_que.status = 'PROCESSING'
+        and tbl_wallet_credit_que.add_date::date = '${date}'
+        returning que_id`;
+
+        try {
+
+            let result = await pgConnection.executeQuery('rmg_dev_db', _query)
+
+            if (result.length > 0) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        }
+        catch (error) {
+            console.log(error);
+            reject(error);
+        }
+    });
 }

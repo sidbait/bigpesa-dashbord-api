@@ -44,6 +44,10 @@ module.exports = {
             // "channel": 'required',
         };
 
+        let obj = req.body
+        // deleting null value from req.body
+        Object.keys(obj).forEach(k => (obj[k] === 'null') && delete obj[k]);
+
         let validation = new services.validator(req.body, rules);
 
         if (validation.passes()) {
@@ -51,7 +55,7 @@ module.exports = {
             let _banner_id = req.body.banner_id ? req.body.banner_id : null;
             let _banner_name = req.body.banner_name ? req.body.banner_name : null;
             let _description = req.body.description ? req.body.description : null;
-            let _image_url = req.body.image_url ? req.body.image_url : null;
+            // let _image_url = req.body.image_url ? req.body.image_url : null;
             let _banner_type = req.body.banner_type ? req.body.banner_type : null;
             let _app_id = req.body.app_id ? req.body.app_id : null;
             let _contest_id = req.body.contest_id ? req.body.contest_id : null;
@@ -73,18 +77,18 @@ module.exports = {
             if (!_banner_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_banner(banner_name,description,image_url,banner_type,app_id,contest_id,click_url,width,height,banner_priority,status,created_date,page,channel) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *",
+                    text: "INSERT INTO tbl_banner(banner_name,description,banner_type,app_id,contest_id,click_url,width,height,banner_priority,status,created_date,page,channel) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *",
                     values: [
-                        _banner_name, _description, _image_url, _banner_type, _app_id, _contest_id, _click_url, _width, _height, _banner_priority, _status, _created_date, _page, _channel
+                        _banner_name, _description, _banner_type, _app_id, _contest_id, _click_url, _width, _height, _banner_priority, _status, _created_date, _page, _channel
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_banner SET banner_id=$1,banner_name=$2,description=$3,image_url=$4,banner_type=$5,app_id=$6,contest_id=$7,click_url=$8,width=$9,height=$10,banner_priority=$11,status=$12,created_date=$13,page=$14,channel=$15 WHERE banner_id=$16 RETURNING *",
+                    text: "UPDATE tbl_banner SET banner_id=$1,banner_name=$2,description=$3,banner_type=$4,app_id=$5,contest_id=$6,click_url=$7,width=$8,height=$9,banner_priority=$10,status=$11,created_date=$12,page=$13,channel=$14 WHERE banner_id=$15 RETURNING *",
                     values: [
-                        _banner_id, _banner_name, _description, _image_url, _banner_type, _app_id, _contest_id, _click_url, _width, _height, _banner_priority, _status, _created_date, _page, _channel, _banner_id
+                        _banner_id, _banner_name, _description, _banner_type, _app_id, _contest_id, _click_url, _width, _height, _banner_priority, _status, _created_date, _page, _channel, _banner_id
                     ]
                 }
 
@@ -96,6 +100,23 @@ module.exports = {
 
 
                 if (result.length > 0) {
+
+                    if (req.files != null && req.files.length > 0) {
+                        // let movePath = await uploadBanner(req, result[0].contest_master_id);
+                        let s3Path = await services.s3.upload(req, 'banners');
+                        let mvQuery = {
+                            text: "UPDATE tbl_banner set image_url = $1 WHERE banner_id= $2 RETURNING image_url",
+                            values: [
+                                s3Path,
+                                result[0].banner_id
+                            ]
+                        }
+
+                        let mvResult = await pgConnection.executeQuery('rmg_dev_db', mvQuery)
+
+                        console.log(mvResult);
+                    }
+
                     services.sendResponse.sendWithCode(req, res, result[0], customMsgType, successMsgType);
                 } else {
                     services.sendResponse.sendWithCode(req, res, error, customMsgType, errMsgType);
