@@ -48,5 +48,6 @@ contestRoutes.post('/getAllContest', contestController.getAllContest);
 contestRoutes.post('/setAllContestOrder', contestController.setAllContestOrder);
 
 contestRoutes.post('/getMatrixCode', contestController.getMatrixCode);
+contestRoutes.post('/removeRank', contestController.removeRank);
 
 module.exports = contestRoutes;

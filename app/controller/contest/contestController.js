@@ -30,10 +30,38 @@ module.exports = {
         // console.log(req.body);
 
         let contest_id = req.body.contest_id ? req.body.contest_id : null;
+        let contest_rank_id = req.body.contest_rank_id ? req.body.contest_rank_id : null;
 
-        let _selectQuery = `select * from tbl_contest_rank where contest_id = ${contest_id} order by lower_rank`
+        let _selectQuery;
+
+        if (contest_id) {
+            _selectQuery = `select * from tbl_contest_rank where contest_id = ${contest_id} and status = 'ACTIVE' order by lower_rank`;
+        } else if (contest_rank_id) {
+            _selectQuery = `select * from tbl_contest_rank where contest_rank_id = ${contest_rank_id}`;
+        }
+
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    removeRank: async function (req, res) {
+
+        let contest_rank_id = req.body.contest_rank_id ? req.body.contest_rank_id : null;
+
+        _updateQuery = `update tbl_contest_rank set status = 'REMOVE' where contest_rank_id = ${contest_rank_id} returning contest_rank_id`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
 
             if (dbResult && dbResult.length > 0) {
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
