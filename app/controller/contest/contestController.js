@@ -1033,7 +1033,7 @@ async function getUpdateQueriesContestOrder(allContestOrder) {
             const x = allContestOrder[i].split("-");
             const priority = i + 1;
 
-            let _query = `update tbl_contest set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and status = 'ACTIVE' and contest_priority != 0`;
+            let _query = `update tbl_contest set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and status = 'ACTIVE' and COALESCE(contest_priority,1) != 0`;
 
             updateQuerie.push(_query)
         }
