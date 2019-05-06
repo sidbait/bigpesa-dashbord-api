@@ -92,6 +92,7 @@ module.exports = {
             let _filename = req.body.filename ? req.body.filename : null;
             let _send_params = req.body.send_params ? req.body.send_params : null;
             let _islive = req.body.islive ? req.body.islive : null;
+            let _top_text = req.body.top_text ? req.body.top_text : null;
 
             let _query;
             let errMsgType = _app_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
@@ -100,18 +101,18 @@ module.exports = {
             if (!_app_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_app(app_name,app_secret,app_code,privacy_policy,term_condition,app_icon,status,created_by,created_at,callback_url,ios_app_url,android_app_url,deep_link,web_url,app_priority,app_type,package_name,filename,send_params,islive) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now(),$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *",
+                    text: "INSERT INTO tbl_app(app_name,app_secret,app_code,privacy_policy,term_condition,app_icon,status,created_by,created_at,callback_url,ios_app_url,android_app_url,deep_link,web_url,app_priority,app_type,package_name,filename,send_params,islive,top_text) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now(),$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) RETURNING *",
                     values: [
-                        _app_name, _app_secret, _app_code, _privacy_policy, _term_condition, _app_icon, _status, _created_by, _callback_url, _ios_app_url, _android_app_url, _deep_link, _web_url, _app_priority, _app_type, _package_name, _filename, _send_params, _islive
+                        _app_name, _app_secret, _app_code, _privacy_policy, _term_condition, _app_icon, _status, _created_by, _callback_url, _ios_app_url, _android_app_url, _deep_link, _web_url, _app_priority, _app_type, _package_name, _filename, _send_params, _islive, _top_text
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_app SET app_name=$1,app_secret=$2,app_code=$3,privacy_policy=$4,term_condition=$5,app_icon=$6,status=$7,updated_by=$8,updated_at=now(),callback_url=$9,ios_app_url=$10,android_app_url=$11,deep_link=$12,web_url=$13,app_priority=$14,app_type=$15,package_name=$16,filename=$17,send_params=$18,islive=$19 WHERE app_id=$20 RETURNING *",
+                    text: "UPDATE tbl_app SET app_name=$1,app_secret=$2,app_code=$3,privacy_policy=$4,term_condition=$5,app_icon=$6,status=$7,updated_by=$8,updated_at=now(),callback_url=$9,ios_app_url=$10,android_app_url=$11,deep_link=$12,web_url=$13,app_priority=$14,app_type=$15,package_name=$16,filename=$17,send_params=$18,islive=$19,top_text=$21 WHERE app_id=$20 RETURNING *",
                     values: [
-                        _app_name, _app_secret, _app_code, _privacy_policy, _term_condition, _app_icon, _status, _updated_by, _callback_url, _ios_app_url, _android_app_url, _deep_link, _web_url, _app_priority, _app_type, _package_name, _filename, _send_params, _islive, _app_id
+                        _app_name, _app_secret, _app_code, _privacy_policy, _term_condition, _app_icon, _status, _updated_by, _callback_url, _ios_app_url, _android_app_url, _deep_link, _web_url, _app_priority, _app_type, _package_name, _filename, _send_params, _islive, _app_id, _top_text
                     ]
                 }
 
@@ -126,11 +127,11 @@ module.exports = {
                 if (result.length > 0) {
                     if (req.files != null && req.files.length > 0) {
                         // let movePath = await uploadAppIcon(req, result[0].app_id);
-                        
+
                         let s3Path = await services.s3.upload(req, 'app_icon');
 
                         let mvQuery = {
-                            text: "UPDATE tbl_app set app_icon = $1 WHERE app_id= $2 RETURNING app_icon",
+                            text: "UPDATE tbl_app set app_icon_url = $1 WHERE app_id= $2 RETURNING app_icon_url",
                             values: [
                                 s3Path,
                                 result[0].app_id
