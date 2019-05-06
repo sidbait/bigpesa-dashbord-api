@@ -70,6 +70,14 @@ module.exports = {
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
 
+            let _start_date = req.body.start_date ? req.body.start_date : null;
+            let _end_date = req.body.end_date ? req.body.end_date : null;
+            let _from_time = req.body.from_time ? req.body.from_time : null;
+            let _to_time = req.body.to_time ? req.body.to_time : null;
+
+            let _new_start_date = joinDateTime(_start_date, _from_time);
+            let _new_end_date = joinDateTime(_end_date, _to_time);
+
             let _query;
             let errMsgType = _banner_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
             let successMsgType = _banner_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
@@ -77,18 +85,18 @@ module.exports = {
             if (!_banner_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_banner(banner_name,description,banner_type,app_id,contest_id,click_url,width,height,banner_priority,status,created_date,page,channel) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *",
+                    text: "INSERT INTO tbl_banner(banner_name,description,banner_type,app_id,contest_id,click_url,width,height,banner_priority,status,created_date,page,channel,start_date,end_date) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *",
                     values: [
-                        _banner_name, _description, _banner_type, _app_id, _contest_id, _click_url, _width, _height, _banner_priority, _status, _created_date, _page, _channel
+                        _banner_name, _description, _banner_type, _app_id, _contest_id, _click_url, _width, _height, _banner_priority, _status, _created_date, _page, _channel, _new_start_date, _new_end_date
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_banner SET banner_id=$1,banner_name=$2,description=$3,banner_type=$4,app_id=$5,contest_id=$6,click_url=$7,width=$8,height=$9,banner_priority=$10,status=$11,created_date=$12,page=$13,channel=$14 WHERE banner_id=$15 RETURNING *",
+                    text: "UPDATE tbl_banner SET banner_id=$1,banner_name=$2,description=$3,banner_type=$4,app_id=$5,contest_id=$6,click_url=$7,width=$8,height=$9,banner_priority=$10,status=$11,created_date=$12,page=$13,channel=$14, start_date=$16,end_date=$17 WHERE banner_id=$15 RETURNING *",
                     values: [
-                        _banner_id, _banner_name, _description, _banner_type, _app_id, _contest_id, _click_url, _width, _height, _banner_priority, _status, _created_date, _page, _channel, _banner_id
+                        _banner_id, _banner_name, _description, _banner_type, _app_id, _contest_id, _click_url, _width, _height, _banner_priority, _status, _created_date, _page, _channel, _banner_id, _new_start_date, _new_end_date
                     ]
                 }
 
@@ -169,4 +177,9 @@ module.exports = {
 
     }
 
+}
+
+function joinDateTime(date, time) {
+    let new_date = date + 'T' + time + 'Z';
+    return new_date
 }
