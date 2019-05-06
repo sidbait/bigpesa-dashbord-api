@@ -503,8 +503,9 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 let channel = req.body.channel;
-                let queryText = "select * from tbl_daily_channel_summary" +
-                    " where channel = $1 and report_date between $2 and $3" +
+                let queryText = "select report_date, upper(channel) channel ,sum(total_register) total_register ,sum(total_verified) total_verified, sum(total_visits) total_visits,sum(unique_visits) unique_visits,sum(unique_percentage) unique_percentage, sum(active_users) active_users,sum(unique_contest_joined) unique_contest_joined,sum(total_contest_joined) total_contest_joined, sum(cash_contest_joined) cash_contest_joined,sum(cash_used) cash_used, sum(cash_contest_played) cash_contest_played, sum(coin_contest_joined) coin_contest_joined, sum(coin_used) coin_used, sum(coin_contest_played) coin_contest_played,sum(free_contest_joined) free_contest_joined, sum(free_contest_played) free_contest_played,sum(win_coin_amount) win_coin_amount,sum(win_cash_amount) win_cash_amount, sum(total_deposit) total_deposit,sum(total_deposit_amount) total_deposit_amount, sum(total_withdrawl) total_withdrawl,sum(total_withdrawl_amount) total_withdrawl_amount from tbl_daily_channel_summary" +
+                    " where upper(channel) = upper($1) and report_date between $2 and $3" +
+                    " group by report_date, upper(channel)" +
                     " ORDER BY report_date asc";
                 valuesArr = [channel, fromDate, toDate]
 
