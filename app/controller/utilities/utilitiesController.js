@@ -98,14 +98,15 @@ module.exports = {
         let date = req.body.date;
         let status = req.body.status;
         let que_type = req.body.que_type ? req.body.que_type : '';
-        let _selectQuery = '';
 
         if (que_type == 'CASH_WALLET_QUEUE' && status == 'PROCESSING') {
 
-            chkTransTbl = await chkTransTbl(date);
-
-            console.log('chkTransTbl result:', chkTransTbl);
-
+            try {
+                let chkTransTblResult = await chkTransTbl(date);
+                console.log('chkTransTbl result:', chkTransTblResult);
+            } catch (error) {
+                console.log(error);
+            }
 
             _updateQuery = `update tbl_wallet_credit_que set status = 'ACTIVE' where status = '${status}' and is_credit = false and add_date::date = '${date}' returning que_id`;
 
@@ -120,6 +121,7 @@ module.exports = {
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
+            console.log(dbResult);
 
             if (dbResult && dbResult.length > 0) {
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
