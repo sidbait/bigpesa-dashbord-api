@@ -122,13 +122,40 @@ module.exports = {
     },
 
     getRank: async function (req, res) {
-        // console.log(req.body);
 
         let contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+        let contest_rank_master_id = req.body.contest_rank_master_id ? req.body.contest_rank_master_id : null;
 
-        let _selectQuery = `select * from tbl_contest_rank_master where contest_master_id = ${contest_master_id} order by lower_rank`
+        let _selectQuery;
+
+        if (contest_master_id) {
+            _selectQuery = `select * from tbl_contest_rank_master where contest_master_id = ${contest_master_id} and status = 'ACTIVE' order by lower_rank`;
+        } else if (contest_rank_master_id) {
+            _selectQuery = `select * from tbl_contest_rank_master where contest_rank_master_id = ${contest_rank_master_id}`;
+        }
+
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    removeRank: async function (req, res) {
+
+        let contest_rank_master_id = req.body.contest_rank_master_id ? req.body.contest_rank_master_id : null;
+
+        _updateQuery = `update tbl_contest_rank_master set status = 'REMOVE' where contest_rank_master_id = ${contest_rank_master_id} returning contest_rank_master_id`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
 
             if (dbResult && dbResult.length > 0) {
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
