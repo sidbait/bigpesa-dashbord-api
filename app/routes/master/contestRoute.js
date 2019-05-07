@@ -34,5 +34,6 @@ contestRoutes.get('/contest/getentryfee', contestController.getEntryFee);
 
 contestRoutes.post('/contest/getAllContest', contestController.getAllContest);
 contestRoutes.post('/contest/setAllContestOrder', contestController.setAllContestOrder);
+contestRoutes.post('/contest/removeRank', contestController.removeRank);
 
 module.exports = contestRoutes;
