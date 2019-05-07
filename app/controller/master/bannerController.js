@@ -147,6 +147,7 @@ module.exports = {
         let _banner_id = req.body.banner_id ? req.body.banner_id : null;
         let _status = req.body.status ? req.body.status : null;
         let _banner_type = req.body.banner_type ? req.body.banner_type : null;
+        let _orderBy = req.body.orderBy ? req.body.orderBy : 'banner_name';
 
         let _selectQuery = 'SELECT * FROM tbl_banner WHERE  1=1'
 
@@ -162,6 +163,8 @@ module.exports = {
             _selectQuery += " AND banner_type = '" + _banner_type + "'"
         }
 
+        _selectQuery += " order by " + _orderBy;
+
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
@@ -175,11 +178,47 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
 
-    }
+    },
+
+    chgBannersOrder: async function (req, res) {
+        // console.log(req.body);
+
+        let bannersOrder = req.body.bannersOrder ? req.body.bannersOrder : null;
+
+        let updateQueries = await getUpdateQuerie(bannersOrder);
+
+        console.log(updateQueries);
+
+        Promise.all(updateQueries.map(async (query) => {
+            return await pgConnection.executeQuery('rmg_dev_db', query);
+        })).then((inresults) => {
+            // console.log(inresults);
+            res.send({ "ok": inresults })
+        })
+        // res.send({ "ok": 'inresults' })
+    },
 
 }
 
 function joinDateTime(date, time) {
     let new_date = date + 'T' + time + 'Z';
     return new_date
+}
+
+async function getUpdateQuerie(bannersOrder) {
+
+    return new Promise((resolve, reject) => {
+        let updateQuerie = []
+
+        for (let i = 0; i < bannersOrder.length; i++) {
+            const id = bannersOrder[i]
+            const priority = i + 1;
+
+            let _query = `update tbl_banner set banner_priority = ${priority} where banner_id = ${id} RETURNING banner_name,banner_priority`;
+
+            updateQuerie.push(_query)
+        }
+
+        resolve(updateQuerie)
+    });
 }
