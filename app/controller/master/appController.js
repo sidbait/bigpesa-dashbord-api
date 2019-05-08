@@ -354,16 +354,34 @@ module.exports = {
 
         let appOrder = req.body.appOrder ? req.body.appOrder : null;
 
-        let updateQueries = await getUpdateQuerie(appOrder);
+        let appsWithPriority = req.body.appsWithPriority ? req.body.appsWithPriority : null;
 
-        // console.log(updateQueries);
+        if (appOrder) {
 
-        Promise.all(updateQueries.map(async (query) => {
-            return await pgConnection.executeQuery('rmg_dev_db', query);
-        })).then((inresults) => {
-            // console.log(inresults);
-            res.send({ "ok": inresults })
-        })
+            let updateQueries = await getUpdateQuerie(appOrder);
+
+            // console.log(updateQueries);
+
+            Promise.all(updateQueries.map(async (query) => {
+                return await pgConnection.executeQuery('rmg_dev_db', query);
+            })).then((inresults) => {
+                // console.log(inresults);
+                res.send({ "ok": inresults })
+            })
+
+        } else if (appsWithPriority) {
+            // console.log(appsWithPriority)
+            let updateQueries = await getAppsWithPriority(appsWithPriority);
+            console.log(updateQueries);
+            
+            Promise.all(updateQueries.map(async (query) => {
+                return await pgConnection.executeQuery('rmg_dev_db', query);
+            })).then((inresults) => {
+                // console.log(inresults);
+                res.send({ "ok": inresults })
+            })
+        }
+
 
     },
 
@@ -428,6 +446,23 @@ async function getUpdateQuerie(appOrder) {
             x[1] = x[1] ? x[1] : false;
 
             let _query = `update tbl_app set app_priority = ${priority},fixed_priority = ${x[1]} where app_id =${x[0]} RETURNING app_name,app_priority`;
+
+            updateQuerie.push(_query)
+        }
+
+        resolve(updateQuerie)
+    });
+}
+
+
+async function getAppsWithPriority(appsWithPriority) {
+
+    return new Promise((resolve, reject) => {
+        let updateQuerie = []
+
+        for (const x of appsWithPriority) {
+            // console.log(x.app_id,x.app_priority,x.fixed_priority);
+            let _query = `update tbl_app set app_priority = ${x.app_priority},fixed_priority = ${x.fixed_priority} where app_id = ${x.app_id} RETURNING app_name,app_priority`;
 
             updateQuerie.push(_query)
         }
