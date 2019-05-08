@@ -77,7 +77,7 @@ module.exports = {
             let _app_code = req.body.app_code ? req.body.app_code : null;
             let _privacy_policy = req.body.privacy_policy ? req.body.privacy_policy : null;
             let _term_condition = req.body.term_condition ? req.body.term_condition : null;
-            let _app_icon = req.body.app_icon ? req.body.app_icon : null;
+            // let _app_icon = req.body.app_icon ? req.body.app_icon : null;
             let _status = req.body.status ? req.body.status : null;
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
@@ -101,18 +101,18 @@ module.exports = {
             if (!_app_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_app(app_name,app_secret,app_code,privacy_policy,term_condition,app_icon,status,created_by,created_at,callback_url,ios_app_url,android_app_url,deep_link,web_url,app_priority,app_type,package_name,filename,send_params,islive,top_text) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now(),$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) RETURNING *",
+                    text: "INSERT INTO tbl_app(app_name,app_secret,app_code,privacy_policy,term_condition,status,created_by,created_at,callback_url,ios_app_url,android_app_url,deep_link,web_url,app_priority,app_type,package_name,filename,send_params,islive,top_text) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now(),$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING *",
                     values: [
-                        _app_name, _app_secret, _app_code, _privacy_policy, _term_condition, _app_icon, _status, _created_by, _callback_url, _ios_app_url, _android_app_url, _deep_link, _web_url, _app_priority, _app_type, _package_name, _filename, _send_params, _islive, _top_text
+                        _app_name, _app_secret, _app_code, _privacy_policy, _term_condition, _status, _created_by, _callback_url, _ios_app_url, _android_app_url, _deep_link, _web_url, _app_priority, _app_type, _package_name, _filename, _send_params, _islive, _top_text
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_app SET app_name=$1,app_secret=$2,app_code=$3,privacy_policy=$4,term_condition=$5,app_icon=$6,status=$7,updated_by=$8,updated_at=now(),callback_url=$9,ios_app_url=$10,android_app_url=$11,deep_link=$12,web_url=$13,app_priority=$14,app_type=$15,package_name=$16,filename=$17,send_params=$18,islive=$19,top_text=$21 WHERE app_id=$20 RETURNING *",
+                    text: "UPDATE tbl_app SET app_name=$1,app_secret=$2,app_code=$3,privacy_policy=$4,term_condition=$5, top_text=$6, status=$7,updated_by=$8,updated_at=now(),callback_url=$9,ios_app_url=$10,android_app_url=$11,deep_link=$12,web_url=$13,app_priority=$14,app_type=$15,package_name=$16,filename=$17,send_params=$18,islive=$19 WHERE app_id=$20 RETURNING *",
                     values: [
-                        _app_name, _app_secret, _app_code, _privacy_policy, _term_condition, _app_icon, _status, _updated_by, _callback_url, _ios_app_url, _android_app_url, _deep_link, _web_url, _app_priority, _app_type, _package_name, _filename, _send_params, _islive, _app_id, _top_text
+                        _app_name, _app_secret, _app_code, _privacy_policy, _term_condition, _top_text, _status, _updated_by, _callback_url, _ios_app_url, _android_app_url, _deep_link, _web_url, _app_priority, _app_type, _package_name, _filename, _send_params, _islive, _app_id
                     ]
                 }
 
@@ -373,7 +373,7 @@ module.exports = {
             // console.log(appsWithPriority)
             let updateQueries = await getAppsWithPriority(appsWithPriority);
             console.log(updateQueries);
-            
+
             Promise.all(updateQueries.map(async (query) => {
                 return await pgConnection.executeQuery('rmg_dev_db', query);
             })).then((inresults) => {
