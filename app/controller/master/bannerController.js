@@ -85,7 +85,7 @@ module.exports = {
             if (!_banner_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_banner(banner_name,description,banner_type,app_id,contest_id,click_url,width,height,banner_priority,status,created_date,page,channel,start_date,end_date) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *",
+                    text: "INSERT INTO tbl_banner(banner_name,description,banner_type,app_id,contest_id,click_url,width,height,banner_priority,status,created_date,page,channel,start_date,end_date) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *",
                     values: [
                         _banner_name, _description, _banner_type, _app_id, _contest_id, _click_url, _width, _height, _banner_priority, _status, _created_date, _page, _channel, _new_start_date, _new_end_date
                     ]
