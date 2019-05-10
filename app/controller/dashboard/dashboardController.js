@@ -8,31 +8,148 @@ module.exports = {
 
     cashSummary: async function (req, res) {
         let days = req.body.days ? req.body.days : 6;
-        let _selectQuery = `select
-        (created_at + (330 * '1m'::interval))::date as report_date,
-        coalesce(sum(case when nz_txn_type = 'DEPOSIT' then amount::decimal end),
-        0) as DEPOSIT,
-        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) as debit,
-        coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'RE-JOIN CONTEST' then amount::decimal + cash_bonus end),0) as re_join,
-        coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit,
-        coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount,
-        coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-REFUND' then amount::decimal end), 0) as contest_refund_amount,
-        coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then cash_bonus end), 0) as reward_win_amount,
-        coalesce(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),
-        0) as WITHDRAW,
-        coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DEPOSITBONUS' then cash_bonus end), 0) as depositbonus,
-        coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DAILY-BONUS' then cash_bonus end),0) as daily_bonus,
-        (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event in('CONTEST-WIN','CONTEST-REFUND') then amount::decimal end), 0)) as pl,
-        sum(amount::decimal) as total
-    from
-        tbl_wallet_transaction
-    where
-        nz_txn_status = 'SUCCESS'
-        and (created_at + (330 * '1m'::interval))::date > (now() + (330 * '1m'::interval))::date - interval '${days} days'
-    group by
-        (created_at + (330 * '1m'::interval))::date
-    order by
-        1`;
+        let _selectQuery = `SELECT
+        wallet_transaction.report_date::DATE,
+        SUM(DEPOSIT) DEPOSIT,
+        SUM(debit) debit,
+        (SUM(winning_balance) + SUM(deposit_balance)) actual_debit,
+        SUM(re_join) re_join,
+        SUM(credit) credit,
+        SUM(cash_win_amount) cash_win_amount,
+        SUM(contest_refund_amount) contest_refund_amount,
+        SUM(WITHDRAW) WITHDRAW,
+        SUM(depositbonus) depositbonus,
+        SUM(daily_bonus) daily_bonus,
+        SUM(total) total,
+        ((SUM(winning_balance) + SUM(deposit_balance)) - (SUM(cash_win_amount) + SUM(contest_refund_amount)))::DECIMAL AS pl,
+        SUM(winning_balance) winning_debit,
+        SUM(reward_balance) reward_debit,
+        SUM(deposit_balance) deposit_debit,
+        sum(mega_entry_fee) mega_entry_fee,
+        sum(mega_winning) mega_winning,
+        sum(cash_entry_fee) cash_entry_fee,
+        sum(cash_winning) cash_winning,
+        (sum(mega_winning) + sum(cash_winning)) winning
+    FROM
+        (
+        SELECT
+            (created_at + (330 * '1m'::INTERVAL))::DATE AS report_date,
+            COALESCE(SUM(CASE WHEN nz_txn_type = 'DEPOSIT' THEN amount::DECIMAL END),
+            0) AS DEPOSIT,
+            COALESCE(SUM(CASE WHEN nz_txn_type = 'DEBIT' AND nz_txn_event IN('JOIN CONTEST', 'RE-JOIN CONTEST') THEN amount::DECIMAL + cash_bonus END),
+            0) AS debit,
+            COALESCE(SUM(CASE WHEN nz_txn_type = 'DEBIT' AND nz_txn_event = 'RE-JOIN CONTEST' THEN amount::DECIMAL + cash_bonus END),
+            0) AS re_join,
+            COALESCE(SUM(CASE WHEN nz_txn_type = 'CREDIT' THEN amount::DECIMAL + cash_bonus END),
+            0) AS credit,
+            COALESCE(SUM(CASE WHEN nz_txn_type = 'CREDIT' AND nz_txn_event = 'CONTEST-WIN' THEN amount::DECIMAL END),
+            0) AS cash_win_amount,
+            COALESCE(SUM(CASE WHEN nz_txn_type = 'CREDIT' AND nz_txn_event = 'CONTEST-REFUND' THEN amount::DECIMAL END),
+            0) AS contest_refund_amount,
+            COALESCE(SUM(CASE WHEN nz_txn_type = 'WITHDRAW' THEN amount::DECIMAL END),
+            0) AS WITHDRAW,
+            COALESCE(SUM(CASE WHEN nz_txn_type = 'CREDIT' AND UPPER(nz_txn_event) = 'DEPOSITBONUS' THEN cash_bonus END),
+            0) AS depositbonus,
+            COALESCE(SUM(CASE WHEN nz_txn_type = 'CREDIT' AND UPPER(nz_txn_event) = 'DAILY-BONUS' THEN cash_bonus END),
+            0) AS daily_bonus,
+            SUM(amount::DECIMAL) AS total,
+            0 AS winning_balance,
+            0 AS reward_balance,
+            0 AS deposit_balance,
+            0 AS mega_entry_fee,
+            0 AS mega_winning,
+            0 AS cash_entry_fee,
+            0 AS cash_winning
+        FROM
+            tbl_wallet_transaction
+        WHERE
+            nz_txn_status = 'SUCCESS'
+        GROUP BY
+            report_date
+    UNION ALL
+        SELECT
+            (created_at + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE AS report_date,
+            0 AS DEPOSIT,
+            0 AS debit,
+            0 AS re_join,
+            0 AS credit,
+            0 AS cash_win_amount,
+            0 AS contest_refund_amount,
+            0 AS WITHDRAW,
+            0 AS depositbonus,
+            0 AS daily_bonus,
+            0 AS total,
+            SUM(moved_wb::DECIMAL) AS winning_balance,
+            SUM(moved_rb::DECIMAL) AS reward_balance,
+            SUM(moved_db::DECIMAL) AS deposit_balance,
+            0 AS mega_entry_fee,
+            0 AS mega_winning,
+            0 AS cash_entry_fee,
+            0 AS cash_winning
+        FROM
+            tbl_wallet_balance_log
+        WHERE
+            txn_type = 'DEBIT'
+        GROUP BY
+            report_date
+    UNION ALL
+        SELECT
+            contest_summary.end_date AS report_date,
+            0 AS DEPOSIT,
+            0 AS debit,
+            0 AS re_join,
+            0 AS credit,
+            0 AS cash_win_amount,
+            0 AS contest_refund_amount,
+            0 AS WITHDRAW,
+            0 AS depositbonus,
+            0 AS daily_bonus,
+            0 AS total,
+            0 AS winning_balance,
+            0 AS reward_balance,
+            0 AS deposit_balance,
+            SUM(CASE WHEN contest_name iLIKE 'MEGA%' THEN user_amount END) AS mega_entry_fee,
+            SUM(CASE WHEN contest_name iLIKE 'MEGA%' THEN win_cash END) AS mega_winning,
+            SUM(CASE WHEN contest_name NOT iLIKE 'MEGA%' AND win_cash > 0 THEN user_amount END) AS cash_entry_fee,
+            SUM(CASE WHEN contest_name NOT iLIKE 'MEGA%' THEN win_cash END) AS cash_winning
+        FROM
+            (
+                SELECT app.app_id,
+                app_name,
+                contest.contest_id,
+                contest_name,
+                contest.start_date::DATE AS start_date,
+                contest.end_date::DATE AS end_date,
+                COALESCE(SUM(CASE WHEN winner.credit_type = 'CASH' THEN winner.win_amount END),
+                0) AS win_cash,
+                COUNT(players.player_id) * entry_fee AS user_amount
+            FROM
+                rmg_db.public.tbl_app AS app
+            INNER JOIN rmg_db.public.tbl_contest AS contest ON
+                app.app_id = contest.app_id
+            INNER JOIN rmg_db.public.tbl_contest_players AS players ON
+                contest.contest_id = players.contest_id
+            LEFT JOIN rmg_db.public.tbl_contest_winner AS winner ON
+                (winner.contest_id = contest.contest_id)
+                AND (winner.player_id = players.player_id)
+            WHERE
+                players.transaction_date::DATE <= contest.end_date::DATE
+            GROUP BY
+                app.app_id,
+                contest.contest_id,
+                app_name,
+                contest_name,
+                entry_fee,
+                start_date,
+                end_date) contest_summary
+        GROUP BY
+            report_date ) wallet_transaction
+    WHERE
+        wallet_transaction.report_date::DATE > (now() + (330 * '1m'::INTERVAL))::DATE - INTERVAL '${days} days'
+    GROUP BY
+        wallet_transaction.report_date::DATE
+    ORDER BY
+        wallet_transaction.report_date::DATE desc`;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
@@ -106,58 +223,56 @@ module.exports = {
 
     registeredVerifiedNotPlayedDayWise: async function (req, res) {
         let days = req.body.days ? req.body.days : 7;
-        let _selectQuery = `select
+        let _selectQuery = `SELECT
         report_date,
-        sum(total_registered) as total_registered,
-        sum(total_otp_verified) as total_otp_verified,
-        sum(verified_but_not_played) as verified_but_not_played
-    from
+        SUM(total_registered) AS total_registered,
+        SUM(playstore_register) AS playstore_register,
+        SUM(pro_register) AS pro_register,
+        SUM(total_otp_verified) AS total_otp_verified,
+        SUM(playstore_verified) AS playstore_verified,
+        SUM(pro_verified) AS pro_verified,
+        SUM(verified_but_not_played) AS verified_but_not_played
+    FROM
         (
-        select
-            (created_at + (330 * '1m'::interval))::date as report_date,
-            count(distinct player_id) as total_registered,
-            count(distinct case when phone_number_verified = true then player_id end) as total_otp_verified ,
-            0 as verified_but_not_played
-        from
+        SELECT
+            (created_at + (330 * '1m'::INTERVAL))::DATE AS report_date,
+            COUNT(DISTINCT player_id) AS total_registered,
+            COUNT( CASE WHEN UPPER(channel) IN('PLAYSTORE') THEN player_id END) AS playstore_register,
+            COUNT( CASE WHEN UPPER(channel) NOT IN('PLAYSTORE') THEN player_id END) AS pro_register,
+            COUNT(DISTINCT CASE WHEN phone_number_verified = TRUE THEN player_id END) AS total_otp_verified ,
+            COUNT( CASE WHEN UPPER(channel) IN('PLAYSTORE') AND phone_number_verified = TRUE THEN player_id END) AS playstore_verified,
+            COUNT( CASE WHEN UPPER(channel) NOT IN('PLAYSTORE') AND phone_number_verified = TRUE THEN player_id END) AS pro_verified,
+            0 AS verified_but_not_played
+        FROM
             tbl_player
-        where
-            (created_at + (330 * '1m'::interval))::date > (now() + (330 * '1m'::interval))::date - interval '${days} days'
-        group by
-            (created_at + (330 * '1m'::interval))::date
-    union all
-        select
-            (created_at + (330 * '1m'::interval))::date as report_date,
-            0 as total_registered,
-            0 as total_otp_verified,
-            count(1) as verified_but_not_played
-        from
+        WHERE
+            (created_at + (330 * '1m'::INTERVAL))::DATE > (now() + (330 * '1m'::INTERVAL))::DATE - INTERVAL '${days} days'
+        GROUP BY
+            (created_at + (330 * '1m'::INTERVAL))::DATE
+    UNION ALL
+        SELECT
+            (created_at + (330 * '1m'::INTERVAL))::DATE AS report_date,
+            0 AS total_registered,
+            0 AS playstore_register,
+            0 AS pro_register,
+            0 AS total_otp_verified,
+            0 AS playstore_verified,
+            0 AS pro_verified,
+            COUNT(1) AS verified_but_not_played
+        FROM
             tbl_player
-        left join (
-            select
-                player_id
-            from
-                tbl_contest_players
-        union all
-            select
-                player_id
-            from
-                tbl_contest_players_backup
-        union all
-            select
-                player_id
-            from
-                tbl_player_contest_25_02_2019) as contest_players on
+        LEFT JOIN tbl_contest_players AS contest_players ON
             tbl_player.player_id = contest_players.player_id
-        where
-            contest_players.player_id is null
-            and tbl_player.phone_number_verified = true
-            and (created_at + (330 * '1m'::interval))::date > (now() + (330 * '1m'::interval))::date - interval '${days} days'
-        group by
-            (created_at + (330 * '1m'::interval))::date ) t_one
-    group by
+        WHERE
+            contest_players.player_id IS NULL
+            AND tbl_player.phone_number_verified = TRUE
+            AND (created_at + (330 * '1m'::INTERVAL))::DATE > (now() + (330 * '1m'::INTERVAL))::DATE - INTERVAL '${days} days'
+        GROUP BY
+            (created_at + (330 * '1m'::INTERVAL))::DATE ) t_one
+    GROUP BY
         report_date
-    order by
-        report_date desc
+    ORDER BY
+        report_date
     `;
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
