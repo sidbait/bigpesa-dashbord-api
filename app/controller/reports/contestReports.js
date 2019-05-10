@@ -73,7 +73,7 @@ module.exports = {
             let pivot = req.body.pivot ? req.body.pivot : false;
             try {
 
-                let query = "select app.app_id, app_name,contest.contest_id contest_name," +
+                let query = "select app.app_id, app_name,contest.contest_id as contest_id, contest.contest_name as  contest_name," +
                     " contest.start_date::date::text as start_date, contest.end_date::date::text as end_date," +
                     " split_part(contest.from_time::text, '.', 1) as from_time , split_part(contest.to_time::text, '.', 1) as to_time," +
                     " contest.debit_type, contest.credit_type,  entry_fee," +
@@ -130,7 +130,7 @@ module.exports = {
                     query += " and entry_fee = " + entry_fee;
                 }
 
-                query += " group by app.app_id, app_name, contest.contest_id, contest_name, entry_fee,contest.max_players, contest.start_date::date::text, contest.end_date::date::text, from_time, to_time, contest.debit_type, contest.credit_type" +
+                query += " group by app.app_id, app_name, contest_id, ontest_name, entry_fee,contest.max_players, contest.start_date::date::text, contest.end_date::date::text, from_time, to_time, contest.debit_type, contest.credit_type" +
                     " order by contest.start_date::date::text desc";
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query);
