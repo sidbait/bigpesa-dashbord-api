@@ -122,13 +122,40 @@ module.exports = {
     },
 
     getRank: async function (req, res) {
-        // console.log(req.body);
 
         let contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+        let contest_rank_master_id = req.body.contest_rank_master_id ? req.body.contest_rank_master_id : null;
 
-        let _selectQuery = `select * from tbl_contest_rank_master where contest_master_id = ${contest_master_id} order by lower_rank`
+        let _selectQuery;
+
+        if (contest_master_id) {
+            _selectQuery = `select * from tbl_contest_rank_master where contest_master_id = ${contest_master_id} and status = 'ACTIVE' order by lower_rank`;
+        } else if (contest_rank_master_id) {
+            _selectQuery = `select * from tbl_contest_rank_master where contest_rank_master_id = ${contest_rank_master_id}`;
+        }
+
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    removeRank: async function (req, res) {
+
+        let contest_rank_master_id = req.body.contest_rank_master_id ? req.body.contest_rank_master_id : null;
+
+        _updateQuery = `update tbl_contest_rank_master set status = 'REMOVE' where contest_rank_master_id = ${contest_rank_master_id} returning contest_rank_master_id`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
 
             if (dbResult && dbResult.length > 0) {
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
@@ -199,12 +226,18 @@ module.exports = {
 
     getAllContest: async function (req, res) {
 
-        // let app_id = req.body.app_id ? req.body.app_id : null;
+        let app_id = req.body.app_id ? req.body.app_id : null;
 
         let _selectQuery = `select distinct entry_fee,debit_type from tbl_contest_master
-        where status = 'ACTIVE'
-        group by entry_fee,debit_type
-        order by debit_type ,entry_fee desc`;
+        where status = 'ACTIVE'`;
+
+        if (app_id) {
+            _selectQuery += ` and app_id = ${app_id}`;
+        }
+
+        _selectQuery += ` group by entry_fee,debit_type
+        order by debit_type ,entry_fee`;
+
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
@@ -225,9 +258,11 @@ module.exports = {
 
         // console.log(req.body);
 
+        let app_id = req.body.app_id ? req.body.app_id : null;
+
         let allMasterContestOrder = req.body.allMasterContestOrder ? req.body.allMasterContestOrder : null;
 
-        let updateQueries = await getUpdateQueriesContestOrder(allMasterContestOrder);
+        let updateQueries = await getUpdateQueriesContestOrder(allMasterContestOrder, app_id);
 
         console.log(updateQueries);
 
@@ -894,19 +929,30 @@ async function cloneRanks(contest_clone_id, contest_master_id) {
     }
 }
 
-async function getUpdateQueriesContestOrder(allMasterContestOrder) {
+async function getUpdateQueriesContestOrder(allMasterContestOrder, app_id) {
 
     return new Promise((resolve, reject) => {
         let updateQuerie = []
+        if (app_id) {
+            for (let i = 0; i < allMasterContestOrder.length; i++) {
+                const x = allMasterContestOrder[i].split("-");
+                const priority = i + 1;
 
-        for (let i = 0; i < allMasterContestOrder.length; i++) {
-            const x = allMasterContestOrder[i].split("-");
-            const priority = i + 1;
+                let _query = `update tbl_contest_master set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and COALESCE(contest_priority,1) != 0 and app_id = ${app_id}`;
 
-            let _query = `update tbl_contest_master set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and COALESCE(contest_priority,1) != 0`;
+                updateQuerie.push(_query)
+            }
+        } else {
+            for (let i = 0; i < allMasterContestOrder.length; i++) {
+                const x = allMasterContestOrder[i].split("-");
+                const priority = i + 1;
 
-            updateQuerie.push(_query)
+                let _query = `update tbl_contest_master set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and COALESCE(contest_priority,1) != 0`;
+
+                updateQuerie.push(_query)
+            }
         }
+
 
         resolve(updateQuerie)
     });

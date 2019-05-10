@@ -154,7 +154,11 @@ module.exports = {
                 _selectQuery += " AND contest_id = '" + _contest_id + "'"
             }
 
-            _selectQuery += " order by lower_rank";
+            if (_status) {
+                _selectQuery += " AND status = '" + _status + "'"
+            }
+
+            _selectQuery += " and status != 'REMOVE' order by lower_rank";
 
             try {
                 let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
