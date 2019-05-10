@@ -130,7 +130,7 @@ module.exports = {
                     query += " and entry_fee = " + entry_fee;
                 }
 
-                query += " group by app.app_id, app_name, contest_id, ontest_name, entry_fee,contest.max_players, contest.start_date::date::text, contest.end_date::date::text, from_time, to_time, contest.debit_type, contest.credit_type" +
+                query += " group by app.app_id, app_name, contest.contest_id, contest.contest_name, entry_fee,contest.max_players, contest.start_date::date::text, contest.end_date::date::text, from_time, to_time, contest.debit_type, contest.credit_type" +
                     " order by contest.start_date::date::text desc";
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query);
