@@ -27,5 +27,5 @@ appRoutes.post('/getwithdrawdepositreport',contestReports.getWithdrawDepositRepo
 appRoutes.post('/balancereport',contestReports.balanceReport);
 appRoutes.get('/getallsource',contestReports.getAllSource);
 appRoutes.get('/totalbalancereport',contestReports.totalBalancereport);
-
+appRoutes.post('/dailysummaryreport',contestReports.dailySummaryReport);
 module.exports = appRoutes;
