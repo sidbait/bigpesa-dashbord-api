@@ -753,25 +753,9 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                queryText = "select (created_at + (330 * '1m'::interval))::date as created_at," +
-                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) as debit," +
-                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'EXPIRED' then amount::decimal + cash_bonus end),0) as expired," +
-                    " coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event = 'RE-JOIN CONTEST' then amount::decimal + cash_bonus end),0) as re_join," +
-                    " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as credit," +
-                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then amount::decimal end), 0) as cash_win_amount," +
-                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-REFUND' then amount::decimal end), 0) as contest_refund_amount," +
-                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event = 'CONTEST-WIN' then cash_bonus end), 0) as reward_win_amount," +
-                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REFUND' then amount::decimal + cash_bonus end), 0) as refund," +
-                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DEPOSITBONUS' then cash_bonus end), 0) as depositbonus," +
-                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REGISTRATION' then cash_bonus end), 0) as registration," +
-                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'REFERRER' then cash_bonus end), 0) as referrer," +
-                    " coalesce(sum(case when nz_txn_type = 'CREDIT' and upper(nz_txn_event) = 'DAILY-BONUS' then cash_bonus end),0) as daily_bonus," +
-                    " (coalesce(sum(case when nz_txn_type = 'DEBIT' and nz_txn_event not in( 'EXPIRED','BONUS_MIGRATION') then amount::decimal + cash_bonus end),0) - coalesce(sum(case when nz_txn_type = 'CREDIT' and nz_txn_event in('CONTEST-WIN','CONTEST-REFUND') then amount::decimal end), 0)) as pl" +
-                    " from tbl_wallet_transaction" +
-                    " where nz_txn_status = 'SUCCESS'" +
-                    " and (created_at + (330 * '1m'::interval))::date between $1 and $2" +
-                    " group by (created_at + (330 * '1m'::interval))::date" +
-                    " order by 1";
+                queryText = "select * from vv_admin_cash_flow_summary" +
+                    " where report_date::date between $1 and $2" +
+                    " order by report_date::date desc";
 
                 valuesArr = [fromDate, toDate]
 
@@ -1013,6 +997,43 @@ module.exports = {
                 services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
             } else {
                 services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+    dailySummaryReport: async function (req, res) {
+        let rules = {
+            "frmdate": 'required',
+            "todate": 'required'
+        };
+        var custom_message = {
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "To Date is mandatory!"
+        };
+        let validation = new services.validator(req.body, rules, custom_message);
+        try {
+            if (validation.passes()) {
+                console.log(req.body)
+                let fromDate = req.body.frmdate;
+                let toDate = req.body.todate;
+                let queryText = "select * from vw_admin_daily_summary_report where report_date between $1 and $2 ORDER BY report_date desc ";
+                valuesArr = [fromDate, toDate]
+
+                let query = {
+                    text: queryText,
+                    values: valuesArr
+                };
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                if (result.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                }
+            } else {
+                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
             }
         }
         catch (error) {
