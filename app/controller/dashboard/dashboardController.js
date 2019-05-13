@@ -3,7 +3,7 @@ const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";
 const customMsgTypeCM = "COMMON_MESSAGE";
-let expiretime = 15 * 60 // in sec //
+let expiretime = 60 * 60 // in sec //
 module.exports = {
 
     cashSummary: async function (req, res) {
@@ -270,7 +270,7 @@ module.exports = {
         group by date`;
 
         try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, 1800)
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery, true, expiretime)
 
             if (dbResult && dbResult.length > 0) {
                 // console.log(dbResult[0]);
