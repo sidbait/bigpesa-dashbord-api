@@ -4,8 +4,10 @@
   "description": "",
   "main": "bigpesa_admin_api.js",
   "dependencies": {
+    "atob": "^2.1.2",
     "aws-sdk": "^2.443.0",
     "bluebird": "^3.5.3",
+    "btoa": "^1.2.1",
     "config": "^3.0.0",
     "convert-excel-to-json": "^1.6.0",
     "cors": "^2.8.5",
