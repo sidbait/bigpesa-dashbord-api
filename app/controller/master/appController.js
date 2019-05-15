@@ -1,6 +1,7 @@
 const pgConnection = require('../../model/pgConnection');
 const mv = require('mv');
-
+const atob = require('atob');
+const btoa = require('btoa');
 const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";
@@ -226,6 +227,19 @@ module.exports = {
             let _game_conf = req.body.game_conf ? req.body.game_conf : null;
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
+            let isQuiz = req.body.isQuiz ? req.body.isQuiz : null;
+
+            if (isQuiz) {
+                _level = req.body.name ? req.body.name : null;
+                let type = req.body.type ? req.body.type : null;
+                let questions = req.body.questions ? req.body.questions : null;
+                // easy|Free|5
+
+                _game_conf = btoa(`${req.body.level}|${type}|${questions}`);
+
+                console.log(`${req.body.level}|${type}|${questions}`,_game_conf);
+                
+            }
 
             let _query;
             let _status = 'ACTIVE';
@@ -295,6 +309,7 @@ module.exports = {
 
         let _conf_id = req.body.conf_id ? req.body.conf_id : null;
         let _app_id = req.body.app_id ? req.body.app_id : null;
+        let isQuiz = req.body.isQuiz ? req.body.isQuiz : null;
 
         let _selectQuery = 'Select * From tbl_game_conf where 1=1'
 
@@ -313,7 +328,23 @@ module.exports = {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
             if (dbResult && dbResult.length > 0) {
-                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+                if (isQuiz) {
+
+                    let newResult = dbResult.map(x => {
+                        let y = atob(x.game_conf).split('|');
+                        console.log(y);
+                        x.name = x.level;
+                        x.level = y[0];
+                        x.type = y[1];
+                        x.questions = y[2];
+                        // x.game_conf = btoa(x.game_conf)
+                        return x
+                    })
+
+                    services.sendResponse.sendWithCode(req, res, newResult, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+                }
             }
             else
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");

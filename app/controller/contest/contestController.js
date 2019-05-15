@@ -585,6 +585,7 @@ module.exports = {
         let _max_players = req.body.max_players ? req.body.max_players : null;
         let _show_upcoming = req.body.show_upcoming ? req.body.show_upcoming : null;
         let _repeat_mode = req.body.repeat_mode ? req.body.repeat_mode : null;
+        let _orderby = req.body.orderby ? req.body.orderby : 'tbl_app.app_name,tbl_contest.start_date';
 
         let _selectQuery = `select case when now()::timestamptz + (330::int * '1m'::interval) < start_date then true end as Upcoming, tbl_app.app_name,tbl_game_conf."level",tbl_contest.* from tbl_contest inner join tbl_app on tbl_app.app_id = tbl_contest.app_id left join tbl_game_conf on tbl_game_conf.game_conf = tbl_contest.game_conf WHERE  1=1`
 
@@ -659,7 +660,7 @@ module.exports = {
             _selectQuery += ` AND now()::timestamptz + (330::int * '1m'::interval) < start_date `
         }
 
-        _selectQuery += ' order by tbl_app.app_name,tbl_contest.start_date'
+        _selectQuery += ' order by ' + _orderby;
 
 
         try {
@@ -1041,7 +1042,10 @@ async function getUpdateQueriesContestOrder(allContestOrder, app_id) {
 
                 let _query = `update tbl_contest set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and status = 'ACTIVE' and COALESCE(contest_priority,1) != 0 and app_id = ${app_id}`;
 
-                updateQuerie.push(_query)
+                let _queryMaster = `update tbl_contest_master set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and COALESCE(contest_priority,1) != 0 and app_id = ${app_id} RETURNING contest_name`;
+
+                updateQuerie.push(_query);
+                updateQuerie.push(_queryMaster);
             }
         } else {
             for (let i = 0; i < allContestOrder.length; i++) {
@@ -1050,7 +1054,10 @@ async function getUpdateQueriesContestOrder(allContestOrder, app_id) {
 
                 let _query = `update tbl_contest set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and status = 'ACTIVE' and COALESCE(contest_priority,1) != 0`;
 
-                updateQuerie.push(_query)
+                let _queryMaster = `update tbl_contest_master set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and COALESCE(contest_priority,1) != 0`;
+
+                updateQuerie.push(_query);
+                updateQuerie.push(_queryMaster);
             }
         }
 
