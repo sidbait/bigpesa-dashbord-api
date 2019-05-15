@@ -507,10 +507,9 @@ module.exports = {
 
         let _selectQuery = `select count(player.player_id) as verfied_users,
         sum(winning_balance) as winning_cash, sum(reward_balance) as reward_cash,
-        sum(deposit_balance) as deposit_cash, sum(bonus) as coin
+        sum(deposit_balance) as deposit_cash
         from tbl_player as player
-        inner join tbl_wallet_balance as cash on player.player_id = cash.player_id 
-        inner join tbl_bonus as coin on player.player_id = coin.player_id
+        inner join tbl_wallet_balance as cash on player.player_id = cash.player_id
         where phone_number_verified = true`;
 
 
@@ -536,13 +535,11 @@ module.exports = {
         count(player.player_id) as active_users,
         sum(winning_balance) as winning_cash,
         sum(reward_balance) as reward_cash,
-        sum(deposit_balance) as deposit_cash,
-        sum(bonus) as coin
+        sum(deposit_balance) as deposit_cash
         from (
         select distinct player_id
         from tbl_contest_players) as player 
-        inner join tbl_wallet_balance as cash on player.player_id = cash.player_id 
-        inner join tbl_bonus as coin on player.player_id = coin.player_id`;
+        inner join tbl_wallet_balance as cash on player.player_id = cash.player_id`;
 
 
         try {
@@ -567,11 +564,9 @@ module.exports = {
         count(distinct player.player_id) as inactive_users,
         sum(winning_balance) as winning_cash,
         sum(reward_balance) as reward_cash,
-        sum(deposit_balance) as deposit_cash,
-        sum(bonus) as coin
+        sum(deposit_balance) as deposit_cash
         from tbl_player as player
-        inner join tbl_wallet_balance as cash on player.player_id = cash.player_id 
-        inner join tbl_bonus as coin on player.player_id = coin.player_id         
+        inner join tbl_wallet_balance as cash on player.player_id = cash.player_id
         left join (
             select
                 player_id
