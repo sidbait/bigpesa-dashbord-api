@@ -225,6 +225,12 @@ module.exports = {
             messageCode: "GET_FAILED",
             statusCode: 401
         },
+        "NO_DATA_FOUND": {
+            success: false,
+            message: "No data available",
+            messageCode: "NO_DATA_FOUND",
+            statusCode: 401
+        },
         "REMOVE_SUCCESS": {
             success: true,
             message: "Details Removed!",

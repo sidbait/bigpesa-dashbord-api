@@ -12,47 +12,27 @@ module.exports = {
 
     getPending: async function (req, res) {
 
-        let rules = {
-            "credit_type": 'required'
-        };
+        let _selectQuery = "select que_id, player.player_id, phone_number, event_type,amount,\"comment\"," +
+            " refunded_by.username as refunded_by";
 
-        var custom_message = {
-            "required.credit_type": "Credit Type is mandatory!"
-        };
+        _selectQuery += " from tbl_wallet_credit_que as que"
 
-        let validation = new services.validator(req.body, rules, custom_message);
-        if (validation.passes()) {
+        _selectQuery +=
+            "  left join tbl_player as player on que.player_id = player.player_id" +
+            " left join tbl_user as refunded_by on refunded_by.user_id = que.refunded_by" +
+            " where que.\"status\" = 'PENDING'";
 
-            let credit_type = req.body.credit_type;
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
-            let _selectQuery = "select que_id, player.player_id, phone_number, event_type,amount,\"comment\"," +
-                " refunded_by.username as refunded_by";
-
-            if (credit_type == "COIN") {
-                _selectQuery += " from tbl_bonus_credit_que as que"
-            } else if (credit_type == "CASH") {
-                _selectQuery += " from tbl_wallet_credit_que as que"
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
             }
-
-            _selectQuery +=
-                "  left join tbl_player as player on que.player_id = player.player_id" +
-                " left join tbl_user as refunded_by on refunded_by.user_id = que.refunded_by" +
-                " where que.\"status\" = 'PENDING'";
-
-            try {
-                let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
-
-                if (dbResult && dbResult.length > 0) {
-                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
-                }
-                else
-                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
-            }
-            catch (error) {
-                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
-            }
-        } else {
-            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "NO_DATA_FOUND");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
     getPendingPlayerList: async function (req, res) {
@@ -144,7 +124,6 @@ module.exports = {
 
         let rules = {
             "selectedContests": 'required',
-            "credit_type": 'required',
             "approved_by": 'required',
             "status": 'required'
         }
@@ -161,12 +140,7 @@ module.exports = {
 
             try {
 
-                if (_credit_type == "CASH") {
-                    _updateQuery = `update tbl_wallet_credit_que set status = '${_status}', approved_by = '${_approved_by}' where que_id in (${_selectedContests.toString()}) returning que_id`
-
-                } else if (_credit_type == "COIN") {
-                    _updateQuery = `update tbl_bonus_credit_que set status = '${_status}', approved_by = '${_approved_by}' where que_id in (${_selectedContests.toString()}) returning que_id`
-                }
+                _updateQuery = `update tbl_wallet_credit_que set status = '${_status}', approved_by = '${_approved_by}' where que_id in (${_selectedContests.toString()}) returning que_id`
 
                 let _updated_id = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
                 console.log(_updateQuery);
