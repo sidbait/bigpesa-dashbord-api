@@ -68,9 +68,9 @@ module.exports = {
             " left join tbl_player as player on que.player_id = player.player_id" +
             " where que.is_claim = 'false'";
 
-            if(app_id){
-                _selectQuery += " and tbl_app.app_id = " + app_id;
-            }
+        if (app_id) {
+            _selectQuery += " and tbl_app.app_id = " + app_id;
+        }
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
@@ -85,7 +85,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
 
-        
     },
     refundPlayer: async function (req, res) {
 
@@ -117,23 +116,12 @@ module.exports = {
             let errMsgType = 'ADD_FAILED';
             let _query;
 
-            if (event_type == "REWARD") {
-                _query = {
-                    text: "INSERT INTO public.tbl_bonus_credit_que " +
-                        " ( event_id, event_type, event_name, amount, " +
-                        " \"comment\", player_id, is_credit, status,is_claim, add_date,next_retry, refunded_by) " +
-                        " VALUES($1,$2,$3,$4,$5,$6, false, 'PENDING',true, now(), now(),$7 )RETURNING que_id, 'coin' as credit_type, amount;",
-                    values: [traxid, event_type, event_type, amount, comment, player_id, refunded_by]
-                };
-
-            } else if (event_type == "REFUND" || event_type == "DepositBonus") {
-                _query = {
-                    text: "INSERT INTO public.tbl_wallet_credit_que " +
-                        " ( event_id, event_type, event_name, amount, " +
-                        " \"comment\", player_id, is_credit, status, add_date,is_claim,next_retry, refunded_by) " +
-                        " VALUES($1,$2,$3,$4,$5,$6, false, 'PENDING', now(), true, now(),$7)RETURNING que_id, 'cash' as credit_type, amount;",
-                    values: [traxid, event_type, event_type, amount, comment, player_id, refunded_by]
-                }
+            _query = {
+                text: "INSERT INTO public.tbl_wallet_credit_que " +
+                    " ( event_id, event_type, event_name, amount, " +
+                    " \"comment\", player_id, is_credit, status, add_date,is_claim,next_retry, refunded_by) " +
+                    " VALUES($1,$2,$3,$4,$5,$6, false, 'PENDING', now(), true, now(),$7)RETURNING que_id, 'cash' as credit_type, amount;",
+                values: [traxid, event_type, event_type, amount, comment, player_id, refunded_by]
             }
             console.log(_query)
             try {
