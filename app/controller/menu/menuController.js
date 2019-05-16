@@ -52,6 +52,13 @@ module.exports = {
                         ContestPriority: true,
                         previewcontest: true,
                     },
+                    ReferrerManagement: {
+                        main: false,
+                        Referrer: false,
+                        Goals: false,
+                        PlayerMaster: false,
+                        PlayerTransaction: false,
+                    },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
@@ -147,6 +154,13 @@ module.exports = {
                         contest: true,
                         ContestPriority: true,
                         previewcontest: true,
+                    },
+                    ReferrerManagement: {
+                        main: true,
+                        Referrer: true,
+                        Goals: true,
+                        PlayerMaster: true,
+                        PlayerTransaction: true,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -244,6 +258,13 @@ module.exports = {
                         ContestPriority: true,
                         previewcontest: true,
                     },
+                    ReferrerManagement: {
+                        main: false,
+                        Referrer: false,
+                        Goals: false,
+                        PlayerMaster: false,
+                        PlayerTransaction: false,
+                    },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
@@ -339,6 +360,13 @@ module.exports = {
                         contest: false,
                         ContestPriority: false,
                         previewcontest: false,
+                    },
+                    ReferrerManagement: {
+                        main: false,
+                        Referrer: false,
+                        Goals: false,
+                        PlayerMaster: false,
+                        PlayerTransaction: false,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -436,6 +464,13 @@ module.exports = {
                         contest: false,
                         ContestPriority: false,
                         previewcontest: false,
+                    },
+                    ReferrerManagement: {
+                        main: false,
+                        Referrer: false,
+                        Goals: false,
+                        PlayerMaster: false,
+                        PlayerTransaction: false,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -539,6 +574,13 @@ module.exports = {
                         ContestPriority: false,
                         previewcontest: false,
                     },
+                    ReferrerManagement: {
+                        main: false,
+                        Referrer: false,
+                        Goals: false,
+                        PlayerMaster: false,
+                        PlayerTransaction: false,
+                    },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
@@ -604,12 +646,12 @@ module.exports = {
                 title: 'Dashboard',
                 type: 'menu__link',
                 show: limit.Dashboard,
-                icontype: 'flaticon-line-graph'
+                icontype: 'fas fa-chart-line'
             }, {
                 path: '',
                 title: 'User Details',
                 type: 'menu__toggle',
-                icontype: 'flaticon-users',
+                icontype: 'fas fa-user-cog',
                 show: limit.UserDetails.main,
                 children: [
                     { path: '/master/manage-users/view-users', title: 'User', show: limit.UserDetails.users },
@@ -619,7 +661,7 @@ module.exports = {
                 path: '',
                 title: 'App Details',
                 type: 'menu__toggle',
-                icontype: 'fa fa-mobile-alt',
+                icontype: 'fas fa-gamepad',
                 show: limit.AppDetails.main,
                 children: [
                     { path: '/master/manage-app/view-app', title: 'App', show: limit.AppDetails.app },
@@ -630,7 +672,7 @@ module.exports = {
                 path: '',
                 title: 'Event Details',
                 type: 'menu__toggle',
-                icontype: 'fa fa-mobile-alt',
+                icontype: 'fas fa-calendar-alt',
                 show: limit.EventDetails.main,
                 children: [
                     { path: '/master/manage-event/view-event', title: 'Events', show: limit.EventDetails.event, },
@@ -643,7 +685,7 @@ module.exports = {
                 path: '',
                 title: 'Banner Details',
                 type: 'menu__toggle',
-                icontype: 'fa fa-mobile-alt',
+                icontype: 'far fa-images',
                 show: limit.BannerDetails.main,
                 children: [
                     { path: '/master/manage-banner/view-banner', title: 'Banners', show: limit.BannerDetails.banner, }
@@ -652,7 +694,7 @@ module.exports = {
                 path: '',
                 title: 'Utilities',
                 type: 'menu__toggle',
-                icontype: 'fa fa-mobile-alt',
+                icontype: 'fas fa-toolbox',
                 show: limit.Utilities.main,
                 children: [
                     { path: '/utilities/queue-reports', title: 'QueueReports', show: limit.Utilities.QueueReports, },
@@ -673,6 +715,18 @@ module.exports = {
                 ]
             }, {
                 path: '',
+                title: 'Referrer Details',
+                type: 'menu__toggle',
+                icontype: 'fas fa-users',
+                show: limit.ReferrerManagement.main,
+                children: [
+                    { path: '/master/referrer-management/referrer-master', title: 'Referrer', show: limit.ReferrerManagement.Referrer },
+                    { path: '/master/referrer-management/referrer-goals', title: 'Goals', show: limit.ReferrerManagement.Goals },
+                    { path: '/master/referrer-management/referrer-player-master', title: 'Player Master', show: limit.ReferrerManagement.PlayerMaster },
+                    { path: '/master/referrer-management/referrer-player-transaction', title: 'Player Transaction', show: limit.ReferrerManagement.PlayerTransaction },
+                ]
+            }, {
+                path: '',
                 title: 'Feedback Details',
                 type: 'menu__toggle',
                 icontype: 'fa fa-mobile-alt',
@@ -685,7 +739,7 @@ module.exports = {
                 path: '',
                 title: 'Reports',
                 type: 'menu__toggle',
-                icontype: 'fa fa-mobile-alt',
+                icontype: 'fas fa-chart-bar',
                 show: limit.Reports.main,
                 children: [
                     { path: '/reports/contest', title: 'Contest Report', show: limit.Reports.contest, },
@@ -717,7 +771,7 @@ module.exports = {
                 path: '',
                 title: 'User Reports',
                 type: 'menu__toggle',
-                icontype: 'fa fa-mobile-alt',
+                icontype: 'fas fa-chart-pie',
                 show: limit.UserReports.main,
                 children: [
                     { path: '/reports/contest', title: 'Player Report', show: limit.UserReports.PlayerReport, },
