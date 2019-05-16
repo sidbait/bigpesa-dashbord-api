@@ -14,5 +14,6 @@ apiRoutes.use(require('./appVersionRoute'));
 apiRoutes.use(require('./feedbackRoute'));
 apiRoutes.use(require('./playerRoute'));
 apiRoutes.use(require('./scoreValidation'));
+apiRoutes.use(require('./referrerRoute'));
 
 module.exports = apiRoutes;
