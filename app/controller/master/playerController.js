@@ -12,47 +12,27 @@ module.exports = {
 
     getPending: async function (req, res) {
 
-        let rules = {
-            "credit_type": 'required'
-        };
+        let _selectQuery = "select que_id, player.player_id, phone_number, event_type,amount,\"comment\"," +
+            " refunded_by.username as refunded_by";
 
-        var custom_message = {
-            "required.credit_type": "Credit Type is mandatory!"
-        };
+        _selectQuery += " from tbl_wallet_credit_que as que"
 
-        let validation = new services.validator(req.body, rules, custom_message);
-        if (validation.passes()) {
+        _selectQuery +=
+            "  left join tbl_player as player on que.player_id = player.player_id" +
+            " left join tbl_user as refunded_by on refunded_by.user_id = que.refunded_by" +
+            " where que.\"status\" = 'PENDING'";
 
-            let credit_type = req.body.credit_type;
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
-            let _selectQuery = "select que_id, player.player_id, phone_number, event_type,amount,\"comment\"," +
-                " refunded_by.username as refunded_by";
-
-            if (credit_type == "COIN") {
-                _selectQuery += " from tbl_bonus_credit_que as que"
-            } else if (credit_type == "CASH") {
-                _selectQuery += " from tbl_wallet_credit_que as que"
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
             }
-
-            _selectQuery +=
-                "  left join tbl_player as player on que.player_id = player.player_id" +
-                " left join tbl_user as refunded_by on refunded_by.user_id = que.refunded_by" +
-                " where que.\"status\" = 'PENDING'";
-
-            try {
-                let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
-
-                if (dbResult && dbResult.length > 0) {
-                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
-                }
-                else
-                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
-            }
-            catch (error) {
-                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
-            }
-        } else {
-            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "NO_DATA_FOUND");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
     getPendingPlayerList: async function (req, res) {
@@ -68,9 +48,9 @@ module.exports = {
             " left join tbl_player as player on que.player_id = player.player_id" +
             " where que.is_claim = 'false'";
 
-            if(app_id){
-                _selectQuery += " and tbl_app.app_id = " + app_id;
-            }
+        if (app_id) {
+            _selectQuery += " and tbl_app.app_id = " + app_id;
+        }
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
@@ -85,7 +65,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
 
-        
     },
     refundPlayer: async function (req, res) {
 
@@ -117,23 +96,12 @@ module.exports = {
             let errMsgType = 'ADD_FAILED';
             let _query;
 
-            if (event_type == "REWARD") {
-                _query = {
-                    text: "INSERT INTO public.tbl_bonus_credit_que " +
-                        " ( event_id, event_type, event_name, amount, " +
-                        " \"comment\", player_id, is_credit, status,is_claim, add_date,next_retry, refunded_by) " +
-                        " VALUES($1,$2,$3,$4,$5,$6, false, 'PENDING',true, now(), now(),$7 )RETURNING que_id, 'coin' as credit_type, amount;",
-                    values: [traxid, event_type, event_type, amount, comment, player_id, refunded_by]
-                };
-
-            } else if (event_type == "REFUND" || event_type == "DepositBonus") {
-                _query = {
-                    text: "INSERT INTO public.tbl_wallet_credit_que " +
-                        " ( event_id, event_type, event_name, amount, " +
-                        " \"comment\", player_id, is_credit, status, add_date,is_claim,next_retry, refunded_by) " +
-                        " VALUES($1,$2,$3,$4,$5,$6, false, 'PENDING', now(), true, now(),$7)RETURNING que_id, 'cash' as credit_type, amount;",
-                    values: [traxid, event_type, event_type, amount, comment, player_id, refunded_by]
-                }
+            _query = {
+                text: "INSERT INTO public.tbl_wallet_credit_que " +
+                    " ( event_id, event_type, event_name, amount, " +
+                    " \"comment\", player_id, is_credit, status, add_date,is_claim,next_retry, refunded_by) " +
+                    " VALUES($1,$2,$3,$4,$5,$6, false, 'PENDING', now(), true, now(),$7)RETURNING que_id, 'cash' as credit_type, amount;",
+                values: [traxid, event_type, event_type, amount, comment, player_id, refunded_by]
             }
             console.log(_query)
             try {
@@ -156,7 +124,6 @@ module.exports = {
 
         let rules = {
             "selectedContests": 'required',
-            "credit_type": 'required',
             "approved_by": 'required',
             "status": 'required'
         }
@@ -173,12 +140,7 @@ module.exports = {
 
             try {
 
-                if (_credit_type == "CASH") {
-                    _updateQuery = `update tbl_wallet_credit_que set status = '${_status}', approved_by = '${_approved_by}' where que_id in (${_selectedContests.toString()}) returning que_id`
-
-                } else if (_credit_type == "COIN") {
-                    _updateQuery = `update tbl_bonus_credit_que set status = '${_status}', approved_by = '${_approved_by}' where que_id in (${_selectedContests.toString()}) returning que_id`
-                }
+                _updateQuery = `update tbl_wallet_credit_que set status = '${_status}', approved_by = '${_approved_by}' where que_id in (${_selectedContests.toString()}) returning que_id`
 
                 let _updated_id = await pgConnection.executeQuery('rmg_dev_db', _updateQuery)
                 console.log(_updateQuery);
