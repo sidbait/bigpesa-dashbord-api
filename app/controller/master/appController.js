@@ -2,6 +2,8 @@ const pgConnection = require('../../model/pgConnection');
 const mv = require('mv');
 const atob = require('atob');
 const btoa = require('btoa');
+var crypto = require('crypto');
+
 const services = require('../../service/service');
 
 const customMsgType = "MASTER_MESSAGE";
@@ -235,10 +237,10 @@ module.exports = {
                 let questions = req.body.questions ? req.body.questions : null;
                 // easy|Free|5
 
-                _game_conf = btoa(`${req.body.level}|${type}|${questions}`);
+                _game_conf = encrypt(`${req.body.level}|${type}|${questions}`);
 
-                console.log(`${req.body.level}|${type}|${questions}`,_game_conf);
-                
+                console.log(`${req.body.level}|${type}|${questions}`, _game_conf);
+
             }
 
             let _query;
@@ -331,7 +333,9 @@ module.exports = {
                 if (isQuiz) {
 
                     let newResult = dbResult.map(x => {
-                        let y = atob(x.game_conf).split('|');
+                        console.log(x.game_conf);
+                        
+                        let y = decrypt(x.game_conf).split('|');
                         console.log(y);
                         x.name = x.level;
                         x.level = y[0];
@@ -350,6 +354,8 @@ module.exports = {
                 services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
         }
         catch (error) {
+            console.log(error);
+            
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
@@ -534,4 +540,16 @@ async function getbulkUpdateGameConfMasterQueries(selectedGamesId, level) {
 
         resolve(updateQueries)
     });
+}
+
+let password = 'hakunamatata';
+
+function encrypt(data) {
+    var cipher = crypto.createCipher('aes-256-ecb', password);
+    return cipher.update(data, 'utf8', 'hex') + cipher.final('hex');
+}
+
+function decrypt(data) {
+    var cipher = crypto.createDecipher('aes-256-ecb', password);
+    return cipher.update(data, 'hex', 'utf8') + cipher.final('utf8');
 }
