@@ -164,14 +164,14 @@ module.exports = {
 
         let app_id = req.body.app_id ? req.body.app_id : null;
 
-        let _selectQuery = `select distinct entry_fee,debit_type from tbl_contest
+        let _selectQuery = `select contest_name, entry_fee,debit_type from tbl_contest
         where status = 'ACTIVE' and start_date > now()`;
 
         if (app_id) {
             _selectQuery += ` and app_id = ${app_id}`;
         }
 
-        _selectQuery += ` group by entry_fee,debit_type order by debit_type ,entry_fee`;
+        _selectQuery += ` group by contest_name, entry_fee,debit_type order by debit_type ,entry_fee`;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
@@ -1040,9 +1040,9 @@ async function getUpdateQueriesContestOrder(allContestOrder, app_id) {
                 const x = allContestOrder[i].split("-");
                 const priority = i + 1;
 
-                let _query = `update tbl_contest set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and status = 'ACTIVE' and COALESCE(contest_priority,1) != 0 and app_id = ${app_id}`;
+                let _query = `update tbl_contest set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and contest_name = '${x[2]}' and status = 'ACTIVE' and COALESCE(contest_priority,1) != 0 and app_id = ${app_id}`;
 
-                let _queryMaster = `update tbl_contest_master set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and COALESCE(contest_priority,1) != 0 and app_id = ${app_id} RETURNING contest_name`;
+                let _queryMaster = `update tbl_contest_master set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and contest_name = '${x[2]}' and COALESCE(contest_priority,1) != 0 and app_id = ${app_id} RETURNING contest_name`;
 
                 updateQuerie.push(_query);
                 updateQuerie.push(_queryMaster);
