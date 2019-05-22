@@ -136,25 +136,4 @@ module.exports = {
 
     },
 
-    getById: async function (req, res) {
-
-        let _visitbonus_id = req.body.visitbonus_id ? req.body.visitbonus_id : null;
-
-        let _selectQuery = "SELECT * FROM tbl_referrer_master WHERE  1=1 AND id = " + _visitbonus_id;
-
-        try {
-            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
-
-            if (dbResult && dbResult.length > 0) {
-                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
-            } else {
-                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
-            }
-        }
-        catch (error) {
-            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
-        }
-
-    }
-
 }
