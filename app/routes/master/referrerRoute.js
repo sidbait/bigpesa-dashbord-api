@@ -1,13 +1,18 @@
 var appRoutes = express.Router();
 
-var validate = require('../../auth/validate');
+var referrerController = require('../../controller/master/referrerController');
+var referrerGoalsController = require('../../controller/master/referrerGoalsController');
 
-var appController = require('../../controller/master/referrerController');
+appRoutes.post('/referrer', referrerController.getAll);
+appRoutes.post('/referrer/add', referrerController.add);
+appRoutes.post('/referrer/update', referrerController.add);
+appRoutes.post('/referrer/search', referrerController.search);
 
-appRoutes.post('/referrer', appController.getAll);
-appRoutes.post('/referrer/add', appController.add);
-appRoutes.post('/referrer/update', appController.add);
-appRoutes.post('/referrer/search', appController.search);
-appRoutes.post('/referrer/getById', appController.getById);
+appRoutes.post('/referrerGoals/add', referrerGoalsController.add);
+appRoutes.post('/referrerGoals/search', referrerGoalsController.search);
+
+appRoutes.post('/getReferrerPlayerMaster', referrerGoalsController.getReferrerPlayerMaster);
+appRoutes.post('/getReferrerTransaction', referrerGoalsController.getReferrerTransaction);
+
 
 module.exports = appRoutes;
