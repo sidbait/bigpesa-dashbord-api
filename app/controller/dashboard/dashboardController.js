@@ -11,7 +11,7 @@ module.exports = {
         let _selectQuery = `select
         *
     from
-        vv_admin_cash_flow_summary
+    vv_admin_daily_cash_flow_summary
     where
         report_date::date > (now() + (330 * '1m'::interval))::date - interval '${days} days'
     order by report_date::date desc`;

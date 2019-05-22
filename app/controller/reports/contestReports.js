@@ -79,14 +79,12 @@ module.exports = {
                     " contest.debit_type, contest.credit_type,  entry_fee," +
                     " sum(distinct contest.win_amount) as prize_pool," +
                     " contest.max_players as contest_max_players," +
-                    // " max_players * count(distinct contest.contest_id) as total_max_players, " +
                     " count(distinct players.player_id) as players_joined," +
                     " count(winner.player_id) as players_win," +
-                    " coalesce(sum(case when winner.credit_type = 'COIN' then winner.win_amount end),0) as win_coin," +
+                    // " coalesce(sum(case when winner.credit_type = 'COIN' then winner.win_amount end),0) as win_coin," +
                     " coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end),0) as win_cash," +
                     " (max_players * count(distinct contest.contest_id)) - (count(distinct players.player_id)) as players_required," +
                     " count(distinct players.player_id) * entry_fee as user_debit_amount," +
-                    // " ((coalesce(count(distinct case when contest.debit_type = 'CASH' then players.player_id end), 0) * entry_fee) - (coalesce(sum(case when winner.credit_type = 'COIN' then 0 end), 0) + coalesce(sum(case when winner.credit_type = 'CASH' then winner.win_amount end), 0))) as profit" +
                     " (COALESCE( CASE WHEN count(winner.player_id) > 0 THEN ((COALESCE(COUNT(DISTINCT CASE WHEN contest.debit_type = 'CASH' THEN players.player_id END),0) * entry_fee) - (COALESCE(SUM(CASE WHEN winner.credit_type = 'CASH' THEN winner.win_amount END),0))) END,0)) AS profit" +
                     " from rmg_db.public.tbl_app as app" +
                     " inner join rmg_db.public.tbl_contest as contest on" +
@@ -95,7 +93,7 @@ module.exports = {
                     " contest.contest_id = players.contest_id" +
                     " left join rmg_db.public.tbl_contest_winner as winner on" +
                     " (winner.contest_id = contest.contest_id) and (winner.player_id = players.player_id)" +
-                    " where contest.start_date::date between '" + startdate + "' and '" + enddate + "'" +
+                    " where contest.start_date::date = '" + startdate + "' and contest.end_date::date = '" + enddate + "'" +
                     " and players.transaction_date::date <= contest.end_date::date";
 
                 if (appid) {
@@ -743,7 +741,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                queryText = "select * from vv_admin_cash_flow_summary" +
+                queryText = "select * from vv_admin_daily_cash_flow_summary" +
                     " where report_date::date between $1 and $2" +
                     " order by report_date::date desc";
 
