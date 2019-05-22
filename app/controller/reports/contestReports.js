@@ -741,7 +741,7 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                queryText = "select * from vv_admin_cash_flow_summary" +
+                queryText = "select * from vv_admin_daily_cash_flow_summary" +
                     " where report_date::date between $1 and $2" +
                     " order by report_date::date desc";
 
