@@ -358,11 +358,13 @@ module.exports = {
 
             let player_id = req.body.player_id;
             try {
-                queryText = "select txn_id, txn_type, winning_balance, reward_balance, deposit_balance, amount, " +
-                " (winning_balance + reward_balance + deposit_balance ) total, created_at " +
+                queryText = "select txn_id, nz_txn_event, tbl_wallet_balance_log.txn_type, winning_balance, reward_balance, deposit_balance, tbl_wallet_balance_log.amount, moved_wb, moved_rb, moved_db, " +
+                " (winning_balance + reward_balance + deposit_balance ) total, tbl_wallet_transaction.created_at + (330::int::int * '1m'::interval) as created_at" +
                 " from tbl_wallet_balance_log " +
-                " where player_id = $1" + 
-                " order by txn_id desc, created_at desc limit 100";
+                " inner join tbl_wallet_transaction " +
+                " on  tbl_wallet_balance_log.txn_id = tbl_wallet_transaction.wallet_txn_id" +
+                " where tbl_wallet_balance_log.player_id = $1" + 
+                " order by txn_id desc, tbl_wallet_transaction.created_at + (330::int::int * '1m'::interval) desc limit 100";
 
                 valuesArr = [player_id];
 

@@ -714,8 +714,8 @@ module.exports = {
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
                 queryText = "select * from vw_admin_top_game_summary" +
-                    " where \"date\"::Date between $1 and $2" +
-                    " ORDER BY total_players_joined desc";
+                    " where contest_date::Date between $1 and $2" +
+                    " ORDER BY contest_date::Date, total_players_joined desc";
                 valuesArr = [fromDate, toDate]
 
                 let query = {
@@ -983,10 +983,8 @@ module.exports = {
     totalBalancereport: async function (req, res) {
 
         try {
-            queryText = "select sum(winning_balance) as winning_balance, sum(reward_balance) as reward_balance, sum(deposit_balance) as deposit_balance, sum(bonus) as coin" +
-                " from tbl_wallet_balance" +
-                " inner join tbl_bonus" +
-                " on tbl_wallet_balance.player_id = tbl_bonus.player_id";
+            queryText = "select sum(winning_balance) as winning_balance, sum(reward_balance) as reward_balance, sum(deposit_balance) as deposit_balance" +
+                " from tbl_wallet_balance";
 
             let query = {
                 text: queryText
@@ -1302,7 +1300,7 @@ module.exports = {
                     " from tbl_contest_players players " +
                     " join tbl_contest contest on " +
                     " contest.contest_id = players.contest_id" +
-                    " where contest.start_date::date between $1 and $2";
+                    " where contest.end_date::date between $1 and $2";
                 valuesArr = [fromDate, toDate]
 
                 let query = {
