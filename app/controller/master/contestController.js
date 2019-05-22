@@ -709,7 +709,13 @@ function readSheet(xlsxFilePath) {
                     V: 'game_conf',
                     W: 'contest_icon',
                     X: 'publish_type',
-                    Y: 'channel'
+                    Y: 'channel',
+                    Z: 'max_lives',
+                    AA: 'min_player',
+                    AB: 'rank_desc',
+                    AC: 'contest_minutes',
+                    AD: 'infinite_users',
+                    AE: 'matrix_code'
                 }
             }, {
                 name: 'rankData',
@@ -738,9 +744,10 @@ function getQueriesContestData(sheetData, _app_id) {
         if (sheetData && sheetData.contestData) {
             let queries = sheetData.contestData.map(object => {
 
-                object['app_id'] = _app_id
-                object['from_time'] = getFormattedTime(object['from_time'])
-                object['to_time'] = getFormattedTime(object['to_time'])
+                object['app_id'] = _app_id;
+                // object['game_conf'] = await getGameConf(_app_id, object['game_conf']);
+                object['from_time'] = getFormattedTime(object['from_time']);
+                object['to_time'] = getFormattedTime(object['to_time']);
                 let count = 0;
                 let cols = [];
                 let values = [];
@@ -765,7 +772,7 @@ function getQueriesContestData(sheetData, _app_id) {
                     text: `INSERT INTO tbl_contest_master(${cols.toString()}) VALUES (${dollcount}) RETURNING contest_master_id`,
                     values: values
                 }
-                // console.log(query,object['contest_uid']);
+                console.log(query);
                 let contest_uid = object['contest_uid'];
                 let output = {
                     query,
@@ -777,6 +784,27 @@ function getQueriesContestData(sheetData, _app_id) {
             resolve(queries)
         } else {
             reject('wrong sheetData or sheet name')
+        }
+    });
+}
+
+function getGameConf(app_id, level) {
+    return new Promise(async (resolve, reject) => {
+        let _selectQuery = `select game_conf from tbl_game_conf where app_id = ${app_id} and "level" ilike '${level}'`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                console.log('game conf found', dbResult[0].game_conf);
+                resolve(dbResult[0].game_conf)
+            } else {
+                console.log('game conf not found');
+                resolve('')
+            }
+        }
+        catch (error) {
+            console.log('game conf not found', error);
         }
     });
 }
