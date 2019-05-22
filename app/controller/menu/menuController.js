@@ -78,10 +78,7 @@ module.exports = {
                         acquisitionsummary: true,
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
-                        userfunnel: true,
                         summary: false,
-                        dailySummary: true,
-                        dailyChannelSummary: true,
                         export: true,
                         bulkNotification: true,
                         hourly: true,
@@ -104,8 +101,7 @@ module.exports = {
                     AcquisitionReports: {
                         main: true,
                         AcquisitionSummary: true,
-                        AcquisitionDetails: true,
-                        UserFunnel: true
+                        AcquisitionDetails: true
                     },
                     Summary: {
                         main: true,
@@ -181,10 +177,7 @@ module.exports = {
                         acquisitionsummary: true,
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
-                        userfunnel: true,
                         summary: false,
-                        dailySummary: true,
-                        dailyChannelSummary: true,
                         export: true,
                         bulkNotification: true,
                         hourly: true,
@@ -207,8 +200,7 @@ module.exports = {
                     AcquisitionReports: {
                         main: false,
                         AcquisitionSummary: false,
-                        AcquisitionDetails: false,
-                        UserFunnel: false
+                        AcquisitionDetails: false
                     },
                     Summary: {
                         main: false,
@@ -284,10 +276,7 @@ module.exports = {
                         acquisitionsummary: false,
                         channelAcquisitionsummary: false,
                         acquisitiondetails: false,
-                        userfunnel: false,
                         summary: false,
-                        dailySummary: false,
-                        dailyChannelSummary: false,
                         export: true,
                         bulkNotification: true,
                         hourly: false,
@@ -310,8 +299,7 @@ module.exports = {
                     AcquisitionReports: {
                         main: false,
                         AcquisitionSummary: false,
-                        AcquisitionDetails: false,
-                        UserFunnel: false
+                        AcquisitionDetails: false
                     },
                     Summary: {
                         main: false,
@@ -387,10 +375,7 @@ module.exports = {
                         acquisitionsummary: true,
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
-                        userfunnel: true,
                         summary: false,
-                        dailySummary: true,
-                        dailyChannelSummary: true,
                         export: true,
                         bulkNotification: true,
                         hourly: true,
@@ -413,8 +398,7 @@ module.exports = {
                     AcquisitionReports: {
                         main: false,
                         AcquisitionSummary: false,
-                        AcquisitionDetails: false,
-                        UserFunnel: false
+                        AcquisitionDetails: false
                     },
                     Summary: {
                         main: false,
@@ -491,10 +475,7 @@ module.exports = {
                         acquisitionsummary: false,
                         channelAcquisitionsummary: false,
                         acquisitiondetails: false,
-                        userfunnel: false,
                         summary: false,
-                        dailySummary: false,
-                        dailyChannelSummary: false,
                         export: true,
                         bulkNotification: true,
                         hourly: false,
@@ -517,8 +498,7 @@ module.exports = {
                     AcquisitionReports: {
                         main: false,
                         AcquisitionSummary: false,
-                        AcquisitionDetails: false,
-                        UserFunnel: false
+                        AcquisitionDetails: false
                     },
                     Summary: {
                         main: false,
@@ -600,10 +580,7 @@ module.exports = {
                         acquisitionsummary: false,
                         channelAcquisitionsummary: false,
                         acquisitiondetails: false,
-                        userfunnel: false,
                         summary: false,
-                        dailySummary: false,
-                        dailyChannelSummary: false,
                         export: false,
                         bulkNotification: false,
                         hourly: false,
@@ -626,8 +603,7 @@ module.exports = {
                     AcquisitionReports: {
                         main: false,
                         AcquisitionSummary: false,
-                        AcquisitionDetails: false,
-                        UserFunnel: false
+                        AcquisitionDetails: false
                     },
                     Summary: {
                         main: false,
@@ -755,10 +731,7 @@ module.exports = {
                     { path: '/reports/acquisitionsummary', title: 'Acquisition Summary', show: limit.Reports.acquisitionsummary, },
                     { path: '/reports/channelacquisitionsummary', title: 'Channel Acquisition Summary', show: limit.Reports.channelAcquisitionsummary, },
                     { path: '/reports/acquisitiondetails', title: 'Acquisition Details', show: limit.Reports.acquisitiondetails, },
-                    { path: '/reports/userfunnel', title: 'User Funnel', show: limit.Reports.userfunnel, },
                     { path: '/reports/summary', title: 'Summary', show: limit.Reports.summary, },
-                    { path: '/reports/dailysummary', title: 'Daily Summary', show: limit.Reports.dailySummary, },
-                    { path: '/reports/dailychannelwisesummary', title: 'Daily channelwise Summary', show: limit.Reports.dailyChannelSummary, },
                     { path: '/reports/export', title: 'Export', show: limit.Reports.export, },
                     { path: '/reports/bulknotification', title: 'Bulk SMS Notification', show: limit.Reports.bulkNotification, },
                     { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, },
@@ -796,8 +769,7 @@ module.exports = {
                 children: [
 
                     { path: '/reports/acquisitionsummary', title: 'AcquisitionSummary', show: limit.AcquisitionReports.AcquisitionSummary, },
-                    { path: '/reports/acquisitiondetails', title: 'AcquisitionDetails', show: limit.AcquisitionReports.AcquisitionDetails, },
-                    { path: '/reports/userfunnel', title: 'User Funnel', show: limit.AcquisitionReports.UserFunnel, }
+                    { path: '/reports/acquisitiondetails', title: 'AcquisitionDetails', show: limit.AcquisitionReports.AcquisitionDetails, }
                 ]
             },
 
