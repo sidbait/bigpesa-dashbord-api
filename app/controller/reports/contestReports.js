@@ -424,16 +424,6 @@ module.exports = {
                     " where dt between '" + fromDate + "' and '" + toDate + "'  " +
                     " order by dt asc;";
 
-
-                /*  queryText = "select * from vw_admin_user_funnel where reg_date::Date between $1 and $2 ORDER BY trans_date asc ";
-                 valuesArr = [fromDate, toDate]
- 
-                 let query = {
-                     text: queryText,
-                     values: valuesArr
-                 }; */
-
-
                 let result = await pgConnection.executeQuery('rmg_dev_db', query)
                 if (result.length > 0) {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
