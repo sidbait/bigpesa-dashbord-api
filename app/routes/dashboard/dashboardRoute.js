@@ -30,4 +30,8 @@ dashboardRoutes.get('/chkEnvironment',dashboardController.chkEnvironment);
 
 dashboardRoutes.get('/getOtp',dashboardController.getOtp);
 
+dashboardRoutes.get('/walletTransactionCount',dashboardController.walletTransactionCount);
+
+dashboardRoutes.get('/walletCreditQueCount',dashboardController.walletCreditQueCount);
+
 module.exports = dashboardRoutes;
