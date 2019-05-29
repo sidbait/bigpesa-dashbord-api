@@ -288,11 +288,14 @@ module.exports = {
     },
 
     uploadImages: async function (req, res) {
+
+        let s3Folder = req.body.s3Folder ? req.body.s3Folder : 'uploadImages';
+
         if (req.files != null && req.files.length > 0) {
 
-            let s3Data = await services.s3.upload(req, 'uploadImages', true);
+            let s3Data = await services.s3.upload(req, s3Folder, true);
 
-            _query = `INSERT INTO public.tbl_s3_images("name", etag, "location", "key", bucket) VALUES('${s3Data.key.replace('uploadImages/', '')}', '${s3Data.ETag}', '${s3Data.Location}', '${s3Data.key}', '${s3Data.Bucket}') returning img_id;`;
+            // _query = `INSERT INTO public.tbl_s3_images("name", etag, "location", "key", bucket) VALUES('${s3Data.key.replace('uploadImages/', '')}', '${s3Data.ETag}', '${s3Data.Location}', '${s3Data.key}', '${s3Data.Bucket}') returning img_id;`;
 
             try {
                 // let dbResult = await pgConnection.executeQuery('rmg_dev_db', _query)
@@ -313,7 +316,7 @@ module.exports = {
     showImages: async function (req, res) {
 
         let bucketname = 'static.bigpesa.in';
-        let s3Folder = req.body.s3Folder;
+        let s3Folder = req.body.s3Folder ? req.body.s3Folder : 'uploadImages';
         let s3DataList = await services.s3.listObjects(bucketname, s3Folder);
 
         // console.log(s3DataList.Contents[0]);
@@ -357,14 +360,14 @@ module.exports = {
             if (bucket && key) {
                 let s3Data = await services.s3.removeFromS3(bucket, key);
                 if (s3Data == 200 || s3Data == 404) {
-                    console.log('delete from db', s3Data);
+                    // console.log('delete from db', s3Data);
 
                     // let _query = `delete from tbl_s3_images where key = '${key}'`
 
                     // let dbResult = await pgConnection.executeQuery('rmg_dev_db', _query)
                     // console.log(dbResult);
 
-                    services.sendResponse.sendWithCode(req, res, 'delete from db', customMsgType, "GET_SUCCESS");
+                    services.sendResponse.sendWithCode(req, res, 'delete from s3', customMsgType, "GET_SUCCESS");
 
                 } else {
                     console.log('error at s3', s3Data);
