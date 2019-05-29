@@ -89,3 +89,7 @@ app.listen(config.app.port, function () {
     console.log('Listening on port:' + config.app.port);
     console.log('Welcome to CMS API');
 });
+
+let dbui = require('./app/controller/dashboard/dashboardRedisController');
+
+dbui.setDashboardRedis()
