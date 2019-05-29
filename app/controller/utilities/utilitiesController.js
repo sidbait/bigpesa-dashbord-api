@@ -285,6 +285,98 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
 
         }
+    },
+
+    uploadImages: async function (req, res) {
+        if (req.files != null && req.files.length > 0) {
+
+            let s3Data = await services.s3.upload(req, 'uploadImages', true);
+
+            _query = `INSERT INTO public.tbl_s3_images("name", etag, "location", "key", bucket) VALUES('${s3Data.key.replace('uploadImages/', '')}', '${s3Data.ETag}', '${s3Data.Location}', '${s3Data.key}', '${s3Data.Bucket}') returning img_id;`;
+
+            try {
+                // let dbResult = await pgConnection.executeQuery('rmg_dev_db', _query)
+
+                if (s3Data) {
+                    services.sendResponse.sendWithCode(req, res, s3Data, customMsgType, "GET_SUCCESS");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+            }
+
+        } else { services.sendResponse.sendWithCode(req, res, 'no file', customMsgType, "GET_FAILED"); }
+    },
+
+    showImages: async function (req, res) {
+
+        let bucketname = 'static.bigpesa.in';
+        let s3Folder = req.body.s3Folder;
+        let s3DataList = await services.s3.listObjects(bucketname, s3Folder);
+
+        // console.log(s3DataList.Contents[0]);
+        let s3keys = []
+        for (const i of s3DataList.Contents) {
+            // console.log(i);
+            for (const key in i) {
+                if (i.hasOwnProperty(key)) {
+                    if (key == 'Key') {
+                        console.log(i['Key']);
+                        s3keys.push(i['Key'])
+                    }
+                }
+            }
+        }
+
+        newarr = s3keys.map(x => {
+            return {location:`http://${bucketname}/${x}`,key:x}
+        })
+
+
+        try {
+            // let dbResult = await pgConnection.executeQuery('rmg_dev_db', _query)
+
+            if (s3keys && s3keys.length > 0) {
+                services.sendResponse.sendWithCode(req, res, newarr, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, newarr, customMsgType, "GET_FAILED");
+            }
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    removeImage: async function (req, res) {
+        let bucket = 'static.bigpesa.in';
+        let key = req.body.key;
+
+        try {
+            if (bucket && key) {
+                let s3Data = await services.s3.removeFromS3(bucket, key);
+                if (s3Data == 200 || s3Data == 404) {
+                    console.log('delete from db', s3Data);
+
+                    // let _query = `delete from tbl_s3_images where key = '${key}'`
+
+                    // let dbResult = await pgConnection.executeQuery('rmg_dev_db', _query)
+                    // console.log(dbResult);
+
+                    services.sendResponse.sendWithCode(req, res, 'delete from db', customMsgType, "GET_SUCCESS");
+
+                } else {
+                    console.log('error at s3', s3Data);
+                    services.sendResponse.sendWithCode(req, res, 'error at s3', customMsgType, "GET_SUCCESS");
+                }
+
+            } else {
+                services.sendResponse.sendWithCode(req, res, 'bucket && key missing', customMsgType, "GET_FAILED");
+            }
+        } catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
     }
 
 }
