@@ -43,7 +43,8 @@ module.exports = {
                         main: true,
                         QueueReports: true,
                         RunSql: true,
-                        WalletMatrix: true
+                        WalletMatrix: true,
+                        UploadImages: true,
                     },
                     ContestDetails: {
                         main: true,
@@ -142,7 +143,8 @@ module.exports = {
                         main: true,
                         QueueReports: true,
                         RunSql: true,
-                        WalletMatrix: true
+                        WalletMatrix: true,
+                        UploadImages: true,
                     },
                     ContestDetails: {
                         main: true,
@@ -241,7 +243,8 @@ module.exports = {
                         main: false,
                         QueueReports: false,
                         RunSql: false,
-                        WalletMatrix: false
+                        WalletMatrix: false,
+                        UploadImages: true,
                     },
                     ContestDetails: {
                         main: true,
@@ -340,7 +343,8 @@ module.exports = {
                         main: false,
                         QueueReports: false,
                         RunSql: false,
-                        WalletMatrix: false
+                        WalletMatrix: false,
+                        UploadImages: false,
                     },
                     ContestDetails: {
                         main: false,
@@ -440,7 +444,8 @@ module.exports = {
                         main: false,
                         QueueReports: false,
                         RunSql: false,
-                        WalletMatrix: false
+                        WalletMatrix: false,
+                        UploadImages: false,
                     },
                     ContestDetails: {
                         main: false,
@@ -545,7 +550,8 @@ module.exports = {
                         main: false,
                         QueueReports: false,
                         RunSql: false,
-                        WalletMatrix: false
+                        WalletMatrix: false,
+                        UploadImages: false,
                     },
                     ContestDetails: {
                         main: false,
@@ -675,7 +681,8 @@ module.exports = {
                 children: [
                     { path: '/utilities/queue-reports', title: 'QueueReports', show: limit.Utilities.QueueReports, },
                     { path: '/utilities/run-sql', title: 'Run Sql', show: limit.Utilities.RunSql, },
-                    { path: '/utilities/wallet-matrix', title: 'Wallet Matrix', show: limit.Utilities.WalletMatrix, }
+                    { path: '/utilities/wallet-matrix', title: 'Wallet Matrix', show: limit.Utilities.WalletMatrix, },
+                    { path: '/utilities/upload-images', title: 'Upload Images', show: limit.Utilities.UploadImages, }
                 ]
             }, {
                 path: '',
