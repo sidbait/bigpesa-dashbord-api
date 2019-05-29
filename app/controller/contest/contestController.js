@@ -165,7 +165,7 @@ module.exports = {
         let app_id = req.body.app_id ? req.body.app_id : null;
 
         let _selectQuery = `select contest_name, entry_fee,debit_type from tbl_contest
-        where status = 'ACTIVE' and start_date > now()`;
+        where status = 'ACTIVE' and start_date::date >= now()::date and COALESCE(contest_priority,1) != 0`;
 
         if (app_id) {
             _selectQuery += ` and app_id = ${app_id}`;
@@ -1037,7 +1037,7 @@ async function getUpdateQueriesContestOrder(allContestOrder, app_id) {
         let updateQuerie = []
         if (app_id) {
             for (let i = 0; i < allContestOrder.length; i++) {
-                const x = allContestOrder[i].split("-");
+                const x = allContestOrder[i].split("|");
                 const priority = i + 1;
 
                 let _query = `update tbl_contest set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and contest_name = '${x[2]}' and status = 'ACTIVE' and COALESCE(contest_priority,1) != 0 and app_id = ${app_id}`;
@@ -1049,7 +1049,7 @@ async function getUpdateQueriesContestOrder(allContestOrder, app_id) {
             }
         } else {
             for (let i = 0; i < allContestOrder.length; i++) {
-                const x = allContestOrder[i].split("-");
+                const x = allContestOrder[i].split("|");
                 const priority = i + 1;
 
                 let _query = `update tbl_contest set contest_priority = ${priority} where entry_fee = ${x[0]} and debit_type = '${x[1]}' and status = 'ACTIVE' and COALESCE(contest_priority,1) != 0`;
