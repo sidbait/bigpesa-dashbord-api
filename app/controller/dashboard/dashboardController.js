@@ -665,5 +665,44 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
 
         }
-    }
+    },
+
+    walletTransactionCount: async function (req, res) {
+
+        let _selectQuery = `select nz_txn_status, count(1) from tbl_wallet_transaction 
+        where nz_txn_type = 'DEPOSIT' and nz_txn_status in ('PENDING','INPROGRESS') 
+        group by nz_txn_status`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    walletCreditQueCount: async function (req, res) {
+
+        let _selectQuery = `select status, count(1) from tbl_wallet_credit_que 
+        where add_date > current_date - interval '7 days' and status in ('ACTIVE','PROCESSING')
+        group by status;`
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+    
 }
