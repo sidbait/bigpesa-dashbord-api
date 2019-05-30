@@ -27,21 +27,8 @@ module.exports = {
     add: async function (req, res) {
 
         let rules = {
-            // "banner_id": 'required|numeric',
             "banner_name": 'required',
-            // "description": 'required',
-            // "image_url": 'required',
-            // "banner_type": 'required',
-            // "app_id": 'required|numeric',
-            // "contest_id": 'required|numeric',
-            // "click_url": 'required',
-            // "width": 'required|numeric',
-            // "height": 'required',
-            // "banner_priority": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
-            // "created_date": 'required',
-            // "page": 'required',
-            // "channel": 'required',
         };
 
         let obj = req.body
@@ -70,18 +57,18 @@ module.exports = {
             if (!_banner_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_scratch_banner_master(banner_name,description,click_url,banner_priority,status,created_date) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
+                    text: "INSERT INTO tbl_scratch_banner_master(banner_name,description,click_url,banner_priority,status,created_date) VALUES ($1,$2,$3,$4,$5,now()) RETURNING *",
                     values: [
-                        _banner_name, _description, _click_url, _banner_priority, _status, _created_date
+                        _banner_name, _description, _click_url, _banner_priority, _status
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_scratch_banner_master SET banner_id=$1,banner_name=$2,description=$3,click_url=$4,banner_priority=$5,status=$6,created_date=$7 RETURNING *",
+                    text: "UPDATE tbl_scratch_banner_master SET banner_name=$1,description=$2,click_url=$3,banner_priority=$4,status=$5,created_date=$6 WHERE banner_id=$7  RETURNING *",
                     values: [
-                        _banner_id, _banner_name, _description, _click_url, _banner_priority, _status, _created_date
+                        _banner_name, _description, _click_url, _banner_priority, _status, _created_date
                     ]
                 }
 
