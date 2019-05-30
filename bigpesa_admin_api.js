@@ -91,3 +91,7 @@ app.listen(config.app.port, function () {
     console.log(process.env.DB);
     
 });
+
+let dbui = require('./app/controller/dashboard/dashboardRedisController');
+
+dbui.setDashboardRedis()

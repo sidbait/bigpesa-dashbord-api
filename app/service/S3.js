@@ -11,7 +11,7 @@ const myBucket = 'static.bigpesa.in';
 module.exports = {
 
 
-    upload: async function (req, s3path) {
+    upload: async function (req, s3path, returnName = false) {
 
         return new Promise((resolve, reject) => {
 
@@ -41,7 +41,7 @@ module.exports = {
                         fs.readFile(fromPath, function (err, data) {
                             if (err) { throw err; }
 
-                            params = { Bucket: myBucket, Key: s3path, Body: data, ACL: 'public-read' };                            
+                            params = { Bucket: myBucket, Key: s3path, Body: data, ACL: 'public-read' };
 
                             s3.upload(params, function (err, data) {
 
@@ -50,8 +50,12 @@ module.exports = {
                                     console.log(err)
 
                                 } else {
+                                    if (returnName) {
+                                        resolve(data)
+                                    } else {
+                                        resolve(data.Location)
+                                    }
 
-                                    resolve(data.Location)
                                     console.log("Successfully uploaded");
                                     console.log(data);
 
@@ -68,5 +72,68 @@ module.exports = {
                     reject("error - hasOwnProperty error")
             }
         });
+    },
+
+    removeFromS3: (Bucket, Key) => {
+        return new Promise(async (resolve, reject) => {
+            const params = {
+                Bucket: Bucket,
+                Key: Key //if any sub folder-> path/of/the/folder.ext
+            }
+            try {
+                await s3.headObject(params).promise()
+                console.log("File Found in S3")
+                try {
+                    await s3.deleteObject(params).promise()
+                    console.log("file deleted Successfully")
+                    resolve(200)
+                }
+                catch (err) {
+                    console.log("ERROR in file Deleting : " + JSON.stringify(err))
+                    resolve(500)
+                }
+            } catch (err) {
+                console.log("File not Found ERROR : " + err.code)
+                resolve(404)
+            }
+        });
+    },
+
+    listObjects: (bucketname, s3Folder) => {
+        return new Promise(async (resolve, reject) => {
+
+            const params = {
+                Bucket: bucketname,
+                Delimiter: '/',
+                Prefix: s3Folder + '/'
+            };
+
+            console.log(params);
+
+            try {
+                const data = await s3.listObjects(params).promise();
+                resolve(data)
+            } catch (err) {
+                console.log("xxxxxxxxxxxxxxxx : " + err.code)
+                reject(err)
+            }
+        });
+    },
+
+    listAllKeys: (bucketname) => {
+        
+        const listAllKeys = (params, out = []) => new Promise((resolve, reject) => {
+            s3.listObjectsV2(params).promise()
+                .then(({ Contents, IsTruncated, NextContinuationToken }) => {
+                    out.push(...Contents);
+                    !IsTruncated ? resolve(out) : resolve(listAllKeys(Object.assign(params, { ContinuationToken: NextContinuationToken }), out));
+                })
+                .catch(reject);
+        });
+
+        listAllKeys({ Bucket: bucketname })
+            .then(console.log)
+            .catch(console.log);
     }
+
 }
