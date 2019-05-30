@@ -59,18 +59,18 @@ module.exports = {
             if (!_scratch_event_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_scratch_event_master(name,event_code,channel,amount,status,add_date,description,win_description) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *",
+                    text: "INSERT INTO tbl_scratch_event_master(name,event_code,channel,amount,status,description,win_description,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now()) RETURNING scratch_event_id",
                     values: [
-                        _event_name, _event_code, _channel, _amount, _status, _created_date,_description,_win_description
+                        _event_name, _event_code, _channel, _amount, _status, _description,_win_description, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_scratch_event_master SET scratch_event_id=$1,name=$2,event_code=$3,channel=$4,amount=$5,status=$6,add_date=$7,description=$8,win_description=$9 RETURNING *",
+                    text: "UPDATE tbl_scratch_event_master SET name=$1,event_code=$2,channel=$3,amount=$4,status=$5,description=$6,win_description=$7,updated_by=$8,updated_at=now() WHERE scratch_event_id=$9 RETURNING scratch_event_id",
                     values: [
-                        _scratch_event_id, _event_name, _event_code, _channel, _amount, _status, _created_date, _description, _win_description
+                        _event_name, _event_code, _channel, _amount, _status, _description, _win_description, _updated_by, _scratch_event_id
                     ]
                 }
 

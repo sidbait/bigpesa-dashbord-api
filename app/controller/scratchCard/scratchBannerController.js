@@ -57,18 +57,18 @@ module.exports = {
             if (!_banner_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_scratch_banner_master(banner_name,description,click_url,banner_priority,status,created_date) VALUES ($1,$2,$3,$4,$5,now()) RETURNING banner_id",
+                    text: "INSERT INTO tbl_scratch_banner_master(banner_name,description,click_url,banner_priority,status,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,now()) RETURNING banner_id",
                     values: [
-                        _banner_name, _description, _click_url, _banner_priority, _status
+                        _banner_name, _description, _click_url, _banner_priority, _status, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_scratch_banner_master SET banner_name=$1,description=$2,click_url=$3,banner_priority=$4,status=$5,created_date=now() WHERE banner_id= $6 RETURNING banner_id",
+                    text: "UPDATE tbl_scratch_banner_master SET banner_name=$1,description=$2,click_url=$3,banner_priority=$4,status=$5,updated_by=$6,updated_at=now() WHERE banner_id= $7 RETURNING banner_id",
                     values: [
-                        _banner_name, _description, _click_url, _banner_priority, _status, _banner_id
+                        _banner_name, _description, _click_url, _banner_priority, _status, _updated_by, _banner_id
                     ]
                 }
 

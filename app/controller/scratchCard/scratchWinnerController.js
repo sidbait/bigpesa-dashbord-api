@@ -9,7 +9,7 @@ module.exports = {
 
     getAll: async function (req, res) {
 
-        let _selectQuery = "SELECT * FROM tbl_scratch_campaign_master";
+        let _selectQuery = "SELECT * FROM tbl_scratch_winner_banners"
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
@@ -27,7 +27,8 @@ module.exports = {
     add: async function (req, res) {
 
         let rules = {
-            "camp_name": 'required',
+            "banner_name":'required',
+            "prize_amount": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
         };
 
@@ -39,12 +40,13 @@ module.exports = {
 
         if (validation.passes()) {
 
-            let _camp_id = req.body.camp_id ? req.body.camp_id : null;
-            let _camp_name = req.body.camp_name ? req.body.camp_name : null;
-            let _camp_description = req.body.camp_description ? req.body.camp_description : null;
-            //let _image_url = req.body.image_url ? req.body.image_url : null;
+            let _banner_id = req.body.banner_id ? req.body.banner_id : null;
+            let _player_id = req.body.player_id ? req.body.player_id : null;
+            let _banner_name = req.body.banner_name ? req.body.banner_name : null;
+            let _description = req.body.description ? req.body.description : null;
+            let _click_url = req.body.click_url ? req.body.click_url : null;
+            let _banner_priority = req.body.banner_priority ? req.body.banner_priority : null;
             let _status = req.body.status ? req.body.status : null;
-            let _channel = req.body.channel ? req.body.channel : null;
             let _created_date = req.body.created_date ? req.body.created_date : null;
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
@@ -58,24 +60,24 @@ module.exports = {
             let _new_end_date = joinDateTime(_end_date, _to_time);
 
             let _query;
-            let errMsgType = _camp_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
-            let successMsgType = _camp_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
+            let errMsgType = _banner_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
+            let successMsgType = _banner_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
 
-            if (!_camp_id) {
+            if (!_banner_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_scratch_campaign_master(camp_name,camp_description,status,channel,valid_from,valid_to,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now()) RETURNING camp_id",
+                    text: "INSERT INTO tbl_scratch_winner_banners(banner_name,description,click_url,banner_priority,from_date,to_date,player_id,status,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,now()) RETURNING banner_id",
                     values: [
-                        _camp_name, _camp_description, _status, _channel, _new_start_date, _new_end_date, _created_by
+                        _banner_name, _description, _click_url, _banner_priority, _new_start_date, _new_end_date, _player_id, _status, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_scratch_campaign_master SET camp_name=$1,camp_description=$2,status=$3,channel=$4,valid_from=$5,valid_to=$6,updated_by=$7,updated_at=now() WHERE camp_id=$8 RETURNING camp_id",
+                    text: "UPDATE tbl_scratch_winner_banners SET banner_name=$1,description=$2,click_url=$3,banner_priority=$4,from_date=$5,to_date=$6,player_id=$7,status=$8,updated_by=$9,updated_at=now() WHERE banner_id=$10 RETURNING banner_id",
                     values: [
-                        _camp_name, _camp_description, _status, _channel, _new_start_date, _new_end_date, _updated_by, _camp_id
+                        _banner_name, _description, _click_url, _banner_priority, _new_start_date, _new_end_date, _player_id, _status, _updated_by, _banner_id
                     ]
                 }
 
@@ -90,12 +92,12 @@ module.exports = {
 
                     if (req.files != null && req.files.length > 0) {
                         // let movePath = await uploadBanner(req, result[0].contest_master_id);
-                        let s3Path = await services.s3.upload(req, 'scratchcampimage');
+                        let s3Path = await services.s3.upload(req, 'scratchwinnerbanner');
                         let mvQuery = {
-                            text: "UPDATE tbl_scratch_campaign_master set camp_image = $1 WHERE camp_id= $2 RETURNING camp_image",
+                            text: "UPDATE tbl_scratch_winner_banners set image_url = $1 WHERE banner_id= $2 RETURNING image_url",
                             values: [
                                 s3Path,
-                                result[0].camp_id
+                                result[0].banner_id
                             ]
                         }
 
@@ -123,15 +125,15 @@ module.exports = {
 
     search: async function (req, res) {
 
-        let _camp_id = req.body.camp_id ? req.body.camp_id : null;
+        let _banner_id = req.body.banner_id ? req.body.banner_id : null;
         let _status = req.body.status ? req.body.status : null;
         //let _banner_type = req.body.banner_type ? req.body.banner_type : null;
-        let _orderBy = req.body.orderBy ? req.body.orderBy : 'camp_name';
+        let _orderBy = req.body.orderBy ? req.body.orderBy : 'banner_name';
 
-        let _selectQuery = 'SELECT * FROM tbl_scratch_campaign_master WHERE  1=1'
+        let _selectQuery = 'SELECT * FROM tbl_scratch_winner_banners WHERE  1=1'
 
-        if (_camp_id) {
-            _selectQuery += " AND camp_id = " + _camp_id
+        if (_banner_id) {
+            _selectQuery += " AND banner_id = " + _banner_id
         }
 
         if (_status) {
@@ -154,12 +156,9 @@ module.exports = {
         }
 
     },
-
 }
 
 function joinDateTime(date, time) {
     let new_date = date + 'T' + time + 'Z';
     return new_date
 }
-
-    

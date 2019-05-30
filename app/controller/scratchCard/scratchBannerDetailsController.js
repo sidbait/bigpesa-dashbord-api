@@ -55,18 +55,18 @@ module.exports = {
             if (!_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_scratch_campaign_banner(camp_id,banner_id,status,created_date) VALUES ($1,$2,$3,$4) RETURNING *",
+                    text: "INSERT INTO tbl_scratch_campaign_banner(camp_id,banner_id,status,created_by,created_at) VALUES ($1,$2,$3,$4) RETURNING id",
                     values: [
-                        _camp_id, _banner_id, _status, _created_date
+                        _camp_id, _banner_id, _status, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_scratch_campaign_banner SET id=$1,camp_id=$2,banner_id=$3,status=$4,created_date=$5 RETURNING *",
+                    text: "UPDATE tbl_scratch_campaign_banner SET camp_id=$1,banner_id=$2,status=$3,updated_by=$4,updated_at=now() WHERE id=$5 RETURNING id",
                     values: [
-                        _id, _camp_id, _banner_id, _status, _created_date
+                        _camp_id, _banner_id, _status, _updated_by
                     ]
                 }
 

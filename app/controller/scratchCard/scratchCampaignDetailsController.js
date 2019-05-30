@@ -55,18 +55,18 @@ module.exports = {
             if (!_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_scratch_campaign_details(camp_id,scratch_event_id,status,add_date) VALUES ($1,$2,$3,$4) RETURNING *",
+                    text: "INSERT INTO tbl_scratch_campaign_details(camp_id,scratch_event_id,status,created_by,created_at) VALUES ($1,$2,$3,$4,now()) RETURNING id",
                     values: [
-                        _camp_id, _scratch_event_id, _status, _created_date
+                        _camp_id, _scratch_event_id, _status, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_scratch_campaign_details SET id=$1,camp_id=$2,scratch_event_id=$3,status=$4,add_date=$5 RETURNING *",
+                    text: "UPDATE tbl_scratch_campaign_details SET camp_id=$1,scratch_event_id=$2,status=$3,updated_by=$4,updated_at=now() WHERE id=$5 RETURNING id",
                     values: [
-                        _id, _camp_id, _scratch_event_id, _status, _created_date
+                        _camp_id, _scratch_event_id, _status, _created_by, _id
                     ]
                 }
 
