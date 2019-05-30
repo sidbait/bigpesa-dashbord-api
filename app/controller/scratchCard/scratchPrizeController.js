@@ -58,18 +58,18 @@ module.exports = {
             if (!_prize_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_scratch_prize_master(prize_code,prize_description,prize_amount,gratification_type,status,add_date,prize_title) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *",
+                    text: "INSERT INTO tbl_scratch_prize_master(prize_code,prize_description,prize_amount,gratification_type,status,prize_title,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now()) RETURNING prize_id",
                     values: [
-                        _prize_code, _prize_description, _prize_amount, _gratification_type, _status, _created_date, _prize_title
+                        _prize_code, _prize_description, _prize_amount, _gratification_type, _status, _prize_title, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_scratch_prize_master SET prize_id=$1,prize_code=$2,prize_description=$3,prize_amount=$4,gratification_type=$5,status=$6,created_date=$7,prize_title=$8 RETURNING *",
+                    text: "UPDATE tbl_scratch_prize_master SET prize_code=$1,prize_description=$2,prize_amount=$3,gratification_type=$4,status=$5,prize_title=$6,updated_by=$7,updated_at=now() WHERE prize_id=$8 RETURNING prize_id",
                     values: [
-                        _prize_id, _prize_code, _prize_description, _prize_amount, _gratification_type, _status, _created_date, _prize_title
+                        _prize_code, _prize_description, _prize_amount, _gratification_type, _status, _prize_title, _updated_by, _prize_id
                     ]
                 }
 
