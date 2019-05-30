@@ -53,11 +53,12 @@ module.exports = {
                                     if (returnName) {
                                         resolve(data)
                                     } else {
-                                        resolve(data.Location)
+                                        // resolve(data.Location)
+                                        resolve('http://'+data.Bucket+'/'+data.key);
                                     }
 
                                     console.log("Successfully uploaded");
-                                    console.log(data);
+                                    console.log('http://'+data.Bucket+'/'+data.key);
 
                                 }
 
