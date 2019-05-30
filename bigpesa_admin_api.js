@@ -88,4 +88,6 @@ app.listen(config.app.port, function () {
 
     console.log('Listening on port:' + config.app.port);
     console.log('Welcome to CMS API');
+    console.log(process.env.DB);
+    
 });
