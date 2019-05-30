@@ -29,7 +29,7 @@ module.exports = {
 
                     // let s3path = `admin/uploads/${utc}/${Date.now()}_${element.originalname}`;
 
-                    s3path = s3path ? `${s3path}/${element.originalname}` : `admin/uploads/${utc}/${Date.now()}_${element.originalname}`;
+                    let s3key = s3path ? `${s3path}/${Date.now()}_${element.originalname}` : `admin/uploads/${utc}/${Date.now()}_${element.originalname}`;
 
                     let extension = path.extname(fromPath)
 
@@ -41,7 +41,7 @@ module.exports = {
                         fs.readFile(fromPath, function (err, data) {
                             if (err) { throw err; }
 
-                            params = { Bucket: myBucket, Key: s3path, Body: data, ACL: 'public-read' };
+                            params = { Bucket: myBucket, Key: s3key, Body: data, ACL: 'public-read' };
 
                             s3.upload(params, function (err, data) {
 
@@ -53,11 +53,12 @@ module.exports = {
                                     if (returnName) {
                                         resolve(data)
                                     } else {
-                                        resolve(data.Location)
+                                        // resolve(data.Location)
+                                        resolve('http://'+data.Bucket+'/'+data.key);
                                     }
 
                                     console.log("Successfully uploaded");
-                                    console.log(data);
+                                    console.log('http://'+data.Bucket+'/'+data.key);
 
                                 }
 
@@ -108,10 +109,10 @@ module.exports = {
                 Prefix: s3Folder + '/'
             };
 
-            console.log(params);
+            // console.log(params);
 
             try {
-                const data = await s3.listObjects(params).promise();
+                const data = await s3.listObjectsV2(params).promise();
                 resolve(data)
             } catch (err) {
                 console.log("xxxxxxxxxxxxxxxx : " + err.code)
@@ -121,7 +122,7 @@ module.exports = {
     },
 
     listAllKeys: (bucketname) => {
-        
+
         const listAllKeys = (params, out = []) => new Promise((resolve, reject) => {
             s3.listObjectsV2(params).promise()
                 .then(({ Contents, IsTruncated, NextContinuationToken }) => {

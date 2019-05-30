@@ -57,7 +57,11 @@ module.exports = {
             if (!_banner_id) {
 
                 _query = {
+<<<<<<< HEAD
                     text: "INSERT INTO tbl_scratch_banner_master(banner_name,description,click_url,banner_priority,status,created_date) VALUES ($1,$2,$3,$4,$5,now()) RETURNING *",
+=======
+                    text: "INSERT INTO tbl_scratch_banner_master(banner_name,description,click_url,banner_priority,status,created_date) VALUES ($1,$2,$3,$4,$5,now()) RETURNING banner_id",
+>>>>>>> master
                     values: [
                         _banner_name, _description, _click_url, _banner_priority, _status
                     ]
@@ -66,9 +70,15 @@ module.exports = {
             else {
 
                 _query = {
+<<<<<<< HEAD
                     text: "UPDATE tbl_scratch_banner_master SET banner_name=$1,description=$2,click_url=$3,banner_priority=$4,status=$5,created_date=$6 WHERE banner_id=$7  RETURNING *",
                     values: [
                         _banner_name, _description, _click_url, _banner_priority, _status, _created_date
+=======
+                    text: "UPDATE tbl_scratch_banner_master SET banner_name=$1,description=$2,click_url=$3,banner_priority=$4,status=$5,created_date=now() WHERE banner_id= $6 RETURNING banner_id",
+                    values: [
+                        _banner_name, _description, _click_url, _banner_priority, _status, _banner_id
+>>>>>>> master
                     ]
                 }
 
@@ -82,8 +92,8 @@ module.exports = {
                 if (result.length > 0) {
 
                     if (req.files != null && req.files.length > 0) {
-                        // let movePath = await uploadBanner(req, result[0].contest_master_id);
-                        let s3Path = await services.s3.upload(req, 'scratchbanners');
+
+                        let s3Path = await services.s3.upload(req, 'scratch_card_img');
                         let mvQuery = {
                             text: "UPDATE tbl_scratch_banner_master set image_url = $1 WHERE banner_id= $2 RETURNING image_url",
                             values: [
