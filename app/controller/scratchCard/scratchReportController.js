@@ -54,11 +54,10 @@ module.exports = {
             let _todate = req.body.todate ? req.body.todate : null;
 
             let _selectQuery = `select tbl_scratch_campaign_prizes_details.winner_date::date::text as winner_date, prize_code, prize_type,
-        sum(amount) as pivot_data
+            count(case when is_win = true then 1 end)  as win_count
          from tbl_scratch_campaign_prizes_details 
         join tbl_scratch_prize_master
         on tbl_scratch_campaign_prizes_details.prize_id = tbl_scratch_prize_master.prize_id
-        where tbl_scratch_campaign_prizes_details.winner_date::date between '${_frmdate}' and '${_todate}'
         group by tbl_scratch_campaign_prizes_details.winner_date::date::text, prize_code, prize_type`;
 
             try {
@@ -71,7 +70,7 @@ module.exports = {
                     let options = {
                         row: "winner_date",
                         column: "prize_code",
-                        value: "pivot_data"
+                        value: "win_count"
                     };
                     let output = jsonToPivotjson(dbResult, options);
 
