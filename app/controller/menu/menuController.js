@@ -67,6 +67,7 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -178,6 +179,7 @@ module.exports = {
                         ScratchEvent: true,
                         ScratchPrize: true,
                         ScratchCampaignBanner: true,
+                        ScratchReport: true
                     },
                     FeedbackDetails: {
                         main: false,
@@ -289,6 +291,7 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -400,6 +403,7 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -512,6 +516,7 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -629,6 +634,7 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -786,6 +792,7 @@ module.exports = {
                     { path: '/master/scratch-card-management/scratch-event', title: 'Scratch Event', show: limit.ScratchCardManagement.ScratchEvent },
                     { path: '/master/scratch-card-management/scratch-prize', title: 'Scratch Prize', show: limit.ScratchCardManagement.ScratchPrize },
                     { path: '/master/scratch-card-management/scratch-campaign-banner', title: 'Scratch Campaign Banner', show: limit.ScratchCardManagement.ScratchCampaignBanner },
+                    { path: '/master/scratch-card-management/scratch-report', title: 'Scratch Report', show: limit.ScratchCardManagement.ScratchReport }
                 ]
             }, {
                 path: '',
@@ -804,8 +811,8 @@ module.exports = {
                 icontype: 'fas fa-users-cog',
                 show: limit.Engagement.main,
                 children: [
-                    { path: '/reports/exportnotification', title: 'Notification', show: limit.Reports.bulkNotification, },
-                    { path: '/reports/bulknotification', title: 'Reports', show: limit.Reports.reports, }                    
+                    { path: '/reports/pushnotification', title: 'Notification', show: limit.Engagement.bulkNotification, },
+                    { path: '/reports/bulknotification', title: 'Reports', show: limit.Engagement.reports, }                    
                 ]
             }, {
                 path: '',
