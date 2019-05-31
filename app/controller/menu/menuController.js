@@ -67,10 +67,16 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
+                    },
+                    Engagement:{
+                        main: true,
+                        bulkNotification: true,
+                        reports:false
                     },
                     Reports: {
                         main: true,
@@ -88,8 +94,6 @@ module.exports = {
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: true,
                         splitWiseReport: true,
                         pixel: true,
@@ -175,10 +179,16 @@ module.exports = {
                         ScratchEvent: true,
                         ScratchPrize: true,
                         ScratchCampaignBanner: true,
+                        ScratchReport: true
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
+                    },
+                    Engagement:{
+                        main: true,
+                        bulkNotification: true,
+                        reports:false
                     },
                     Reports: {
                         main: true,
@@ -196,8 +206,6 @@ module.exports = {
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: true,
                         pixel: true,
                         splitWiseReport: true
@@ -283,10 +291,16 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
+                    },
+                    Engagement:{
+                        main: true,
+                        bulkNotification: true,
+                        reports:false
                     },
                     Reports: {
                         main: true,
@@ -304,8 +318,6 @@ module.exports = {
                         channelAcquisitionsummary: false,
                         acquisitiondetails: false,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: false,
                         pixel: true,
                         splitWiseReport: true
@@ -391,10 +403,16 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
+                    },
+                    Engagement:{
+                        main: true,
+                        bulkNotification: true,
+                        reports:false
                     },
                     Reports: {
                         main: true,
@@ -412,8 +430,6 @@ module.exports = {
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: true,
                         pixel: true,
                         splitWiseReport: true
@@ -500,10 +516,16 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
+                    },
+                    Engagement:{
+                        main: false,
+                        bulkNotification: false,
+                        reports:false
                     },
                     Reports: {
                         main: true,
@@ -521,8 +543,6 @@ module.exports = {
                         channelAcquisitionsummary: false,
                         acquisitiondetails: false,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: false,
                         pixel: false,
                         splitWiseReport: false
@@ -614,10 +634,16 @@ module.exports = {
                         ScratchEvent: false,
                         ScratchPrize: false,
                         ScratchCampaignBanner: false,
+                        ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
+                    },
+                    Engagement:{
+                        main: false,
+                        bulkNotification: false,
+                        reports:false
                     },
                     Reports: {
                         main: false,
@@ -635,8 +661,6 @@ module.exports = {
                         channelAcquisitionsummary: false,
                         acquisitiondetails: false,
                         summary: false,
-                        export: false,
-                        bulkNotification: false,
                         hourly: false,
                         pixel: false,
                         splitWiseReport: false
@@ -768,6 +792,7 @@ module.exports = {
                     { path: '/master/scratch-card-management/scratch-event', title: 'Scratch Event', show: limit.ScratchCardManagement.ScratchEvent },
                     { path: '/master/scratch-card-management/scratch-prize', title: 'Scratch Prize', show: limit.ScratchCardManagement.ScratchPrize },
                     { path: '/master/scratch-card-management/scratch-campaign-banner', title: 'Scratch Campaign Banner', show: limit.ScratchCardManagement.ScratchCampaignBanner },
+                    { path: '/master/scratch-card-management/scratch-report', title: 'Scratch Report', show: limit.ScratchCardManagement.ScratchReport }
                 ]
             }, {
                 path: '',
@@ -778,6 +803,16 @@ module.exports = {
                 // countClass: 'feedbackPendingCount',
                 children: [
                     { path: '/master/feedback', title: 'Feedback', show: limit.FeedbackDetails.feedback },
+                ]
+            }, {
+                path: '',
+                title: 'Engagement',
+                type: 'menu__toggle',
+                icontype: 'fas fa-users-cog',
+                show: limit.Engagement.main,
+                children: [
+                    { path: '/reports/pushnotification', title: 'Notification', show: limit.Engagement.bulkNotification, },
+                    { path: '/reports/bulknotification', title: 'Reports', show: limit.Engagement.reports, }                    
                 ]
             }, {
                 path: '',
@@ -800,8 +835,6 @@ module.exports = {
                     { path: '/reports/channelacquisitionsummary', title: 'Channel Acquisition Summary', show: limit.Reports.channelAcquisitionsummary, },
                     { path: '/reports/acquisitiondetails', title: 'Acquisition Details', show: limit.Reports.acquisitiondetails, },
                     { path: '/reports/summary', title: 'Summary', show: limit.Reports.summary, },
-                    { path: '/reports/export', title: 'Export', show: limit.Reports.export, },
-                    { path: '/reports/bulknotification', title: 'Bulk SMS Notification', show: limit.Reports.bulkNotification, },
                     { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, },
                     { path: '/reports/splitwisebalance', title: 'Splitwise Balance Report', show: limit.Reports.splitWiseReport, },
                     { path: '/reports/pixel', title: 'Pixel Report', show: limit.Reports.pixel, }

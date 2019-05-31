@@ -359,12 +359,12 @@ module.exports = {
             let player_id = req.body.player_id;
             try {
                 queryText = "select txn_id, nz_txn_event, tbl_wallet_balance_log.txn_type, winning_balance, reward_balance, deposit_balance, tbl_wallet_balance_log.amount, moved_wb, moved_rb, moved_db, " +
-                " (winning_balance + reward_balance + deposit_balance ) total, tbl_wallet_transaction.created_at as created_at" +
-                " from tbl_wallet_balance_log " +
-                " inner join tbl_wallet_transaction " +
-                " on  tbl_wallet_balance_log.txn_id = tbl_wallet_transaction.wallet_txn_id" +
-                " where tbl_wallet_balance_log.player_id = $1" + 
-                " order by txn_id desc, tbl_wallet_transaction.created_at desc limit 100";
+                    " (winning_balance + reward_balance + deposit_balance ) total, tbl_wallet_transaction.created_at as created_at" +
+                    " from tbl_wallet_balance_log " +
+                    " inner join tbl_wallet_transaction " +
+                    " on  tbl_wallet_balance_log.txn_id = tbl_wallet_transaction.wallet_txn_id" +
+                    " where tbl_wallet_balance_log.player_id = $1" +
+                    " order by txn_id desc, tbl_wallet_transaction.created_at desc limit 100";
 
                 valuesArr = [player_id];
 
@@ -551,7 +551,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
-
     notVerifiedPlayerData: async function (req, res) {
 
         try {
@@ -573,7 +572,6 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
-
     withdrawReport: async function (req, res) {
 
         try {
@@ -627,78 +625,126 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
-    bulkSMSNotification: function (req, res) {
+    bulkSMSNotification: async function (req, res) {
 
         let uploadFilepath = `./public/bulk/SMS/`;
-        var data = null;
-        //var numbers = [];
+        if (req.files.length > 0) {
+            var from_path = req.files[0].destination + req.files[0].filename;
+            var splt = req.files[0].originalname.split('.');
+            var ext = splt[splt.length - 1];
+            if (ext.toLowerCase() == "csv") {
+                var dest_path = new Date().toDateString() + '.' + ext;
+                let moveto = uploadFilepath + dest_path.trim();
+                moveto = moveto.toLowerCase();
+                console.log(from_path);
+                console.log(moveto);
+                const csvFilePath = await moveFile(from_path, moveto)
+                try {
+                    let queryText = `COPY tbl_push_notification(player_id, phone_number, title, event, message, status, push_type) FROM '${csvFilePath}' DELIMITER ' '`;
 
+                    let query = {
+                        text: queryText
+                    };
+
+                    let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                    if (result.length > 0) {
+                        services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
+                    } else {
+                        services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_FAILED");
+                    }
+                }
+                catch (error) {
+                    services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+                }
+
+            }
+            else {
+                services.sendResponse.sendWithCode(req, res, { error: "Please provide proper CSV file." }, customMsgTypeCM, "VALIDATION_FAILED");
+            }
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+    },
+    pushNotification: async function (req, res) {
         let rules = {
+            "frmdate": 'required',
+            "todate": 'required',
+            "event_type": 'required',
             "title": 'required',
             "event": 'required',
-            "push_type": 'required',
-            "message": 'required'
+            "message": 'required',
+            "push_type": 'required'
         };
-
         var custom_message = {
-            "required.title": "Title is mandatory!",
-            "required.event": "Event is mandatory!",
-            "required.push_type": "Push Type is mandatory!",
-            "required.message": "Message is mandatory!"
+            "required.frmdate": "From Date is mandatory!",
+            "required.todate": "End Date is mandatory!",
+            "required.event_type": "End Date is mandatory!",
+            "required.title": "End Date is mandatory!",
+            "required.message": "End Date is mandatory!",
+            "required.todate": "End Date is mandatory!",
+            "required.push_type": "End Date is mandatory!"
         };
 
         let validation = new services.validator(req.body, rules, custom_message);
         if (validation.passes()) {
+            let frmdate = req.body.frmdate;
+            let todate = req.body.todate;
+            let event_type = req.body.event_type;
             let title = req.body.title;
             let event = req.body.event;
-            let push_type = req.body.push_type;
             let message = req.body.message;
-            if (req.files.length > 0) {
-                var from_path = req.files[0].destination + req.files[0].filename;
-                var splt = req.files[0].originalname.split('.');
-                var ext = splt[splt.length - 1];
-                if (ext.toLowerCase() == "csv") {
-                    var dest_path = new Date().toDateString() + '.' + ext;
-                    let moveto = uploadFilepath + dest_path;
-                    moveto = moveto.toLowerCase();
-                    console.log(from_path);
-                    console.log(moveto);
-                    mv(from_path, moveto, { mkdirp: true }, function (err) {
-                        if (err) {
-                            updateflg = false;
-                        }
-                        else {
-                            const csvFilePath = moveto;
-                            csv()
-                                .fromFile(csvFilePath)
-                                .then((jsonObj) => {
-                                    console.log('jsonObj ', jsonObj);
-                                    if (jsonObj[0].hasOwnProperty('phone_number')) {
-                                        for (let index = 0; index < jsonObj.length; index++) {
-                                            data = jsonObj[index];
-                                            //numbers.push(data.phone_number);
-                                            insertPushMessage(data.phone_number, title, event.toUpperCase(), message, push_type)
-                                        }
-                                        //push.pushSMS(numbers.join(), message);
+            let push_type = req.body.push_type;
+            let _query;
 
-                                        services.sendResponse.sendWithCode(req, res, { message: 'File Imported Successfully' }, customMsgTypeBULK, "FILE_IMPORT");
-                                    } else {
-                                        services.sendResponse.sendWithCode(req, res, { error: "File should have column - phone_number" }, customMsgTypeBULK, "WRONG_HEADER");
-                                    }
-                                })
-                        }
-                    });
-                }
-                else {
-                    services.sendResponse.sendWithCode(req, res, { error: "Please provide proper CSV file." }, customMsgTypeCM, "VALIDATION_FAILED");
-                }
-            } else {
-                services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+
+            _query = `insert into tbl_push_notification(player_id, phone_number, title, event, message, status, push_type)
+                select player.player_id, player.phone_number, '${title}', '${event}', '${message}','TEST','${push_type}' from tbl_player player`;
+
+            switch (event_type) {
+                case "not_registerd":
+                    _query += ` where player.phone_number_verified = false 
+                        and (player.created_at + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE between '${frmdate}' and '${todate}'`;
+                    break;
+                case "registerd_not_played":
+                    _query += ` left join tbl_contest_players contest_players on player.player_id = contest_players.player_id
+                        where contest_players.player_id is null and player.phone_number_verified = true
+                        and (player.created_at + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE between '${frmdate}' and '${todate}'`;
+                    break;
+                case "deposit_not_played":
+                    _query += ` inner join (SELECT distinct player_id FROM tbl_wallet_transaction transactions
+                            where nz_txn_type = 'DEPOSIT' and nz_txn_status = 'SUCCESS') as transactions
+                            on player.player_id = transactions.player_id
+                            where not exists (select distinct player_id from tbl_contest_players contest_players
+                            where player.player_id = contest_players.player_id 
+                            and (transaction_date + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE between '${frmdate}' and '${todate}')`;
+                    break;
+                case "never_deposit":
+                    _query += ` WHERE NOT EXISTS (SELECT distinct transactions.player_id FROM tbl_wallet_transaction transactions
+                            where nz_txn_type = 'DEPOSIT' and nz_txn_status = 'SUCCESS'
+                            and player.player_id = transactions.player_id) 
+                            and player.channel != 'Playstore' and player.phone_number_verified = true and player.status = 'ACTIVE'
+                            and (player.created_at + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE between '${frmdate}' and '${todate}'`;
+                    break;
+                default:
+                    break;
             }
-        }
-        else {
-            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
 
+            console.log(_query)
+            try {
+                let result = await pgConnection.executeQuery('rmg_dev_db', _query)
+                console.log(result);
+                if (result.length != null) {
+                    services.sendResponse.sendWithCode(req, res, result, customMsgType, "EXECUTED");
+                } else {
+                    services.sendResponse.sendWithCode(req, res, error, customMsgType, "ADD_FAILED");
+                }
+            }
+            catch (error) {
+                services.sendResponse.sendWithCode(req, res, error, customMsgType, "ADD_FAILED");
+            }
+
+        } else {
+            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
         }
     },
     getRefundList: async function (req, res) {
@@ -737,19 +783,15 @@ module.exports = {
     }
 }
 
-async function insertPushMessage(phone_number, title, event, message, push_type) {
-
-    let queryPushMessage = `insert into tbl_push_notification(player_id, phone_number, title, event, message, status, push_type) values(${phone_number},'${phone_number}','${title}', '${event}', '${message}','ACTIVE','${push_type}')`;
-    try {
-        let dbResult = await pgConnection.executeQuery('rmg_dev_db', queryPushMessage)
-
-        if (dbResult && dbResult.length > 0) {
-            console.log(dbResult);
-            console.log('PushMessage Inserted Successfully');
-        }
-        else
-            console.log(dbResult);
-    } catch (error) {
-        console.log(error);
-    }
+function moveFile(from_path, moveto) {
+    return new Promise((resolve, reject) => {
+        mv(from_path, moveto, { mkdirp: true }, function (err) {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve(moveto)
+            }
+        });
+    });
 }

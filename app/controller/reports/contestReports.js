@@ -64,7 +64,6 @@ module.exports = {
         if (validation.passes()) {
             let appid = req.body.appid ? req.body.appid : false;
             let debit_type = req.body.debit_type ? req.body.debit_type : false;
-            let credit_type = req.body.credit_type ? req.body.credit_type : false;
             let from_time = req.body.from_time ? req.body.from_time : false;
             let to_time = req.body.to_time ? req.body.to_time : false;
             let entry_fee = req.body.entry_fee ? req.body.entry_fee : false;
@@ -76,7 +75,7 @@ module.exports = {
                 let query = "select app.app_id, app_name,contest.contest_id as contest_id, contest.contest_name as  contest_name," +
                     " contest.start_date::date::text as start_date, contest.end_date::date::text as end_date," +
                     " split_part(contest.from_time::text, '.', 1) as from_time , split_part(contest.to_time::text, '.', 1) as to_time," +
-                    " contest.debit_type, contest.credit_type,  entry_fee," +
+                    " contest.debit_type,  entry_fee," +
                     " sum(distinct contest.win_amount) as prize_pool," +
                     " contest.max_players as contest_max_players," +
                     " count(distinct players.player_id) as players_joined," +
@@ -93,7 +92,7 @@ module.exports = {
                     " contest.contest_id = players.contest_id" +
                     " left join rmg_db.public.tbl_contest_winner as winner on" +
                     " (winner.contest_id = contest.contest_id) and (winner.player_id = players.player_id)" +
-                    " where contest.start_date::date = '" + startdate + "' and contest.end_date::date = '" + enddate + "'" +
+                    " where contest.start_date::date between '" + startdate + "' and '" + enddate + "'" +
                     " and players.transaction_date::date <= contest.end_date::date";
 
                 if (appid) {
@@ -116,10 +115,6 @@ module.exports = {
                     query += " and contest.debit_type = '" + debit_type + "'";
                 }
 
-                if (credit_type) {
-                    query += " and contest.credit_type = '" + credit_type + "'";
-                }
-
                 if (to_time) {
                     query += " and to_time = '" + to_time + "'";
                 }
@@ -128,7 +123,7 @@ module.exports = {
                     query += " and entry_fee = " + entry_fee;
                 }
 
-                query += " group by app.app_id, app_name, contest.contest_id, contest.contest_name, entry_fee,contest.max_players, contest.start_date::date::text, contest.end_date::date::text, from_time, to_time, contest.debit_type, contest.credit_type" +
+                query += " group by app.app_id, app_name, contest.contest_id, contest.contest_name, entry_fee,contest.max_players, contest.start_date::date::text, contest.end_date::date::text, from_time, to_time, contest.debit_type" +
                     " order by contest.start_date::date::text desc";
 
                 let result = await pgConnection.executeQuery('rmg_dev_db', query);
