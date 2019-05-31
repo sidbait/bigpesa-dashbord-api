@@ -39,53 +39,37 @@ module.exports = {
 
     scratchWonReport: async function (req, res) {
 
-        let rules = {
-            "frmdate": 'required',
-            "todate": 'required'
-        };
-        var custom_message = {
-            "required.frmdate": "Date is mandatory!",
-            "required.todate": "Date is mandatory!"
-        };
-        let validation = new services.validator(req.body, rules, custom_message);
-        if (validation.passes()) {
+        let _selectQuery = `select case when tbl_scratch_campaign_prizes_details.winner_date is null then '--' else tbl_scratch_campaign_prizes_details.winner_date::date::text end  as winner_date, prize_code, prize_type,
+            count(case when is_win = true then 1 end)  as win_count,
+             sum(case when is_win = true then amount end) as total_amount
+             from tbl_scratch_campaign_prizes_details 
+            join tbl_scratch_prize_master
+            on tbl_scratch_campaign_prizes_details.prize_id = tbl_scratch_prize_master.prize_id
+            group by case when tbl_scratch_campaign_prizes_details.winner_date is null then '--' else tbl_scratch_campaign_prizes_details.winner_date::date::text end, prize_code, prize_type`;
 
-            let _frmdate = req.body.frmdate ? req.body.frmdate : null;
-            let _todate = req.body.todate ? req.body.todate : null;
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
-            let _selectQuery = `select tbl_scratch_campaign_prizes_details.winner_date::date::text as winner_date, prize_code, prize_type,
-            count(case when is_win = true then 1 end)  as win_count
-         from tbl_scratch_campaign_prizes_details 
-        join tbl_scratch_prize_master
-        on tbl_scratch_campaign_prizes_details.prize_id = tbl_scratch_prize_master.prize_id
-        group by tbl_scratch_campaign_prizes_details.winner_date::date::text, prize_code, prize_type`;
+            console.log('dbResult - ', dbResult);
 
-            try {
-                let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
-                console.log('dbResult - ', dbResult);
-                
+            if (dbResult && dbResult.length > 0) {
+                let options = {
+                    row: "winner_date",
+                    column: "prize_code",
+                    value: "win_count"
+                };
+                let output = jsonToPivotjson(dbResult, options);
 
-                if (dbResult && dbResult.length > 0) {
-                    let options = {
-                        row: "winner_date",
-                        column: "prize_code",
-                        value: "win_count"
-                    };
-                    let output = jsonToPivotjson(dbResult, options);
+                console.log('output - ', output)
 
-                    console.log('output - ', output)
-
-                    services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
-                } else {
-                    services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
-                }
+                services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
+            } else {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
             }
-            catch (error) {
-                services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
-            }
-        } else {
-            services.sendResponse.sendWithCode(req, res, validation.errors.errors, customMsgTypeCM, "VALIDATION_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
 
     },
