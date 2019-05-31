@@ -54,11 +54,11 @@ module.exports = {
                                         resolve(data)
                                     } else {
                                         // resolve(data.Location)
-                                        resolve('http://'+data.Bucket+'/'+data.key);
+                                        resolve('http://' + data.Bucket + '/' + data.key);
                                     }
 
                                     console.log("Successfully uploaded");
-                                    console.log('http://'+data.Bucket+'/'+data.key);
+                                    console.log('http://' + data.Bucket + '/' + data.key);
 
                                 }
 
@@ -72,6 +72,34 @@ module.exports = {
                 else
                     reject("error - hasOwnProperty error")
             }
+        });
+    },
+
+    multiUpload: async function (req, s3Folder) {
+
+        return new Promise(async (resolve, reject) => {
+
+            Promise.all(req.files.map(async element => {
+
+                let fromPath = element.destination + element.filename;
+                let s3key = `${s3Folder}/${element.originalname}`;
+
+                let stream = fs.createReadStream(fromPath);
+                let params = { Bucket: myBucket, Key: s3key, Body: stream, ACL: 'public-read' };
+
+                try {
+                    data = await s3.upload(params).promise();
+                    return { url: 'http://' + data.Bucket + '/' + data.key, fieldname: element.fieldname };
+                } catch (error) {
+                    return handleError(err);
+                }
+
+            })).then((results) => {
+
+                resolve(results);
+
+            }).catch(err => reject(err))
+
         });
     },
 
