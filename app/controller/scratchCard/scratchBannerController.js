@@ -117,6 +117,7 @@ module.exports = {
     search: async function (req, res) {
 
         let _banner_id = req.body.banner_id ? req.body.banner_id : null;
+        let _camp_id = req.body.camp_id ? req.body.camp_id : null;        
         let _status = req.body.status ? req.body.status : null;
         //let _banner_type = req.body.banner_type ? req.body.banner_type : null;
         let _orderBy = req.body.orderBy ? req.body.orderBy : 'banner_name';
@@ -125,6 +126,10 @@ module.exports = {
 
         if (_banner_id) {
             _selectQuery += " AND banner_id = " + _banner_id
+        }
+
+        if (_camp_id) {
+            _selectQuery += " AND camp_id = " + _camp_id
         }
 
         if (_status) {

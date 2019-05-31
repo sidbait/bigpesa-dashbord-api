@@ -84,7 +84,7 @@ module.exports = {
 
                     if (req.files != null && req.files.length > 0) {
                         // let movePath = await uploadBanner(req, result[0].contest_master_id);
-                        let s3Path = await services.s3.upload(req, 'scratchprize');
+                        let s3Path = await services.s3.upload(req, 'scratch_card_img');
                         let mvQuery = {
                             text: "UPDATE tbl_scratch_prize_master set prize_image = $1 WHERE prize_id= $2 RETURNING prize_image",
                             values: [
