@@ -27,6 +27,7 @@ const dashboardRoutes = require('../routes/dashboard/dashboardRoute');
 const playerReportRoute = require('../routes/reports/playerReportRoute');
 const menuRoutes = require('../routes/menu/menuRoute');
 const utilitiesRoutes = require('../routes/utilities/utilitiesRoute');
+const scratchcardRoutes = require('../routes/scratchCard/scratchCardRoute');
 
 apiRoutes.get('/', function (req, res) {
     sendResponse.sendWithCode(req, res, null, "COMMON_MESSAGE", "WELCOME");
@@ -47,7 +48,8 @@ app.use(middleware.injectMiddleware(
         apiRoutes_user.use('/role', roleRoutes),
         apiRoutes_user.use('/dashboard', dashboardRoutes),
         apiRoutes_user.use('/utilities', utilitiesRoutes),
-        apiRoutes_user.use('/menu', menuRoutes)
+        apiRoutes_user.use('/menu', menuRoutes),
+        apiRoutes_user.use('/scratchCard', scratchcardRoutes)
     ]
 ));
 app.use(middleware.injectMiddleware(

@@ -43,7 +43,8 @@ module.exports = {
                         main: true,
                         QueueReports: true,
                         RunSql: true,
-                        WalletMatrix: true
+                        WalletMatrix: true,
+                        UploadImages: true,
                     },
                     ContestDetails: {
                         main: true,
@@ -58,6 +59,14 @@ module.exports = {
                         Goals: false,
                         PlayerMaster: false,
                         PlayerTransaction: false,
+                    },
+                    ScratchCardManagement: {
+                        main: false,
+                        ScratchBanner: false,
+                        ScratchCampaign: false,
+                        ScratchEvent: false,
+                        ScratchPrize: false,
+                        ScratchCampaignBanner: false,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -145,7 +154,8 @@ module.exports = {
                         main: true,
                         QueueReports: true,
                         RunSql: true,
-                        WalletMatrix: true
+                        WalletMatrix: true,
+                        UploadImages: true,
                     },
                     ContestDetails: {
                         main: true,
@@ -160,6 +170,14 @@ module.exports = {
                         Goals: true,
                         PlayerMaster: true,
                         PlayerTransaction: true,
+                    },
+                    ScratchCardManagement: {
+                        main: true,
+                        ScratchBanner: true,
+                        ScratchCampaign: true,
+                        ScratchEvent: true,
+                        ScratchPrize: true,
+                        ScratchCampaignBanner: true,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -247,7 +265,8 @@ module.exports = {
                         main: false,
                         QueueReports: false,
                         RunSql: false,
-                        WalletMatrix: false
+                        WalletMatrix: false,
+                        UploadImages: true,
                     },
                     ContestDetails: {
                         main: true,
@@ -262,6 +281,14 @@ module.exports = {
                         Goals: false,
                         PlayerMaster: false,
                         PlayerTransaction: false,
+                    },
+                    ScratchCardManagement: {
+                        main: false,
+                        ScratchBanner: false,
+                        ScratchCampaign: false,
+                        ScratchEvent: false,
+                        ScratchPrize: false,
+                        ScratchCampaignBanner: false,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -349,7 +376,8 @@ module.exports = {
                         main: false,
                         QueueReports: false,
                         RunSql: false,
-                        WalletMatrix: false
+                        WalletMatrix: false,
+                        UploadImages: false,
                     },
                     ContestDetails: {
                         main: false,
@@ -364,6 +392,14 @@ module.exports = {
                         Goals: false,
                         PlayerMaster: false,
                         PlayerTransaction: false,
+                    },
+                    ScratchCardManagement: {
+                        main: false,
+                        ScratchBanner: false,
+                        ScratchCampaign: false,
+                        ScratchEvent: false,
+                        ScratchPrize: false,
+                        ScratchCampaignBanner: false,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -452,7 +488,8 @@ module.exports = {
                         main: false,
                         QueueReports: false,
                         RunSql: false,
-                        WalletMatrix: false
+                        WalletMatrix: false,
+                        UploadImages: false,
                     },
                     ContestDetails: {
                         main: false,
@@ -467,6 +504,14 @@ module.exports = {
                         Goals: false,
                         PlayerMaster: false,
                         PlayerTransaction: false,
+                    },
+                    ScratchCardManagement: {
+                        main: false,
+                        ScratchBanner: false,
+                        ScratchCampaign: false,
+                        ScratchEvent: false,
+                        ScratchPrize: false,
+                        ScratchCampaignBanner: false,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -560,7 +605,8 @@ module.exports = {
                         main: false,
                         QueueReports: false,
                         RunSql: false,
-                        WalletMatrix: false
+                        WalletMatrix: false,
+                        UploadImages: false,
                     },
                     ContestDetails: {
                         main: false,
@@ -575,6 +621,14 @@ module.exports = {
                         Goals: false,
                         PlayerMaster: false,
                         PlayerTransaction: false,
+                    },
+                    ScratchCardManagement: {
+                        main: false,
+                        ScratchBanner: false,
+                        ScratchCampaign: false,
+                        ScratchEvent: false,
+                        ScratchPrize: false,
+                        ScratchCampaignBanner: false,
                     },
                     FeedbackDetails: {
                         main: false,
@@ -693,7 +747,8 @@ module.exports = {
                 children: [
                     { path: '/utilities/queue-reports', title: 'QueueReports', show: limit.Utilities.QueueReports, },
                     { path: '/utilities/run-sql', title: 'Run Sql', show: limit.Utilities.RunSql, },
-                    { path: '/utilities/wallet-matrix', title: 'Wallet Matrix', show: limit.Utilities.WalletMatrix, }
+                    { path: '/utilities/wallet-matrix', title: 'Wallet Matrix', show: limit.Utilities.WalletMatrix, },
+                    { path: '/utilities/upload-images', title: 'Upload Images', show: limit.Utilities.UploadImages, }
                 ]
             }, {
                 path: '',
@@ -718,6 +773,19 @@ module.exports = {
                     { path: '/master/referrer-management/referrer-goals', title: 'Goals', show: limit.ReferrerManagement.Goals },
                     { path: '/master/referrer-management/referrer-player-master', title: 'Player Master', show: limit.ReferrerManagement.PlayerMaster },
                     { path: '/master/referrer-management/referrer-player-transaction', title: 'Player Transaction', show: limit.ReferrerManagement.PlayerTransaction },
+                ]
+            }, {
+                path: '',
+                title: 'Scratch Card',
+                type: 'menu__toggle',
+                icontype: 'fab fa-lastfm-square',
+                show: limit.ScratchCardManagement.main,
+                children: [
+                    { path: '/master/scratch-card-management/scratch-banner', title: 'Scratch Banner', show: limit.ScratchCardManagement.ScratchBanner },
+                    { path: '/master/scratch-card-management/scratch-campaign', title: 'Scratch Campaign', show: limit.ScratchCardManagement.ScratchCampaign },
+                    { path: '/master/scratch-card-management/scratch-event', title: 'Scratch Event', show: limit.ScratchCardManagement.ScratchEvent },
+                    { path: '/master/scratch-card-management/scratch-prize', title: 'Scratch Prize', show: limit.ScratchCardManagement.ScratchPrize },
+                    { path: '/master/scratch-card-management/scratch-campaign-banner', title: 'Scratch Campaign Banner', show: limit.ScratchCardManagement.ScratchCampaignBanner },
                 ]
             }, {
                 path: '',
