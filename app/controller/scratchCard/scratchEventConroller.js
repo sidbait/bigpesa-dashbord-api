@@ -26,7 +26,7 @@ module.exports = {
     add: async function (req, res) {
 
         let rules = {
-            "event_name": 'required',
+            "name": 'required',
             "amount": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
         };
@@ -40,7 +40,7 @@ module.exports = {
         if (validation.passes()) {
 
             let _scratch_event_id = req.body.scratch_event_id ? req.body.scratch_event_id : null;
-            let _event_name = req.body.event_name ? req.body.event_name : null;
+            let _event_name = req.body.name ? req.body.name : null;
             let _event_code = req.body.event_code ? req.body.event_code : null;
             let _description = req.body.description ? req.body.description : null;
             let _win_description = req.body.win_description ? req.body.win_description : null;
@@ -85,7 +85,7 @@ module.exports = {
 
                     if (req.files != null && req.files.length > 0) {
                         // let movePath = await uploadBanner(req, result[0].contest_master_id);
-                        let s3Path = await services.s3.upload(req, 'scratchevent');
+                        let s3Path = await services.s3.upload(req, 'scratch_card_img');
                         let mvQuery = {
                             text: "UPDATE tbl_scratch_event_master set image = $1 WHERE scratch_event_id= $2 RETURNING image",
                             values: [
