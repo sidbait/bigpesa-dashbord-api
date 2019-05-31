@@ -29,7 +29,7 @@ module.exports = {
 
                     // let s3path = `admin/uploads/${utc}/${Date.now()}_${element.originalname}`;
 
-                    let s3key = s3path ? `${s3path}/${Date.now()}_${element.originalname}` : `admin/uploads/${utc}/${Date.now()}_${element.originalname}`;
+                    let s3key = s3path ? `${s3path}/${element.originalname}` : `admin/uploads/${utc}/${Date.now()}_${element.originalname}`;
 
                     let extension = path.extname(fromPath)
 
