@@ -6,9 +6,10 @@ const customMsgType = "MASTER_MESSAGE";
 const customMsgTypeCM = "COMMON_MESSAGE";
 
 module.exports = {
+
     getAll: async function (req, res) {
 
-        let _selectQuery = "SELECT * FROM tbl_scratch_event_master"
+        let _selectQuery = "SELECT * FROM tbl_scratch_winner_banners"
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
 
@@ -26,8 +27,8 @@ module.exports = {
     add: async function (req, res) {
 
         let rules = {
-            "event_name": 'required',
-            "amount": 'required',
+            "banner_name":'required',
+            "prize_amount": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
         };
 
@@ -39,38 +40,44 @@ module.exports = {
 
         if (validation.passes()) {
 
-            let _scratch_event_id = req.body.scratch_event_id ? req.body.scratch_event_id : null;
-            let _event_name = req.body.event_name ? req.body.event_name : null;
-            let _event_code = req.body.event_code ? req.body.event_code : null;
+            let _banner_id = req.body.banner_id ? req.body.banner_id : null;
+            let _player_id = req.body.player_id ? req.body.player_id : null;
+            let _banner_name = req.body.banner_name ? req.body.banner_name : null;
             let _description = req.body.description ? req.body.description : null;
-            let _win_description = req.body.win_description ? req.body.win_description : null;
-            let _amount = req.body.amount ? req.body.amount : null;
+            let _click_url = req.body.click_url ? req.body.click_url : null;
+            let _banner_priority = req.body.banner_priority ? req.body.banner_priority : null;
             let _status = req.body.status ? req.body.status : null;
             let _created_date = req.body.created_date ? req.body.created_date : null;
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
 
-            let _channel = req.body.channel ? req.body.channel : null;
+            let _start_date = req.body.start_date ? req.body.start_date : null;
+            let _end_date = req.body.end_date ? req.body.end_date : null;
+            let _from_time = req.body.from_time ? req.body.from_time : null;
+            let _to_time = req.body.to_time ? req.body.to_time : null;
+
+            let _new_start_date = joinDateTime(_start_date, _from_time);
+            let _new_end_date = joinDateTime(_end_date, _to_time);
 
             let _query;
-            let errMsgType = _scratch_event_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
-            let successMsgType = _scratch_event_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
+            let errMsgType = _banner_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
+            let successMsgType = _banner_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
 
-            if (!_scratch_event_id) {
+            if (!_banner_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_scratch_event_master(name,event_code,channel,amount,status,description,win_description,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,now()) RETURNING scratch_event_id",
+                    text: "INSERT INTO tbl_scratch_winner_banners(banner_name,description,click_url,banner_priority,from_date,to_date,player_id,status,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,now()) RETURNING banner_id",
                     values: [
-                        _event_name, _event_code, _channel, _amount, _status, _description,_win_description, _created_by
+                        _banner_name, _description, _click_url, _banner_priority, _new_start_date, _new_end_date, _player_id, _status, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_scratch_event_master SET name=$1,event_code=$2,channel=$3,amount=$4,status=$5,description=$6,win_description=$7,updated_by=$8,updated_at=now() WHERE scratch_event_id=$9 RETURNING scratch_event_id",
+                    text: "UPDATE tbl_scratch_winner_banners SET banner_name=$1,description=$2,click_url=$3,banner_priority=$4,from_date=$5,to_date=$6,player_id=$7,status=$8,updated_by=$9,updated_at=now() WHERE banner_id=$10 RETURNING banner_id",
                     values: [
-                        _event_name, _event_code, _channel, _amount, _status, _description, _win_description, _updated_by, _scratch_event_id
+                        _banner_name, _description, _click_url, _banner_priority, _new_start_date, _new_end_date, _player_id, _status, _updated_by, _banner_id
                     ]
                 }
 
@@ -85,12 +92,12 @@ module.exports = {
 
                     if (req.files != null && req.files.length > 0) {
                         // let movePath = await uploadBanner(req, result[0].contest_master_id);
-                        let s3Path = await services.s3.upload(req, 'scratchevent');
+                        let s3Path = await services.s3.upload(req, 'scratchwinnerbanner');
                         let mvQuery = {
-                            text: "UPDATE tbl_scratch_event_master set image = $1 WHERE scratch_event_id= $2 RETURNING image",
+                            text: "UPDATE tbl_scratch_winner_banners set image_url = $1 WHERE banner_id= $2 RETURNING image_url",
                             values: [
                                 s3Path,
-                                result[0].scratch_event_id
+                                result[0].banner_id
                             ]
                         }
 
@@ -118,15 +125,15 @@ module.exports = {
 
     search: async function (req, res) {
 
-        let _scratch_event_id = req.body.scratch_event_id ? req.body.scratch_event_id : null;
+        let _banner_id = req.body.banner_id ? req.body.banner_id : null;
         let _status = req.body.status ? req.body.status : null;
         //let _banner_type = req.body.banner_type ? req.body.banner_type : null;
-        let _orderBy = req.body.orderBy ? req.body.orderBy : 'name';
+        let _orderBy = req.body.orderBy ? req.body.orderBy : 'banner_name';
 
-        let _selectQuery = 'SELECT * FROM tbl_scratch_event_master WHERE  1=1'
+        let _selectQuery = 'SELECT * FROM tbl_scratch_winner_banners WHERE  1=1'
 
-        if (_scratch_event_id) {
-            _selectQuery += " AND scratch_event_id = " + _scratch_event_id
+        if (_banner_id) {
+            _selectQuery += " AND banner_id = " + _banner_id
         }
 
         if (_status) {
@@ -149,5 +156,9 @@ module.exports = {
         }
 
     },
+}
 
+function joinDateTime(date, time) {
+    let new_date = date + 'T' + time + 'Z';
+    return new_date
 }
