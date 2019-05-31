@@ -219,6 +219,12 @@ module.exports = {
             messageCode: "GET_SUCCESS",
             statusCode: 200
         },
+        "EXECUTED": {
+            success: true,
+            message: "Executed Successfully!",
+            messageCode: "EXECUTED",
+            statusCode: 200
+        },
         "GET_FAILED": {
             success: false,
             message: "Failed to find details!",

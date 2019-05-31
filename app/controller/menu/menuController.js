@@ -63,6 +63,11 @@ module.exports = {
                         main: false,
                         feedback: false,
                     },
+                    Engagement:{
+                        main: true,
+                        bulkNotification: true,
+                        reports:false
+                    },
                     Reports: {
                         main: true,
                         contest: false,
@@ -79,8 +84,6 @@ module.exports = {
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: true,
                         splitWiseReport: true,
                         pixel: true,
@@ -162,6 +165,11 @@ module.exports = {
                         main: false,
                         feedback: false,
                     },
+                    Engagement:{
+                        main: true,
+                        bulkNotification: true,
+                        reports:false
+                    },
                     Reports: {
                         main: true,
                         contest: false,
@@ -178,8 +186,6 @@ module.exports = {
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: true,
                         pixel: true,
                         splitWiseReport: true
@@ -261,6 +267,11 @@ module.exports = {
                         main: false,
                         feedback: false,
                     },
+                    Engagement:{
+                        main: true,
+                        bulkNotification: true,
+                        reports:false
+                    },
                     Reports: {
                         main: true,
                         contest: false,
@@ -277,8 +288,6 @@ module.exports = {
                         channelAcquisitionsummary: false,
                         acquisitiondetails: false,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: false,
                         pixel: true,
                         splitWiseReport: true
@@ -360,6 +369,11 @@ module.exports = {
                         main: false,
                         feedback: false,
                     },
+                    Engagement:{
+                        main: true,
+                        bulkNotification: true,
+                        reports:false
+                    },
                     Reports: {
                         main: true,
                         contest: false,
@@ -376,8 +390,6 @@ module.exports = {
                         channelAcquisitionsummary: true,
                         acquisitiondetails: true,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: true,
                         pixel: true,
                         splitWiseReport: true
@@ -460,6 +472,11 @@ module.exports = {
                         main: false,
                         feedback: false,
                     },
+                    Engagement:{
+                        main: false,
+                        bulkNotification: false,
+                        reports:false
+                    },
                     Reports: {
                         main: true,
                         contest: false,
@@ -476,8 +493,6 @@ module.exports = {
                         channelAcquisitionsummary: false,
                         acquisitiondetails: false,
                         summary: false,
-                        export: true,
-                        bulkNotification: true,
                         hourly: false,
                         pixel: false,
                         splitWiseReport: false
@@ -565,6 +580,11 @@ module.exports = {
                         main: false,
                         feedback: false,
                     },
+                    Engagement:{
+                        main: false,
+                        bulkNotification: false,
+                        reports:false
+                    },
                     Reports: {
                         main: false,
                         contest: false,
@@ -581,8 +601,6 @@ module.exports = {
                         channelAcquisitionsummary: false,
                         acquisitiondetails: false,
                         summary: false,
-                        export: false,
-                        bulkNotification: false,
                         hourly: false,
                         pixel: false,
                         splitWiseReport: false
@@ -713,6 +731,16 @@ module.exports = {
                 ]
             }, {
                 path: '',
+                title: 'Engagement',
+                type: 'menu__toggle',
+                icontype: 'fas fa-users-cog',
+                show: limit.Engagement.main,
+                children: [
+                    { path: '/reports/exportnotification', title: 'Notification', show: limit.Reports.bulkNotification, },
+                    { path: '/reports/bulknotification', title: 'Reports', show: limit.Reports.reports, }                    
+                ]
+            }, {
+                path: '',
                 title: 'Reports',
                 type: 'menu__toggle',
                 icontype: 'fas fa-chart-bar',
@@ -732,8 +760,6 @@ module.exports = {
                     { path: '/reports/channelacquisitionsummary', title: 'Channel Acquisition Summary', show: limit.Reports.channelAcquisitionsummary, },
                     { path: '/reports/acquisitiondetails', title: 'Acquisition Details', show: limit.Reports.acquisitiondetails, },
                     { path: '/reports/summary', title: 'Summary', show: limit.Reports.summary, },
-                    { path: '/reports/export', title: 'Export', show: limit.Reports.export, },
-                    { path: '/reports/bulknotification', title: 'Bulk SMS Notification', show: limit.Reports.bulkNotification, },
                     { path: '/reports/hourly', title: 'Hourly Report', show: limit.Reports.hourly, },
                     { path: '/reports/splitwisebalance', title: 'Splitwise Balance Report', show: limit.Reports.splitWiseReport, },
                     { path: '/reports/pixel', title: 'Pixel Report', show: limit.Reports.pixel, }
