@@ -28,7 +28,13 @@ module.exports = {
 
         let rules = {
             "camp_name": 'required',
+            // "camp_description": 'required',
+            // "camp_image": 'required',
+            // "camp_icon": 'required',
+            // "valid_from": 'required',
+            // "valid_to": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
+            // "channel": 'required',
         };
 
         let obj = req.body
@@ -42,10 +48,8 @@ module.exports = {
             let _camp_id = req.body.camp_id ? req.body.camp_id : null;
             let _camp_name = req.body.camp_name ? req.body.camp_name : null;
             let _camp_description = req.body.camp_description ? req.body.camp_description : null;
-            //let _image_url = req.body.image_url ? req.body.image_url : null;
             let _status = req.body.status ? req.body.status : null;
             let _channel = req.body.channel ? req.body.channel : null;
-            let _created_date = req.body.created_date ? req.body.created_date : null;
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
 
@@ -54,8 +58,8 @@ module.exports = {
             let _from_time = req.body.from_time ? req.body.from_time : null;
             let _to_time = req.body.to_time ? req.body.to_time : null;
 
-            let _new_start_date = joinDateTime(_start_date, _from_time);
-            let _new_end_date = joinDateTime(_end_date, _to_time);
+            let _valid_from = joinDateTime(_start_date, _from_time);
+            let _valid_to = joinDateTime(_end_date, _to_time);
 
             let _query;
             let errMsgType = _camp_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
@@ -64,18 +68,18 @@ module.exports = {
             if (!_camp_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_scratch_campaign_master(camp_name,camp_description,status,add_date,channel,valid_from,valid_to) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *",
+                    text: "INSERT INTO tbl_scratch_campaign_master(camp_name,camp_description,valid_from,valid_to,status,channel,created_by,created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,now()) RETURNING *",
                     values: [
-                        _camp_name, _camp_description, _status, _created_date, _channel, _new_start_date, _new_end_date
+                        _camp_name, _camp_description, _valid_from, _valid_to, _status, _channel, _created_by
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_scratch_campaign_master SET camp_id=$1,camp_name=$2,camp_description=$3,status=$4,add_date=$5,channel=$6,valid_from=$7,valid_to=$8 RETURNING *",
+                    text: "UPDATE tbl_scratch_campaign_master SET camp_name=$1,camp_description=$2,valid_from=$3,valid_to=$4,status=$5,channel=$6,updated_by=$7,updated_at=now() WHERE camp_id=$8 RETURNING *",
                     values: [
-                        _camp_id, _camp_name, _camp_description, _status, _created_date, _channel, _new_start_date, _new_end_date
+                        _camp_name, _camp_description, _valid_from, _valid_to, _status, _channel, _updated_by, _camp_id
                     ]
                 }
 
@@ -90,18 +94,40 @@ module.exports = {
 
                     if (req.files != null && req.files.length > 0) {
                         // let movePath = await uploadBanner(req, result[0].contest_master_id);
-                        let s3Path = await services.s3.upload(req, 'scratchcampimage');
-                        let mvQuery = {
-                            text: "UPDATE tbl_scratch_campaign_master set camp_image = $1 WHERE camp_id= $2 RETURNING camp_image",
-                            values: [
-                                s3Path,
-                                result[0].camp_id
-                            ]
+                        let s3Path = await services.s3.multiUpload(req, 'scratch_card_img');
+                        console.log(s3Path);
+
+                        for (const iterator of s3Path) {
+
+                            if (iterator.fieldname == 'camp_icon') {
+                                let mvQuery = {
+                                    text: "UPDATE tbl_scratch_campaign_master set camp_icon = $1 WHERE camp_id= $2 RETURNING camp_image",
+                                    values: [
+                                        iterator.url,
+                                        result[0].camp_id
+                                    ]
+                                }
+
+                                let mvResult = await pgConnection.executeQuery('rmg_dev_db', mvQuery)
+
+                                console.log(mvResult);
+                            }
+
+                            if (iterator.fieldname == 'camp_image') {
+                                let mvQuery = {
+                                    text: "UPDATE tbl_scratch_campaign_master set camp_image = $1 WHERE camp_id= $2 RETURNING camp_image",
+                                    values: [
+                                        iterator.url,
+                                        result[0].camp_id
+                                    ]
+                                }
+
+                                let mvResult = await pgConnection.executeQuery('rmg_dev_db', mvQuery)
+
+                                console.log(mvResult);
+                            }
                         }
 
-                        let mvResult = await pgConnection.executeQuery('rmg_dev_db', mvQuery)
-
-                        console.log(mvResult);
                     }
 
                     services.sendResponse.sendWithCode(req, res, result[0], customMsgType, successMsgType);
@@ -162,4 +188,3 @@ function joinDateTime(date, time) {
     return new_date
 }
 
-    
