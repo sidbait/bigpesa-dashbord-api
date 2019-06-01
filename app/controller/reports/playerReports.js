@@ -698,7 +698,7 @@ module.exports = {
 
 
             _query = `insert into tbl_push_notification(player_id, phone_number, title, event, message, status, push_type)
-                select player.player_id, player.phone_number, '${title}', '${event}', '${message}','TEST','${push_type}' from tbl_player player`;
+                select player.player_id, player.phone_number, '${title}', '${event}', '${message}','ACTIVE','${push_type}' from tbl_player player`;
 
             switch (event_type) {
                 case "not_registerd":
