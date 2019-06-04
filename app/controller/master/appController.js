@@ -477,7 +477,7 @@ async function getUpdateQuerie(appOrder) {
         let updateQuerie = []
 
         for (let i = 0; i < appOrder.length; i++) {
-            const x = appOrder[i].split("-");
+            const x = appOrder[i].split("|");
             const priority = i;
 
             x[1] = x[1] ? x[1] : false;
