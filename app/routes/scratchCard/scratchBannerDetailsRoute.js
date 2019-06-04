@@ -22,6 +22,6 @@ appRoutes.post('/scratchbannerDetails/search', function (req, res) {
 });
 
 appRoutes.post('/scratchbannerDetails/getCampBanner', appController.getCampBanner);
-appRoutes.post('/scratchbannerDetails/updateCampBannerStatus', appController.updateCampBannerStatus);
+appRoutes.post('/scratchbannerDetails/mapCampBannerStatus', appController.mapCampBannerStatus);
 
 module.exports = appRoutes;

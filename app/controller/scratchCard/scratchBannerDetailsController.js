@@ -142,10 +142,9 @@ module.exports = {
         }
     },
 
-    updateCampBannerStatus: async function (req, res) {
+    mapCampBannerStatus: async function (req, res) {
         let rules = {
             "bannerList": 'required',
-            "status": 'required',
             "camp_id": 'required',
         }
 
