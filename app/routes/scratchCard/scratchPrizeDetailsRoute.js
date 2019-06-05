@@ -4,20 +4,7 @@ var validate = require('../../auth/validate');
 
 var appController = require('../../controller/scratchCard/scratchPrizeDetailsController');
 
-appRoutes.get('/scratchprizedetails', function (req, res) {
-    appController.getAll(req, res);
-});
-
-appRoutes.post('/scratchprizedetails/add', function (req, res) {
-    appController.add(req, res);
-});
-
-appRoutes.post('/scratchprizedetails/update', function (req, res) {
-    appController.add(req, res);
-});
-
-appRoutes.post('/scratchprizedetails/search', function (req, res) {
-    appController.search(req, res);
-});
+appRoutes.post('/scratchprizedetails/getCampPrize', appController.getCampPrize);
+appRoutes.post('/scratchprizedetails/mapCampPrizeStatus', appController.mapCampPrizeStatus);
 
 module.exports = appRoutes;
