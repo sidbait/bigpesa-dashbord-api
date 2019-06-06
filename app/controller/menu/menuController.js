@@ -39,6 +39,10 @@ module.exports = {
                         main: true,
                         banner: true
                     },
+                    PopUp: {
+                        main: true,
+                        view: true
+                    },
                     Utilities: {
                         main: true,
                         QueueReports: true,
@@ -66,17 +70,16 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchCampaignBanner: false,
                         ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
                     },
-                    Engagement:{
+                    Engagement: {
                         main: true,
                         bulkNotification: true,
-                        reports:false
+                        reports: false
                     },
                     Reports: {
                         main: true,
@@ -150,6 +153,10 @@ module.exports = {
                     BannerDetails: {
                         main: true,
                         banner: true
+                    }, 
+                    PopUp: {
+                        main: true,
+                        view: true
                     },
                     Utilities: {
                         main: true,
@@ -178,17 +185,16 @@ module.exports = {
                         ScratchCampaign: true,
                         ScratchEvent: true,
                         ScratchPrize: true,
-                        ScratchCampaignBanner: true,
                         ScratchReport: true
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
                     },
-                    Engagement:{
+                    Engagement: {
                         main: true,
                         bulkNotification: true,
-                        reports:false
+                        reports: false
                     },
                     Reports: {
                         main: true,
@@ -263,6 +269,10 @@ module.exports = {
                         main: false,
                         banner: false
                     },
+                    PopUp: {
+                        main: false,
+                        view: false
+                    },
                     Utilities: {
                         main: false,
                         QueueReports: false,
@@ -290,17 +300,16 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchCampaignBanner: false,
                         ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
                     },
-                    Engagement:{
+                    Engagement: {
                         main: true,
                         bulkNotification: true,
-                        reports:false
+                        reports: false
                     },
                     Reports: {
                         main: true,
@@ -375,6 +384,10 @@ module.exports = {
                         main: false,
                         banner: false
                     },
+                    PopUp: {
+                        main: false,
+                        view: false
+                    },
                     Utilities: {
                         main: false,
                         QueueReports: false,
@@ -402,17 +415,16 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchCampaignBanner: false,
                         ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
                     },
-                    Engagement:{
+                    Engagement: {
                         main: true,
                         bulkNotification: true,
-                        reports:false
+                        reports: false
                     },
                     Reports: {
                         main: true,
@@ -488,6 +500,10 @@ module.exports = {
                         main: false,
                         banner: false
                     },
+                    PopUp: {
+                        main: false,
+                        view: false
+                    },
                     Utilities: {
                         main: false,
                         QueueReports: false,
@@ -515,17 +531,16 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchCampaignBanner: false,
                         ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
                     },
-                    Engagement:{
+                    Engagement: {
                         main: false,
                         bulkNotification: false,
-                        reports:false
+                        reports: false
                     },
                     Reports: {
                         main: true,
@@ -606,6 +621,10 @@ module.exports = {
                         main: false,
                         banner: false
                     },
+                    PopUp: {
+                        main: false,
+                        view: false
+                    },
                     Utilities: {
                         main: false,
                         QueueReports: false,
@@ -633,17 +652,16 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchCampaignBanner: false,
                         ScratchReport: false
                     },
                     FeedbackDetails: {
                         main: false,
                         feedback: false,
                     },
-                    Engagement:{
+                    Engagement: {
                         main: false,
                         bulkNotification: false,
-                        reports:false
+                        reports: false
                     },
                     Reports: {
                         main: false,
@@ -746,6 +764,15 @@ module.exports = {
                 ]
             }, {
                 path: '',
+                title: 'PopUp Details',
+                type: 'menu__toggle',
+                icontype: 'fas fa-external-link-alt', //<i class="fas fa-external-link-alt"></i>
+                show: limit.PopUp.main,
+                children: [
+                    { path: '/master/pop-up/view-pop-up', title: 'PopUp', show: limit.PopUp.view, }
+                ]
+            }, {
+                path: '',
                 title: 'Utilities',
                 type: 'menu__toggle',
                 icontype: 'fas fa-toolbox',
@@ -791,7 +818,6 @@ module.exports = {
                     { path: '/master/scratch-card-management/scratch-campaign', title: 'Scratch Campaign', show: limit.ScratchCardManagement.ScratchCampaign },
                     { path: '/master/scratch-card-management/scratch-event', title: 'Scratch Event', show: limit.ScratchCardManagement.ScratchEvent },
                     { path: '/master/scratch-card-management/scratch-prize', title: 'Scratch Prize', show: limit.ScratchCardManagement.ScratchPrize },
-                    { path: '/master/scratch-card-management/scratch-campaign-banner', title: 'Scratch Campaign Banner', show: limit.ScratchCardManagement.ScratchCampaignBanner },
                     { path: '/master/scratch-card-management/scratch-report', title: 'Scratch Report', show: limit.ScratchCardManagement.ScratchReport }
                 ]
             }, {
@@ -812,7 +838,7 @@ module.exports = {
                 show: limit.Engagement.main,
                 children: [
                     { path: '/reports/pushnotification', title: 'Notification', show: limit.Engagement.bulkNotification, },
-                    { path: '/reports/bulknotification', title: 'Reports', show: limit.Engagement.reports, }                    
+                    { path: '/reports/bulknotification', title: 'Reports', show: limit.Engagement.reports, }
                 ]
             }, {
                 path: '',

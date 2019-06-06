@@ -46,11 +46,26 @@ module.exports = {
 
         console.log('createDailyContest Start ' + new Date());
         var todaysDate = new Date()
-        var dt = dateFormat(todaysDate, "yyyy-mm-dd");
-        let insertquery = `insert into tbl_contest (contest_master_id, app_id, contest_name, contest_type,contest_desc, start_date, end_date, from_time, to_time, max_players, winners, entry_fee, currency, profit_margin, status, debit_type, credit_type, win_amount, css_class, contest_priority, game_conf,created_at,publish_type,channel) 
-        select contest_master_id, app_id, contest_name, contest_type, contest_desc,  (('${dt}' || ' ' || from_time ::text)::timestamptz) ,  (('${dt}' || ' ' || to_time ::text)::timestamptz ),   from_time, to_time, max_players, winners, entry_fee, currency, profit_margin, status, debit_type, credit_type, win_amount, css_class, contest_priority, game_conf,now(),publish_type,channel from tbl_contest_master 
-        where contest_master_id not in (select contest_master_id from tbl_contest where start_date::DATE = '${dt}' and contest_master_id is not null) 
-        and contest_type ='Daily' and status = 'ACTIVE' returning contest_master_id`;
+        var date = dateFormat(todaysDate, "yyyy-mm-dd");
+        let insertquery = "insert into tbl_contest (contest_master_id, app_id, contest_name, contest_type," +
+        " contest_desc, start_date, end_date, from_time, to_time, max_players, winners, entry_fee, " +
+        " currency, profit_margin, status, debit_type, credit_type, " +
+        " win_amount, css_class, contest_priority, game_conf ,created_at, " +
+        " channel,publish_type,min_player,max_lives,rank_desc,infinite_users,matrix_code) " +
+        " select contest_master_id, app_id, contest_name, contest_type, contest_desc, " +
+        " (('" + date + "' || ' ' || from_time :: text)::timestamptz) , " +
+        " (('" + date + "' || ' ' || to_time ::text)::timestamptz ),   " +
+        " from_time, to_time, max_players, winners, entry_fee, " +
+        " currency, profit_margin, status, debit_type, credit_type," +
+        " win_amount, css_class, contest_priority, game_conf,now(),channel, " +
+        " publish_type,min_player,max_lives,rank_desc,infinite_users,matrix_code " +
+        " from tbl_contest_master " +
+        " where contest_master_id not in (select contest_master_id " +
+        " from tbl_contest where start_date::DATE = '" + date + "' " +
+        " and contest_master_id is not null ) " +
+        " and contest_type ='Daily' " +
+        " and status = 'ACTIVE'";
+
 
         console.log('addContestForDate - ', insertquery);
 
@@ -879,11 +894,15 @@ function getQueriesRankData(sheetData, contest_uid, contest_master_id) {
 
 async function insertContestRankDetails() {
     return new Promise(async (resolve, reject) => {
-        // let pendingContestRank = 'select distinct contest_id, contest_master_id from ' +
-        //     ' tbl_contest where created_at::Date = now()::date and ' +
-        //     ' contest_id not in (select distinct contest_id from tbl_contest_rank) order by contest_id'
 
-        let pendingContestRank = `select distinct contest_id, contest_master_id from tbl_contest  where created_at > (now() - (7 * interval '1 Day')) and status = 'ACTIVE' and contest_master_id is not null and  contest_id not in (select distinct contest_id from tbl_contest_rank) order by contest_id`
+        let pendingContestRank = `SELECT DISTINCT contest.contest_id, 
+        contest.contest_master_id FROM tbl_contest contest        
+        WHERE contest.created_at > (now() - (2 * interval '1 Day'))
+        and contest.status = 'ACTIVE'
+        AND NOT EXISTS
+        (SELECT DISTINCT contest_id  FROM tbl_contest_rank ranks where 
+         ranks.contest_id = contest.contest_id)
+            ORDER BY contest.contest_id`
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', pendingContestRank);
@@ -896,8 +915,12 @@ async function insertContestRankDetails() {
 
                     console.log(element)
 
-                    let insertRankdetails = "insert into tbl_contest_rank ( contest_id, rank_name, rank_desc, lower_rank, upper_rank, prize_amount, status, created_at, updated_at, credit_type) " +
-                        " select  " + element.contest_id + ", rank_name, rank_desc,  lower_rank, upper_rank, prize_amount, status, created_at, updated_at,credit_type from tbl_contest_rank_master where contest_master_id =  " + element.contest_master_id + " returning contest_id";
+                    let insertRankdetails = "insert into tbl_contest_rank ( contest_id, rank_name, rank_desc, " +
+                    " lower_rank, upper_rank, prize_amount, status, created_at, updated_at, credit_type) " +
+                    " select  " + element.contest_id + ", rank_name, rank_desc, " +
+                    " lower_rank, upper_rank, prize_amount, status, created_at, updated_at,credit_type " +
+                    " from tbl_contest_rank_master where contest_master_id =  " + element.contest_master_id;
+
 
                     // console.log('insertRankdetails - ', insertRankdetails);
                     if (element.contest_id && element.contest_master_id) {
