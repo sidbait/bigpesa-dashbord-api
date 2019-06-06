@@ -1,6 +1,6 @@
 const pgConnection = require('../../model/pgConnection');
 
-let expiretime = 60 * 60 // in sec //
+let expiretime = 15 * 60 // in sec // 15 min
 
 module.exports = {
     setDashboardRedis: async () => {
@@ -17,7 +17,7 @@ module.exports = {
             todaysCountsDebitCredit(expiretime);
             totalUsersWithCashCoin(expiretime);
             activeUsersWithCashCoin(expiretime);
-        }, 30 * 60 * 1000);
+        }, 16 * 60 * 1000);
     }
 }
 
