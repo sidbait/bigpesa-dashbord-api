@@ -70,7 +70,8 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchReport: false
+                        ScratchReport: false,
+                        ScratchWinnerBanner: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -185,7 +186,8 @@ module.exports = {
                         ScratchCampaign: true,
                         ScratchEvent: true,
                         ScratchPrize: true,
-                        ScratchReport: true
+                        ScratchReport: true,
+                        ScratchWinnerBanner: true
                     },
                     FeedbackDetails: {
                         main: false,
@@ -300,7 +302,8 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchReport: false
+                        ScratchReport: false,
+                        ScratchWinnerBanner: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -415,7 +418,8 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchReport: false
+                        ScratchReport: false,
+                        ScratchWinnerBanner: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -531,7 +535,8 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchReport: false
+                        ScratchReport: false,
+                        ScratchWinnerBanner: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -652,7 +657,8 @@ module.exports = {
                         ScratchCampaign: false,
                         ScratchEvent: false,
                         ScratchPrize: false,
-                        ScratchReport: false
+                        ScratchReport: false,
+                        ScratchWinnerBanner: false
                     },
                     FeedbackDetails: {
                         main: false,
@@ -818,7 +824,8 @@ module.exports = {
                     { path: '/master/scratch-card-management/scratch-campaign', title: 'Scratch Campaign', show: limit.ScratchCardManagement.ScratchCampaign },
                     { path: '/master/scratch-card-management/scratch-event', title: 'Scratch Event', show: limit.ScratchCardManagement.ScratchEvent },
                     { path: '/master/scratch-card-management/scratch-prize', title: 'Scratch Prize', show: limit.ScratchCardManagement.ScratchPrize },
-                    { path: '/master/scratch-card-management/scratch-report', title: 'Scratch Report', show: limit.ScratchCardManagement.ScratchReport }
+                    { path: '/master/scratch-card-management/scratch-report', title: 'Scratch Report', show: limit.ScratchCardManagement.ScratchReport },
+                    { path: '/master/scratch-card-management/scratch-winner-banner', title: 'Scratch Winner Banner', show: limit.ScratchCardManagement.ScratchWinnerBanner }
                 ]
             }, {
                 path: '',
