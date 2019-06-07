@@ -105,7 +105,7 @@ module.exports = {
                 };
                 let output = jsonToPivotjson(dbResult, options);
 
-                console.log('output - ', output)
+                //console.log('output - ', output)
 
                 services.sendResponse.sendWithCode(req, res, output, customMsgType, "GET_SUCCESS");
             } else {
