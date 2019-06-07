@@ -28,7 +28,6 @@ module.exports = {
 
         let rules = {
             "banner_name":'required',
-            "prize_amount": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
         };
 
