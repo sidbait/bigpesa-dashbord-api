@@ -75,8 +75,9 @@ module.exports = {
                     },
                     Engagement:{
                         main: true,
-                        bulkNotification: true,
-                        reports:false
+                        messageEvent: true,
+                        messageTemplate: true,
+                        messageSchedule: true
                     },
                     Reports: {
                         main: true,
@@ -187,8 +188,9 @@ module.exports = {
                     },
                     Engagement:{
                         main: true,
-                        bulkNotification: true,
-                        reports:false
+                        messageEvent: true,
+                        messageTemplate: true,
+                        messageSchedule: true
                     },
                     Reports: {
                         main: true,
@@ -299,8 +301,9 @@ module.exports = {
                     },
                     Engagement:{
                         main: true,
-                        bulkNotification: true,
-                        reports:false
+                        messageEvent: true,
+                        messageTemplate: true,
+                        messageSchedule: true
                     },
                     Reports: {
                         main: true,
@@ -411,8 +414,9 @@ module.exports = {
                     },
                     Engagement:{
                         main: true,
-                        bulkNotification: true,
-                        reports:false
+                        messageEvent: true,
+                        messageTemplate: true,
+                        messageSchedule: true
                     },
                     Reports: {
                         main: true,
@@ -524,8 +528,9 @@ module.exports = {
                     },
                     Engagement:{
                         main: false,
-                        bulkNotification: false,
-                        reports:false
+                        messageEvent: false,
+                        messageTemplate: false,
+                        messageSchedule: false
                     },
                     Reports: {
                         main: true,
@@ -642,8 +647,9 @@ module.exports = {
                     },
                     Engagement:{
                         main: false,
-                        bulkNotification: false,
-                        reports:false
+                        messageEvent: false,
+                        messageTemplate: false,
+                        messageSchedule: false
                     },
                     Reports: {
                         main: false,
@@ -811,8 +817,9 @@ module.exports = {
                 icontype: 'fas fa-users-cog',
                 show: limit.Engagement.main,
                 children: [
-                    { path: '/reports/pushnotification', title: 'Notification', show: limit.Engagement.bulkNotification, },
-                    { path: '/reports/bulknotification', title: 'Reports', show: limit.Engagement.reports, }                    
+                    { path: '/engagement/message-event', title: 'Message Event', show: limit.Engagement.messageEvent, },
+                    { path: '/engagement/message-template', title: 'Message Template', show: limit.Engagement.messageTemplate, },
+                    { path: '/engagement/message-schedule', title: 'Message Schedule', show: limit.Engagement.messageSchedule, }                     
                 ]
             }, {
                 path: '',
