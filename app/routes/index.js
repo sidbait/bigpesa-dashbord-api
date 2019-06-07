@@ -28,6 +28,7 @@ const playerReportRoute = require('../routes/reports/playerReportRoute');
 const menuRoutes = require('../routes/menu/menuRoute');
 const utilitiesRoutes = require('../routes/utilities/utilitiesRoute');
 const scratchcardRoutes = require('../routes/scratchCard/scratchCardRoute');
+const engagementRoutes = require('../routes/engagement/engagementRoute');
 const popUpRoutes = require('../routes/popUp/popRoute');
 
 apiRoutes.get('/', function (req, res) {
@@ -51,6 +52,7 @@ app.use(middleware.injectMiddleware(
         apiRoutes_user.use('/utilities', utilitiesRoutes),
         apiRoutes_user.use('/menu', menuRoutes),
         apiRoutes_user.use('/scratchCard', scratchcardRoutes),
+        apiRoutes_user.use('/engagement', engagementRoutes),
         apiRoutes_user.use('/popUp', popUpRoutes)
     ]
 ));
