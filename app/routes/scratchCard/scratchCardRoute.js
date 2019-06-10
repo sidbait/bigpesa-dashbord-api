@@ -11,5 +11,6 @@ apiRoutes.use(require('./scratchPrizeRoute'));
 apiRoutes.use(require('./scratchPrizeDetailsRoute'));
 apiRoutes.use(require('./scratchWinnerRoute'));
 apiRoutes.use(require('./scratchReportRoute'));
+apiRoutes.use(require('./scratchCampaignPrizesDetailsRoute'));
 
 module.exports = apiRoutes;
