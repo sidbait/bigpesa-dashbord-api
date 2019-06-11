@@ -834,7 +834,10 @@ function readSheet(xlsxFilePath) {
                     AB: 'min_player',
                     AC: 'rank_desc',
                     AD: 'show_from_date',
-                    AE: 'show_from_time'
+                    AE: 'show_from_time',
+                    // AE: 'contest_minutes',
+                    AF: 'infinite_users',
+                    AG: 'matrix_code',
                 }
             }, {
                 name: 'rankData',
