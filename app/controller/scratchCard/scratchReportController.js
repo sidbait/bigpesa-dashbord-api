@@ -25,16 +25,19 @@ module.exports = {
         }
 
 
-        let _selectQuery = `select ${group_by},
+        let _selectQuery = `select tbl_scratch_campaign_master.camp_name as campaign,${group_by},
         amount, count(1) avaialble,
         (amount * count(1)) total_amount,
         count(case when is_win = false then 1 end) remaining,
         count(case when is_win = true then 1 end) won,
         count(case when is_claim = true then 1 end) claimed,
-        count(case when is_credited = true then 1 end) credited
+        count(case when is_credited = true then 1 end) credited,
+        round(count(case when is_win = true then 1 end)::decimal / count(1)::decimal * 100, 2) as used_percentage
             from tbl_scratch_campaign_prizes_details 
         join tbl_scratch_prize_master
-        on tbl_scratch_campaign_prizes_details.prize_id = tbl_scratch_prize_master.prize_id`
+        on tbl_scratch_campaign_prizes_details.prize_id = tbl_scratch_prize_master.prize_id
+        inner join tbl_scratch_campaign_master
+        on tbl_scratch_campaign_prizes_details.camp_id = tbl_scratch_campaign_master.camp_id`
 
         if (_camp_id) {
             _selectQuery += ` where tbl_scratch_campaign_prizes_details.camp_id = ${_camp_id}`
@@ -44,7 +47,7 @@ module.exports = {
             _selectQuery += ` where tbl_scratch_campaign_prizes_details.from_date between '${_frmdate}' and '${_todate}'`
         }
 
-        _selectQuery += ` group by ${group_by}, amount 
+        _selectQuery += ` group by tbl_scratch_campaign_master.camp_name, ${group_by}, amount 
         order by 1, 2, 3`;
 
         try {
