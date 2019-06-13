@@ -697,17 +697,16 @@ module.exports = {
                 console.log(req.body)
                 let fromDate = req.body.frmdate;
                 let toDate = req.body.todate;
-                queryText = "select * from vw_admin_top_game_summary" +
-                    " where contest_date::Date between $1 and $2" +
-                    " ORDER BY contest_date::Date, total_players_joined desc";
-                valuesArr = [fromDate, toDate]
+                let appid = req.body.appid;
+                let queryText = `select * from vw_admin_top_game_summary where contest_date::Date between '${fromDate}' and '${toDate}'`;
 
-                let query = {
-                    text: queryText,
-                    values: valuesArr
-                };
+                if (appid) {
+                    queryText += ` and app_id = ${appid}`
+                }
 
-                let result = await pgConnection.executeQuery('rmg_dev_db', query)
+                queryText += ` ORDER BY contest_date::Date, total_players_joined desc`;
+
+                let result = await pgConnection.executeQuery('rmg_dev_db', queryText)
                 if (result.length > 0) {
                     services.sendResponse.sendWithCode(req, res, result, customMsgType, "GET_SUCCESS");
                 } else {
