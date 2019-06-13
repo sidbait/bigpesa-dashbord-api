@@ -25,7 +25,7 @@ module.exports = {
         }
 
 
-        let _selectQuery = `select tbl_scratch_campaign_master.camp_name as campaign,${group_by},
+        let _selectQuery = `select tbl_scratch_campaign_master.camp_id as camp_id, tbl_scratch_campaign_master.camp_name as campaign, ${group_by},
         amount, count(1) avaialble,
         (amount * count(1)) total_amount,
         count(case when is_win = false then 1 end) remaining,
@@ -47,8 +47,8 @@ module.exports = {
             _selectQuery += ` where tbl_scratch_campaign_prizes_details.from_date between '${_frmdate}' and '${_todate}'`
         }
 
-        _selectQuery += ` group by tbl_scratch_campaign_master.camp_name, ${group_by}, amount 
-        order by 1, 2, 3`;
+        _selectQuery += ` group by tbl_scratch_campaign_master.camp_id, tbl_scratch_campaign_master.camp_name, ${group_by}, amount 
+        order by 1, 2, 3, 4, 5, 6`;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
