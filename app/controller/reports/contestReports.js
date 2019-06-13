@@ -168,16 +168,16 @@ module.exports = {
             let startdate = req.body.startdate;
             let enddate = req.body.enddate;
             try {
-                queryText = "select app_download.download_date::date::text as download_date, app_download.agency_source," +
+                queryText = "select (app_download.download_date + (330 * '1m'::interval))::date::text as download_date, app_download.agency_source," +
                     " COUNT(app_download.download_id) AS downloads," +
                     " count(distinct player.player_id) as register," +
                     " count(distinct CASE WHEN player.phone_number_verified = true THEN player.player_id END) AS otp_verified" +
                     " from tbl_app_download app_download" +
                     " left join tbl_player_device player_device on player_device.device_id = app_download.device_id" +
                     " left join tbl_player player on player.player_id = player_device.player_id" +
-                    " where app_download.download_date::date between $1 and $2" +
-                    " group by app_download.download_date::date::text, app_download.agency_source" +
-                    " order by app_download.download_date::date::text desc";
+                    " where (app_download.download_date + (330 * '1m'::interval))::date between $1 and $2" +
+                    " group by (app_download.download_date + (330 * '1m'::interval))::date::text, app_download.agency_source" +
+                    " order by (app_download.download_date + (330 * '1m'::interval))::date::text desc";
                 valuesArr = [startdate, enddate]
 
                 let query = {
@@ -295,11 +295,12 @@ module.exports = {
                 let channel = req.body.channel;
                 let source = req.body.source ? req.body.source : '';
 
-                queryText = "select * from tbl_acquisition_summary_channel" +
-                    " where channel = $1" +
+                queryText = "select report_date::date, upper(channel) channel, reg_source, sum(total_visits) total_visits, sum(unique_visits) unique_visits, sum(unique_percentage) unique_percentage, sum(total_register) total_register, sum(total_verified) total_verified, sum(total_deposit) total_deposit, sum(total_deposit_amount) total_deposit_amount, sum(unique_contest_joined) unique_contest_joined, sum(total_contest_joined) total_contest_joined, sum(cash_contest_joined) cash_contest_joined, sum(cash_used) cash_used, sum(cash_contest_played) cash_contest_played, sum(free_contest_joined) free_contest_joined, sum(free_contest_played) free_contest_played, sum(win_cash_amount) win_cash_amount, sum(total_withdrawl) total_withdrawl, sum(total_withdrawl_amount) total_withdrawl_amount from tbl_acquisition_summary_channel " +
+                    " where upper(channel) = upper($1)" +
                     " and reg_source ilike '%" + source + "%'" +
                     " and report_date between $2 and $3" +
-                    " ORDER BY report_date, reg_source";
+                    " GROUP BY report_date, upper(channel), reg_source" +
+                    " ORDER BY report_date, upper(channel), reg_source";
                 valuesArr = [channel, fromDate, toDate]
 
                 let query = {
