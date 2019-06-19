@@ -18,14 +18,12 @@ module.exports = {
             "from_time": 'required',
             "to_time": 'required',
             "daily_frequecny": 'required',
-            "is_repeat": 'required',
-            "fixed_base": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
         };
 
         let obj = req.body
         console.log(req.body);
-        
+
         // deleting null value from req.body
         Object.keys(obj).forEach(k => (obj[k] === 'null') && delete obj[k]);
 
@@ -42,8 +40,8 @@ module.exports = {
             let _from_time = req.body.from_time ? req.body.from_time : null;
             let _to_time = req.body.to_time ? req.body.to_time : null;
             let _daily_frequecny = req.body.daily_frequecny ? req.body.daily_frequecny : null;
-            let _is_repeat = req.body.is_repeat ? req.body.is_repeat : null;
-            let _fixed_base = req.body.fixed_base ? req.body.fixed_base : null;
+            let _is_repeat = req.body.is_repeat ? req.body.is_repeat : false;
+            let _fixed_base = req.body.fixed_base ? req.body.fixed_base : false;
 
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
@@ -65,9 +63,9 @@ module.exports = {
             else {
 
                 _query = {
-                    text: "UPDATE tbl_message_schedule SET schedule_id=$1,me_id=$2,mt_id=$3,base_type=$4,from_date=$5,to_date=$6,from_time=$7,to_time=$8,next_send_date=$9,daily_frequecny=$10,is_repeat=$11,fixed_base=$12,status=$13,updated_at=now(),updated_by=$14 RETURNING schedule_id",
+                    text: "UPDATE tbl_message_schedule SET me_id=$1,mt_id=$2,base_type=$3,from_date=$4,to_date=$5,from_time=$6,to_time=$7,next_send_date=$8,daily_frequecny=$9,is_repeat=$10,fixed_base=$11,status=$12,updated_at=now(),updated_by=$13  where schedule_id=$14 RETURNING schedule_id",
                     values: [
-                        _schedule_id, _me_id, _mt_id, _base_type, _from_date, _to_date, _from_time, _to_time, _from_date, _daily_frequecny, _is_repeat, _fixed_base, _status, _updated_by
+                        _me_id, _mt_id, _base_type, _from_date, _to_date, _from_time, _to_time, _from_date, _daily_frequecny, _is_repeat, _fixed_base, _status, _updated_by, _schedule_id
                     ]
                 }
 
@@ -111,7 +109,7 @@ module.exports = {
         let _status = req.body.status ? req.body.status : null;
         let _orderBy = req.body.orderBy ? req.body.orderBy : 'next_send_date';
 
-        let _selectQuery = `SELECT schedule_id,tbl_message_schedule.me_id,event_name,tbl_message_schedule.mt_id,message,base_type,from_date::date::text,to_date::date::text,from_time,to_time,daily_frequecny,is_repeat,fixed_base,tbl_message_schedule.status  FROM tbl_message_schedule
+        let _selectQuery = `SELECT schedule_id,tbl_message_schedule.me_id,event_name,tbl_message_schedule.mt_id,message,base_type,from_date::date::text,to_date::date::text,from_time,to_time,next_send_date::date::text, daily_frequecny,is_repeat,fixed_base,tbl_message_schedule.status  FROM tbl_message_schedule
         inner join tbl_message_templates
         on tbl_message_templates.mt_id = tbl_message_schedule.mt_id
         inner join tbl_message_event
