@@ -30,6 +30,7 @@ const utilitiesRoutes = require('../routes/utilities/utilitiesRoute');
 const scratchcardRoutes = require('../routes/scratchCard/scratchCardRoute');
 const engagementRoutes = require('../routes/engagement/engagementRoute');
 const popUpRoutes = require('../routes/popUp/popRoute');
+const botUserRoutes = require('../routes/botUser/botUserRoute');
 
 apiRoutes.get('/', function (req, res) {
     sendResponse.sendWithCode(req, res, null, "COMMON_MESSAGE", "WELCOME");
@@ -53,7 +54,8 @@ app.use(middleware.injectMiddleware(
         apiRoutes_user.use('/menu', menuRoutes),
         apiRoutes_user.use('/scratchCard', scratchcardRoutes),
         apiRoutes_user.use('/engagement', engagementRoutes),
-        apiRoutes_user.use('/popUp', popUpRoutes)
+        apiRoutes_user.use('/popUp', popUpRoutes),
+        apiRoutes_user.use('/bot', botUserRoutes)
     ]
 ));
 app.use(middleware.injectMiddleware(
