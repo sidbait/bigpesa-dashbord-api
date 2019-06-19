@@ -37,14 +37,15 @@ module.exports = {
         join tbl_scratch_prize_master
         on tbl_scratch_campaign_prizes_details.prize_id = tbl_scratch_prize_master.prize_id
         inner join tbl_scratch_campaign_master
-        on tbl_scratch_campaign_prizes_details.camp_id = tbl_scratch_campaign_master.camp_id`
+        on tbl_scratch_campaign_prizes_details.camp_id = tbl_scratch_campaign_master.camp_id  
+        where 1=1 `
 
         if (_camp_id) {
-            _selectQuery += ` where tbl_scratch_campaign_prizes_details.camp_id = ${_camp_id}`
+            _selectQuery += ` and tbl_scratch_campaign_prizes_details.camp_id = ${_camp_id}`
         }
 
         if (_frmdate) {
-            _selectQuery += ` where tbl_scratch_campaign_prizes_details.from_date between '${_frmdate}' and '${_todate}'`
+            _selectQuery += ` and tbl_scratch_campaign_prizes_details.from_date between '${_frmdate}' and '${_todate}'`
         }
 
         _selectQuery += ` group by tbl_scratch_campaign_master.camp_id, tbl_scratch_campaign_master.camp_name, ${group_by}, amount 
@@ -82,14 +83,14 @@ module.exports = {
             sum(case when is_credited = true then amount end) credited_amount
             from tbl_scratch_campaign_prizes_details 
             join tbl_scratch_prize_master
-            on tbl_scratch_campaign_prizes_details.prize_id = tbl_scratch_prize_master.prize_id`;
+            on tbl_scratch_campaign_prizes_details.prize_id = tbl_scratch_prize_master.prize_id where 1=1`;
 
             if (_camp_id) {
-                _selectQuery += ` where tbl_scratch_campaign_prizes_details.camp_id = ${_camp_id}`
+                _selectQuery += ` and tbl_scratch_campaign_prizes_details.camp_id = ${_camp_id}`
             }
 
             if (_frmdate) {
-                _selectQuery += ` where tbl_scratch_campaign_prizes_details.from_date between '${_frmdate}' and '${_todate}'`
+                _selectQuery += ` and tbl_scratch_campaign_prizes_details.from_date between '${_frmdate}' and '${_todate}'`
             }
 
             _selectQuery += ` group by case when tbl_scratch_campaign_prizes_details.winner_date is null then '--' else tbl_scratch_campaign_prizes_details.winner_date::date::text end, prize_code, prize_type`;
