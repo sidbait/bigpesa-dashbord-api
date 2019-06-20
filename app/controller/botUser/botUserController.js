@@ -9,7 +9,7 @@ module.exports = {
 
     chkCanAdd: async function (req, res) {
         let userId = req.body.userId ? req.body.userId : null;
-        if ((userId == '420559314854608897' || userId == '418513611208785923') ? true : false) {
+        if ((userId == '420559314854608897' || userId == '418513611208785923' || userId == '414259009505296385') ? true : false) {
             services.sendResponse.sendWithCode(req, res, true, customMsgType, "GET_SUCCESS");
         } else {
             services.sendResponse.sendWithCode(req, res, false, customMsgType, "GET_FAILED");
