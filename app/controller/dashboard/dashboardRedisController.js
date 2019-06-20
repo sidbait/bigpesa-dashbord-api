@@ -7,6 +7,7 @@ module.exports = {
         console.log('setDashboardRedis.........');
 
         setInterval(() => {
+            console.log('setting Dashboard Redis.........');
             inactiveUsersWithCashCoin(expiretime);
             cashSummary(expiretime);
             registeredVerifiedNotPlayed(expiretime);
@@ -17,7 +18,7 @@ module.exports = {
             todaysCountsDebitCredit(expiretime);
             totalUsersWithCashCoin(expiretime);
             activeUsersWithCashCoin(expiretime);
-        }, 16 * 60 * 1000);
+        }, 10 * 60 * 1000);
     }
 }
 

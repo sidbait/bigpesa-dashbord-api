@@ -56,6 +56,7 @@ module.exports = {
                         contest: true,
                         ContestPriority: true,
                         previewcontest: true,
+                        BotUsers:true,
                     },
                     ReferrerManagement: {
                         main: false,
@@ -174,6 +175,7 @@ module.exports = {
                         contest: true,
                         ContestPriority: true,
                         previewcontest: true,
+                        BotUsers:true,
                     },
                     ReferrerManagement: {
                         main: true,
@@ -292,6 +294,7 @@ module.exports = {
                         contest: true,
                         ContestPriority: true,
                         previewcontest: true,
+                        BotUsers:true,
                     },
                     ReferrerManagement: {
                         main: false,
@@ -410,6 +413,7 @@ module.exports = {
                         contest: false,
                         ContestPriority: false,
                         previewcontest: false,
+                        BotUsers:false,
                     },
                     ReferrerManagement: {
                         main: false,
@@ -529,6 +533,7 @@ module.exports = {
                         contest: false,
                         ContestPriority: false,
                         previewcontest: false,
+                        BotUsers:false,
                     },
                     ReferrerManagement: {
                         main: false,
@@ -653,6 +658,7 @@ module.exports = {
                         contest: false,
                         ContestPriority: false,
                         previewcontest: false,
+                        BotUsers:false,
                     },
                     ReferrerManagement: {
                         main: false,
@@ -812,6 +818,7 @@ module.exports = {
                     { path: '/master/manage-contest/view-contest', title: 'Contest', show: limit.ContestDetails.contest },
                     { path: '/master/manage-contest/preview-contest', title: 'Preview Contest', show: limit.ContestDetails.previewcontest },
                     { path: '/master/manage-contest/contest-priority', title: 'Contest Priority', show: limit.ContestDetails.ContestPriority },
+                    { path: '/master/manage-contest/bot-users', title: 'Bot Users', show: limit.ContestDetails.BotUsers },
                 ]
             }, {
                 path: '',
