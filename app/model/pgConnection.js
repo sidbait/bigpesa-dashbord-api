@@ -80,7 +80,7 @@ function executeQuery_db(dataBase, dbQuery, isReadOnly, callback) {
     else if (dataBase == "rmg_dev_db" && process.env.DB == 'pg_stg')
         pool = pool_pg_stg;
     else
-        pool = pool_private;
+        pool = pool_pg_private;
 
     if (isReadOnly)
         pool = pool_pg_readonly;
