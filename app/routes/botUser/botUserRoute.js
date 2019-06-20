@@ -12,6 +12,8 @@ botUserRoutes.post('/searchPlayer', botUserController.searchPlayer);
 botUserRoutes.post('/addNewBot', botUserController.addNewBot);
 botUserRoutes.post('/getOldContests', botUserController.getOldContests);
 botUserRoutes.post('/chkCanAdd', botUserController.chkCanAdd);
+botUserRoutes.post('/getProfile', botUserController.getProfile);
+botUserRoutes.post('/updateProfile', botUserController.updateProfile);
 
 
 
