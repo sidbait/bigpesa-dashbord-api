@@ -293,22 +293,28 @@ async function insertData(prize_ids, sheetData) {
         if (prize_ids.hasOwnProperty(key)) {
             const element = prize_ids[key];
 
-            if (element.match) {
-                console.log(element.match, element.prize_id);
+            try {
+                if (element.match) {
+                    console.log(element.match, element.prize_id);
 
-                // insert data for element.prize_id from sheet
+                    // insert data for element.prize_id from sheet
 
-                let queries = await getQueriesData(sheetData, element.prize_id);
-                console.log(queries);
+                    let queries = await getQueriesData(sheetData, element.prize_id);
 
-                Promise.all(queries.map(async (query) => {
-                    if (query != false) {
-                        return await pgConnection.executeQuery('rmg_dev_db', query);
-                    }
-                })).then((inresults) => {
-                    console.log(inresults);
+                    Promise.all(queries.map(async (query) => {
+                        if (query != false) {
+                            // return await pgConnection.executeQuery('rmg_dev_db', query);
+                            let data = {
+                                type: 'executeQueryKue',
+                                query: query
+                            }
+                            services.kue.createkue('executeQueryKue', data)
+                        }
+                    }))
 
-                })
+                }
+            } catch (error) {
+                console.log(error);
 
             }
         }

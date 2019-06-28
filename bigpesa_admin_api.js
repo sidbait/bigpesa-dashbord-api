@@ -1,5 +1,8 @@
 var cors = require('cors');
-// async = require('async');
+var kue = require('kue');
+var ui = require('kue-ui');
+var kueService = require('./app/service/kueService');
+
 express = require('express');
 bodyParser = require('body-parser');
 // request = require("request");
@@ -16,6 +19,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
+ui.setup({
+    apiURL: '/api', // IMPORTANT: specify the api url
+    baseURL: '/kue', // IMPORTANT: specify the base url
+    updateInterval: 5000 // Optional: Fetches new data every 5000 ms
+});
+
+// Mount kue JSON api
+app.use('/api', kue.app);
+// Mount UI
+app.use('/kue', ui.app);
 
 //multer setup
 var storage = multer.diskStorage({
@@ -89,6 +103,14 @@ app.listen(config.app.port, function () {
     console.log('Listening on port:' + config.app.port);
     console.log('Welcome to CMS API');
     console.log(process.env.DB);
+
+    kueService.processkue('executeQueryKue', function (isSuccess) {
+        if (isSuccess) {
+            console.log('data process from kue');
+        } else {
+            console.log('error while processing data from kue');
+        }
+    })
 
     let dbui = require('./app/controller/dashboard/dashboardRedisController');
 

@@ -6,6 +6,7 @@ var services = {
    customMessage: require('./customMessage.js'),
    sendMail: require('./sendMail.js'),
    s3:require('./S3'),
+   kue:require('./kueService'),
 };
 
 module.exports = services;
