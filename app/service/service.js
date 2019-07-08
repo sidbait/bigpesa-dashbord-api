@@ -5,8 +5,9 @@ var services = {
    consoleLog: require('./consoleLog.js'),
    customMessage: require('./customMessage.js'),
    sendMail: require('./sendMail.js'),
-   s3:require('./S3'),
-   kue:require('./kueService'),
+   s3: require('./S3'),
+   kue: require('./kueService'),
+   commonServices: require('./commonServices'),
 };
 
 module.exports = services;

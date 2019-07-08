@@ -39,20 +39,21 @@ module.exports = {
         }
     },
 
+
     //LOGIN/REGISTER MODULES
     "LOGIN_MESSAGE": {
 
         "USER_ALREADY_REGISTERD": {
             success: false,
-            message: "Email Id or Username already exists. Please provide another!!",
+            message: "User Alerady Registered",
             messageCode: "ALREADY_REGISTERD",
             statusCode: 401
         },
         "USER_REGISTERED_SUCCESS": {
-            success: false,
+            success: true,
             message: "Registered Successfully.",
             messageCode: "REGISTERED_SUCCESS",
-            statusCode: 401
+            statusCode: 200
         },
         "USER_DEACTIVE": {
             success: false,
@@ -253,6 +254,18 @@ module.exports = {
             success: false,
             message: "Level Already exists",
             messageCode: "LEVEL_EXIST",
+            statusCode: 401
+        },
+        "TXN_SUCCESS": {
+            success: true,
+            message: "Transaction Success!",
+            messageCode: "TXN_SUCCESS",
+            statusCode: 200
+        },
+        "TXN_FAILED": {
+            success: false,
+            message: "Transaction Failed!",
+            messageCode: "TXN_FAILED",
             statusCode: 401
         }
     },

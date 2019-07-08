@@ -1,21 +1,21 @@
 {
   "app": {
     "host": "0.0.0.0",
-    "port": "3005",
+    "port": "3001",
     "app_key": "yXzLPeD4f3FXHsK33aExnuKyBHAFr8AmxYyWMAvaH2jaMhMTap"
   },
   "logger": {
     "level": "info",
-    "filename": "bigpesa-dash.log"
+    "filename": "loyalty.log"
   },
   "debug_db_result": true,
   "db_connectionString": {
     "pg": {
-      "pg_public": {
+      "pg_loyalty": {
         "user": "bigpesa",
         "password": "YP8mhNqxaZBbDtjQrS6m",
-        "database": "rmg_db",
-        "host": "192.168.5.121",
+        "database": "loyalty",
+        "host": "192.168.5.129",
         "port": 5432,
         "ssl": true,
         "max": 50,
@@ -25,7 +25,7 @@
       "pg_stg": {
         "user": "bigpesa",
         "password": "YP8mhNqxaZBbDtjQrS6m",
-        "database": "rmg_db",
+        "database": "loyalty",
         "host": "192.168.5.129",
         "port": 5432
       }
@@ -33,7 +33,7 @@
   },
   "jwt_sessions": {
     "private_key": "MKMKMXBJ",
-    "expires_in": 18000,
+    "expires_in": 157784760,
     "refresh_time": 18000
   },
   "s3_auth": {

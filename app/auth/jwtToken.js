@@ -3,18 +3,16 @@ const config = require('config');
 
 module.exports = {
 
-    generateToken: function (userDetails) {
+    generateToken: function (playerDetails) {
 
         var claims = {
             sub: 'authentication',
             iss: 'http://bigpesa.com',
             permissions: 'all',
             identity: {
-                source: 'bigpesa-CMS',
-                userId: userDetails.user_id,
-                emailId: userDetails.email,
-                userTypeId: userDetails.role_id,
-                userType: userDetails.role_title,
+                source: 'loyalty-nz',
+                playerId: playerDetails.playerId,
+                appId: playerDetails.appId,
                 date: new Date()
             }
         };
