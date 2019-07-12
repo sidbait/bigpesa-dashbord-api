@@ -1,13 +1,27 @@
-﻿﻿const pg = require('pg');
-
+﻿const pg = require('pg');
+const logger = require('tracer').colorConsole();
 const config = require('config');
 const perf = require('execution-time')();
-
+//const services = require('../service/service.js');
 const consoleLog = require('../service/consoleLog.js');
 
 const redis = require('./redisConnection');
 
-const pool_loyalty = new pg.Pool(config.db_connectionString.pg.pg_loyalty);
+const pool_pg_public = new pg.Pool(config.db_connectionString.pg.pg_public);
+const pool_pg_private = new pg.Pool(config.db_connectionString.pg.pg_private);
+const pool_pg_stg = new pg.Pool(config.db_connectionString.pg.pg_stg);
+
+const pool_pg_readonly = new pg.Pool({
+    "user": "support",
+    "password": "Support@123",
+    "database": "rmg_db",
+    "host": "192.168.5.121",
+    "port": 5432,
+    "ssl": true,
+    "max": 50,
+    "min": 10,
+    "idleTimeoutMillis": 500000
+})
 
 module.exports = {
 
@@ -59,8 +73,21 @@ function executeQuery_db(dataBase, dbQuery, isReadOnly, callback) {
 
     var pool = null;
 
-    if (dataBase == "loyalty")
-        pool = pool_loyalty;
+    if (dataBase == "rmg_dev_db" && process.env.DB == 'pg_private')
+        pool = pool_pg_private;
+    else if (dataBase == "rmg_dev_db" && process.env.DB == 'pg_public')
+        pool = pool_pg_public;
+    else if (dataBase == "rmg_dev_db" && process.env.DB == 'pg_stg')
+        pool = pool_pg_stg;
+    else
+        pool = pool_pg_private;
+
+    if (isReadOnly)
+        pool = pool_pg_readonly;
+
+    console.log('process.env.DB ==>', process.env.DB);
+    // console.log(pool);
+
 
     if (pool == null) {
         callback("DB Pool details not available for dataBase - " + dataBase, null);
