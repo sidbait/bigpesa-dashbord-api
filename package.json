@@ -1,8 +1,8 @@
 {
-  "name": "loyalty-api",
+  "name": "bigpesa-dashbord-api",
   "version": "1.0.0",
   "description": "",
-  "main": "loyalty-api.js",
+  "main": "bigpesa_admin_api.js",
   "dependencies": {
     "atob": "^2.1.2",
     "aws-sdk": "^2.443.0",
