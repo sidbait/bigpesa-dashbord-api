@@ -111,7 +111,7 @@ module.exports = {
                 queryText = "select order_id, (amount::decimal + cash_bonus) as amount, created_at, nz_txn_type,nz_txn_status, nz_txn_event_name" +
                     " from tbl_wallet_transaction" +
                     " where player_id = $1" +
-                    " order by created_at desc limit 200";
+                    " order by created_at desc limit 1000";
                 valuesArr = [player_id];
 
                 let query = {
