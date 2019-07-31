@@ -28,6 +28,10 @@ module.exports = {
 
         let rules = {
             "banner_name":'required',
+            "start_date":'required',
+            "end_date":'required',
+            "from_time":'required',
+            "to_time":'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
         };
 
@@ -90,8 +94,9 @@ module.exports = {
                 if (result.length > 0) {
 
                     if (req.files != null && req.files.length > 0) {
-                        // let movePath = await uploadBanner(req, result[0].contest_master_id);
-                        let s3Path = await services.s3.upload(req, 'scratch_card_img');
+                       console.log('uploading ....');
+                       
+                        let s3Path = await services.s3.upload(req, 'scratch_card_img/winner');
                         let mvQuery = {
                             text: "UPDATE tbl_scratch_winner_banners set image_url = $1 WHERE banner_id= $2 RETURNING image_url",
                             values: [
