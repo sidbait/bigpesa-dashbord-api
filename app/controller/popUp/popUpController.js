@@ -37,7 +37,7 @@ module.exports = {
             // "popup_type": 'required',
             // "msg": 'required',
             // "description": 'required',
-            "img_url": 'required',
+            // "img_url": 'required',
             // "show_count": 'required',
             // "from_date": 'required',
             // "to_date": 'required',
