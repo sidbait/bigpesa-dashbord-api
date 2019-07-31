@@ -57,7 +57,7 @@ module.exports = {
             let _msg = req.body.msg ? req.body.msg : null;
             let _description = req.body.description ? req.body.description : null;
 
-            let _show_count = req.body.show_count ? req.body.show_count : null;
+            let _show_count = req.body.show_count ? req.body.show_count : 0;
 
             let _start_date = req.body.start_date ? req.body.start_date : null;
             let _end_date = req.body.end_date ? req.body.end_date : null;
