@@ -45,14 +45,17 @@ module.exports = {
                         // console.log(sheetData);
 
                         const sheetDataCounts = await countSheetData(sheetData, 'prize_id')
+                        console.log('sheetDataCounts');
                         console.log(sheetDataCounts);
 
                         let queryDbCounts = `select prize_id,prize_count from tbl_scratch_campaign_prizes where camp_id = ${_camp_id}`;
                         const dbCounts = await pgConnection.executeQuery('rmg_dev_db', queryDbCounts);
+                        console.log('dbCounts');
                         console.log(dbCounts);
 
                         let queryExistingDbCounts = `select prize_id,count(prize_id) from tbl_scratch_campaign_prizes_details where camp_id = ${_camp_id} group by prize_id`;
                         const existingDbCounts = await pgConnection.executeQuery('rmg_dev_db', queryExistingDbCounts);
+                        console.log('existingDbCounts');
                         console.log(existingDbCounts);
 
                         let prize_ids = await validateData(dbCounts, existingDbCounts, sheetDataCounts)
@@ -93,7 +96,7 @@ module.exports = {
         let _camp_id = req.body.camp_id ? req.body.camp_id : null;
         let _selectQuery = `select id,camp_id,scp.prize_id,prize_count,scp.status,spm.prize_description from tbl_scratch_campaign_prizes scp
         join tbl_scratch_prize_master spm on scp.prize_id = spm.prize_id
-        where camp_id = ${_camp_id}`;
+        where camp_id = ${_camp_id} order by prize_id`;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
@@ -113,7 +116,7 @@ module.exports = {
 
         let _id = req.body.id ? req.body.id : null;
         let _selectQuery = `select id,camp_id,scp.prize_id,prize_count,scp.status,spm.prize_description from tbl_scratch_campaign_prizes scp
-        join tbl_scratch_prize_master spm on scp.prize_id = spm.prize_id where id = ${_id}`;
+        join tbl_scratch_prize_master spm on scp.prize_id = spm.prize_id where id = ${_id} order by prize_id`;
 
         try {
             let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
