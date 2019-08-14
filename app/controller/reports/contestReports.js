@@ -512,7 +512,7 @@ module.exports = {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
     },
-    cashReport: async function (req, res) {
+        cashReport: async function (req, res) {
         let rules = {
             "frmdate": 'required',
             "todate": 'required'
@@ -537,8 +537,7 @@ module.exports = {
                     " coalesce(sum(case when nz_txn_type = 'CREDIT' then amount::decimal + cash_bonus end),0) as CREDIT," +
                     " count(case when nz_txn_type = 'WITHDRAW' then player_id end) as withdraw_count," +
                     " count(distinct case when nz_txn_type = 'WITHDRAW' then player_id end) as unique_withdraw_count," +
-                    " COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW," +
-                    " sum(amount::decimal) as total" +
+                    " COALESCE(sum(case when nz_txn_type = 'WITHDRAW' then amount::decimal end),0) as WITHDRAW" +
                     " from tbl_wallet_transaction " +
                     " where nz_txn_status = 'SUCCESS'" +
                     " and (created_at + 330::double precision * '00:01:00'::interval)::date between $1 and $2" +

@@ -17,7 +17,6 @@ module.exports = {
             "to_date": 'required',
             "from_time": 'required',
             "to_time": 'required',
-            "daily_frequecny": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
         };
 
@@ -39,9 +38,13 @@ module.exports = {
             let _to_date = req.body.to_date ? req.body.to_date : null;
             let _from_time = req.body.from_time ? req.body.from_time : null;
             let _to_time = req.body.to_time ? req.body.to_time : null;
-            let _daily_frequecny = req.body.daily_frequecny ? req.body.daily_frequecny : null;
             let _is_repeat = req.body.is_repeat ? req.body.is_repeat : false;
+            let _daily_frequecny = req.body.daily_frequecny ? req.body.daily_frequecny : 0;
             let _fixed_base = req.body.fixed_base ? req.body.fixed_base : false;
+            let _date_range = req.body.date_range ? req.body.date_range : null;
+            let _pastdays = req.body.pastdays ? req.body.pastdays : 0;
+            let _base_from_date = req.body.base_from_date ? req.body.base_from_date : null;
+            let _base_to_date = req.body.base_to_date ? req.body.base_to_date : null;
 
             let _created_by = req.body.userid ? req.body.userid : null;
             let _updated_by = req.body.userid ? req.body.userid : null;
@@ -51,21 +54,30 @@ module.exports = {
             let errMsgType = _schedule_id ? 'UPDATE_FAILED' : 'ADD_FAILED'
             let successMsgType = _schedule_id ? 'UPDATE_SUCCESS' : 'ADD_SUCCESS'
 
+            _daily_frequecny = _is_repeat ? _daily_frequecny : 0;
+
+            if (_date_range == 'past') {
+                _base_from_date = null;
+                _base_to_date = null;
+            } else if (_date_range == 'between') {
+                _pastdays = 0;
+            }
+
             if (!_schedule_id) {
 
                 _query = {
-                    text: "INSERT INTO tbl_message_schedule(me_id,mt_id,base_type,from_date,to_date,from_time,to_time,next_send_date,daily_frequecny,is_repeat,fixed_base,status,created_by,  created_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,now()) RETURNING schedule_id",
+                    text: "INSERT INTO tbl_message_schedule(me_id,mt_id,base_type,from_date,to_date,from_time,to_time,next_send_date,daily_frequecny,is_repeat,fixed_base,status,created_by,  created_at,date_range,base_from_date,base_to_date,pastdays) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,now(),$14,$15,$16,$17) RETURNING schedule_id",
                     values: [
-                        _me_id, _mt_id, _base_type, _from_date, _to_date, _from_time, _to_time, _from_date, _daily_frequecny, _is_repeat, _fixed_base, _status, _created_by
+                        _me_id, _mt_id, _base_type, _from_date, _to_date, _from_time, _to_time, _from_date, _daily_frequecny, _is_repeat, _fixed_base, _status, _created_by, _date_range, _base_from_date, _base_to_date, _pastdays
                     ]
                 }
             }
             else {
 
                 _query = {
-                    text: "UPDATE tbl_message_schedule SET me_id=$1,mt_id=$2,base_type=$3,from_date=$4,to_date=$5,from_time=$6,to_time=$7,next_send_date=$8,daily_frequecny=$9,is_repeat=$10,fixed_base=$11,status=$12,updated_at=now(),updated_by=$13  where schedule_id=$14 RETURNING schedule_id",
+                    text: "UPDATE tbl_message_schedule SET me_id=$1,mt_id=$2,base_type=$3,from_date=$4,to_date=$5,from_time=$6,to_time=$7,next_send_date=$8,daily_frequecny=$9,is_repeat=$10,fixed_base=$11,status=$12,updated_at=now(),updated_by=$13, date_range=$14,base_from_date=$15,base_to_date=$16,pastdays=$17 where schedule_id=$18 RETURNING schedule_id",
                     values: [
-                        _me_id, _mt_id, _base_type, _from_date, _to_date, _from_time, _to_time, _from_date, _daily_frequecny, _is_repeat, _fixed_base, _status, _updated_by, _schedule_id
+                        _me_id, _mt_id, _base_type, _from_date, _to_date, _from_time, _to_time, _from_date, _daily_frequecny, _is_repeat, _fixed_base, _status, _updated_by, _date_range, _base_from_date, _base_to_date, _pastdays, _schedule_id
                     ]
                 }
 
@@ -109,7 +121,7 @@ module.exports = {
         let _status = req.body.status ? req.body.status : null;
         let _orderBy = req.body.orderBy ? req.body.orderBy : 'next_send_date';
 
-        let _selectQuery = `SELECT schedule_id,tbl_message_schedule.me_id,event_name,tbl_message_schedule.mt_id,message,base_type,from_date::date::text,to_date::date::text,from_time,to_time,next_send_date::date::text, daily_frequecny,is_repeat,fixed_base,tbl_message_schedule.status  FROM tbl_message_schedule
+        let _selectQuery = `SELECT schedule_id,tbl_message_schedule.me_id,event_name,tbl_message_schedule.mt_id,message,base_type,from_date::date::text,to_date::date::text,from_time,to_time,next_send_date::date::text, daily_frequecny,is_repeat,fixed_base,date_range, base_from_date,base_to_date,pastdays, tbl_message_schedule.status  FROM tbl_message_schedule
         inner join tbl_message_templates
         on tbl_message_templates.mt_id = tbl_message_schedule.mt_id
         inner join tbl_message_event
@@ -121,7 +133,7 @@ module.exports = {
         }
 
         if (_me_id) {
-            _selectQuery += " AND tbl_message_schedule.mt_id = " + _me_id
+            _selectQuery += " AND tbl_message_schedule.me_id = " + _me_id
         }
 
         if (_mt_id) {
