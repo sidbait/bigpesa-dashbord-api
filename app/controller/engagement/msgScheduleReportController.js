@@ -74,12 +74,27 @@ module.exports = {
         let _base_from_date = req.body.base_from_date ? req.body.base_from_date : null;
         let _base_to_date = req.body.base_to_date ? req.body.base_to_date : null;
 
+        let _query = `select count(distinct player.player_id) from tbl_player player`;
 
-        _query = `select count(player.player_id) from tbl_player player`;
 
         switch (_base_type) {
             case "test":
                 _query += " where player.phone_number in('919930104412','918097642971','919969320125','917208689212','918600366639','919867636396')";
+                break;
+
+            case "active":
+                _query += ` inner join tbl_visitors visitors on
+                player.player_id = visitors.playerid
+                WHERE 1 = 1
+                and (visitors.visit_date + 330::double precision * '00:01:00'::interval)::date >= '2019-04-27'::date AND visitors.playerid IS NOT NULL 
+                and player.phone_number_verified = true
+                and player.status = 'ACTIVE'`;
+
+                if (_date_range == 'past') {
+                    _query += ` and (visitors.visit_date + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE >= (now() + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE - ${_pastdays}`
+                } else if (_date_range == 'between') {
+                    _query += ` and (visitors.visit_date + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE between '${_base_from_date}' and '${_base_to_date}'`
+                }
                 break;
 
             case "registerd":
@@ -105,7 +120,7 @@ module.exports = {
 
             case "registerd_not_played":
                 _query += ` left join tbl_contest_players contest_players on player.player_id = contest_players.player_id
-                            where contest_players.player_id is null and player.phone_number_verified = true`;
+                            where contest_players.player_id is null and player.phone_number_verified = true and player.status = 'ACTIVE'`;
 
                 if (_date_range == 'past') {
                     _query += ` and (player.created_at + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE >= (now() + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE - ${_pastdays}`
@@ -127,7 +142,7 @@ module.exports = {
                     _query += ` and (transaction_date + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE between '${_base_from_date}' and '${_base_to_date}'`
                 }
 
-                _query += `)`;
+                _query += `) and player.status = 'ACTIVE'`;
 
                 break;
 
@@ -147,7 +162,7 @@ module.exports = {
             case "scratch_contest_winner":
                 _query += ` inner join tbl_scratch_campaign_prizes_details scratch 
                     on scratch.player_id = player.player_id
-                    where is_win = true`;
+                    where is_win = true and player.phone_number_verified = true and player.status = 'ACTIVE'`;
 
                 if (_date_range == 'past') {
                     _query += ` and (winner_date + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE >= (now() + 330::DOUBLE PRECISION * '00:01:00'::INTERVAL)::DATE - ${_pastdays}`
