@@ -326,8 +326,8 @@ module.exports = {
                     Reports: {
                         main: true,
                         contest: false,
-                        contestsummary: false,
-                        gamesummary: false,
+                        contestsummary: true,
+                        gamesummary: true,
                         downloadsummary: false,
                         userreport: true,
                         cash: false,
