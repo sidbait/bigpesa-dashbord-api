@@ -30,7 +30,6 @@ module.exports = {
             "message": 'required',
             "me_id": 'required',
             "message_type": 'required',
-            "sms_pipe": 'required',
             "status": 'required|in:ACTIVE,DEACTIVE,PENDING',
         };
 
