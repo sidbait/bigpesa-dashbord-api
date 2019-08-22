@@ -12,6 +12,11 @@ module.exports = {
         let _selectQuery = `select event_name, base_type, count(1) as pending from tbl_scheduled_sms sms_log
         inner join tbl_message_event mevent on
         mevent.me_id = sms_log.me_id
+        group by event_name, base_type
+union all
+select event_name, base_type, count(1) as pending from tbl_scheduled_push push_log
+        inner join tbl_message_event mevent on
+        mevent.me_id = push_log.me_id
         group by event_name, base_type`;
 
         try {
