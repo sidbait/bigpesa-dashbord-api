@@ -8,7 +8,7 @@ appRoutes.post('/msgschedulereport/getbasetypecount', function (req, res) {
     appController.getbasetypecount(req, res);
 });
 
-appRoutes.post('/msgschedulereport/getpendingcount', function (req, res) {
+appRoutes.get('/msgschedulereport/getpendingcount', function (req, res) {
     appController.getPendingCount(req, res);
 });
 
