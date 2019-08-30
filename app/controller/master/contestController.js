@@ -48,23 +48,23 @@ module.exports = {
         var todaysDate = new Date()
         var date = dateFormat(todaysDate, "yyyy-mm-dd");
         let insertquery = "insert into tbl_contest (contest_master_id, app_id, contest_name, contest_type," +
-        " contest_desc, start_date, end_date, from_time, to_time, max_players, winners, entry_fee, " +
-        " currency, profit_margin, status, debit_type, credit_type, " +
-        " win_amount, css_class, contest_priority, game_conf ,created_at, " +
-        " channel,publish_type,min_player,max_lives,rank_desc,infinite_users,matrix_code) " +
-        " select contest_master_id, app_id, contest_name, contest_type, contest_desc, " +
-        " (('" + date + "' || ' ' || from_time :: text)::timestamptz) , " +
-        " (('" + date + "' || ' ' || to_time ::text)::timestamptz ),   " +
-        " from_time, to_time, max_players, winners, entry_fee, " +
-        " currency, profit_margin, status, debit_type, credit_type," +
-        " win_amount, css_class, contest_priority, game_conf,now(),channel, " +
-        " publish_type,min_player,max_lives,rank_desc,infinite_users,matrix_code " +
-        " from tbl_contest_master " +
-        " where contest_master_id not in (select contest_master_id " +
-        " from tbl_contest where start_date::DATE = '" + date + "' " +
-        " and contest_master_id is not null ) " +
-        " and contest_type ='Daily' " +
-        " and status = 'ACTIVE'";
+            " contest_desc, start_date, end_date, from_time, to_time, max_players, winners, entry_fee, " +
+            " currency, profit_margin, status, debit_type, credit_type, " +
+            " win_amount, css_class, contest_priority, game_conf ,created_at, " +
+            " channel,publish_type,min_player,max_lives,rank_desc,infinite_users,matrix_code) " +
+            " select contest_master_id, app_id, contest_name, contest_type, contest_desc, " +
+            " (('" + date + "' || ' ' || from_time :: text)::timestamptz) , " +
+            " (('" + date + "' || ' ' || to_time ::text)::timestamptz ),   " +
+            " from_time, to_time, max_players, winners, entry_fee, " +
+            " currency, profit_margin, status, debit_type, credit_type," +
+            " win_amount, css_class, contest_priority, game_conf,now(),channel, " +
+            " publish_type,min_player,max_lives,rank_desc,infinite_users,matrix_code " +
+            " from tbl_contest_master " +
+            " where contest_master_id not in (select contest_master_id " +
+            " from tbl_contest where start_date::DATE = '" + date + "' " +
+            " and contest_master_id is not null ) " +
+            " and contest_type ='Daily' " +
+            " and status = 'ACTIVE'";
 
 
         console.log('addContestForDate - ', insertquery);
@@ -644,6 +644,64 @@ module.exports = {
         }
     },
 
+    deleteBanner: async function (req, res) {
+
+        let contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+
+        let delQuery = {
+            text: "UPDATE tbl_contest_master set contest_icon = $1 WHERE contest_master_id= $2 RETURNING contest_master_id",
+            values: [
+                null,
+                contest_master_id
+            ]
+        }
+
+        try {
+
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', delQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    addBanner: async function (req, res) {
+
+        let contest_master_id = req.body.contest_master_id ? req.body.contest_master_id : null;
+
+        try {
+
+            if (req.files != null && req.files.length > 0) {
+
+                let s3Path = await services.s3.upload(req, 'contest_icon');
+                let mvQuery = {
+                    text: "UPDATE tbl_contest_master set contest_icon = $1 WHERE contest_master_id= $2 RETURNING contest_icon",
+                    values: [
+                        s3Path,
+                        contest_master_id
+                    ]
+                }
+
+                let mvResult = await pgConnection.executeQuery('rmg_dev_db', mvQuery)
+
+                if (mvResult && mvResult.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, mvResult, customMsgType, "GET_SUCCESS");
+                }
+
+            } else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
 }
 
 async function uploadBanner(req, contest_master_id) {
@@ -916,10 +974,10 @@ async function insertContestRankDetails() {
                     console.log(element)
 
                     let insertRankdetails = "insert into tbl_contest_rank ( contest_id, rank_name, rank_desc, " +
-                    " lower_rank, upper_rank, prize_amount, status, created_at, updated_at, credit_type) " +
-                    " select  " + element.contest_id + ", rank_name, rank_desc, " +
-                    " lower_rank, upper_rank, prize_amount, status, created_at, updated_at,credit_type " +
-                    " from tbl_contest_rank_master where contest_master_id =  " + element.contest_master_id;
+                        " lower_rank, upper_rank, prize_amount, status, created_at, updated_at, credit_type) " +
+                        " select  " + element.contest_id + ", rank_name, rank_desc, " +
+                        " lower_rank, upper_rank, prize_amount, status, created_at, updated_at,credit_type " +
+                        " from tbl_contest_rank_master where contest_master_id =  " + element.contest_master_id;
 
 
                     // console.log('insertRankdetails - ', insertRankdetails);
