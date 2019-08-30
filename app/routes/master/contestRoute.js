@@ -36,4 +36,7 @@ contestRoutes.post('/contest/getAllContest', contestController.getAllContest);
 contestRoutes.post('/contest/setAllContestOrder', contestController.setAllContestOrder);
 contestRoutes.post('/contest/removeRank', contestController.removeRank);
 
+contestRoutes.post('/contest/addBanner', contestController.addBanner);
+contestRoutes.post('/contest/removeImage', contestController.deleteBanner);
+
 module.exports = contestRoutes;

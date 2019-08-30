@@ -743,6 +743,64 @@ module.exports = {
         }
     },
 
+    deleteBanner: async function (req, res) {
+
+        let contest_id = req.body.contest_id ? req.body.contest_id : null;
+
+        let delQuery = {
+            text: "UPDATE tbl_contest set contest_icon = $1 WHERE contest_id= $2 RETURNING contest_id",
+            values: [
+                null,
+                contest_id
+            ]
+        }
+
+        try {
+
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', delQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    addBanner: async function (req, res) {
+
+        let contest_id = req.body.contest_id ? req.body.contest_id : null;
+
+        try {
+
+            if (req.files != null && req.files.length > 0) {
+
+                let s3Path = await services.s3.upload(req, 'contest_icon');
+                let mvQuery = {
+                    text: "UPDATE tbl_contest set contest_icon = $1 WHERE contest_id= $2 RETURNING contest_icon",
+                    values: [
+                        s3Path,
+                        contest_id
+                    ]
+                }
+
+                let mvResult = await pgConnection.executeQuery('rmg_dev_db', mvQuery)
+
+                if (mvResult && mvResult.length > 0) {
+                    services.sendResponse.sendWithCode(req, res, mvResult, customMsgType, "GET_SUCCESS");
+                }
+
+            } else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
 }
 
 function joinDateTime(date, time) {
