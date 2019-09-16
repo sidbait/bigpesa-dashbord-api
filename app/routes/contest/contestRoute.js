@@ -9,6 +9,16 @@ contestRoutes.get('/', function(req, res)
     contestController.getAll(req, res);
 });
 
+contestRoutes.post('/addBanner', function(req, res)
+{ 
+    contestController.addBanner(req, res);
+});
+
+contestRoutes.post('/removeImage', function(req, res)
+{ 
+    contestController.deleteBanner(req, res);
+});
+
 contestRoutes.post('/add', function(req, res)
 { 
     contestController.add(req, res);
