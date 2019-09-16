@@ -192,7 +192,51 @@ select event_name, base_type, count(1) as pending from tbl_scheduled_push push_l
         catch (error) {
             services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
         }
-    }
+    },
+
+    getMessageLogCount: async function (req, res) {
+
+        let _selectQuery = `select event_name, base_type, tbl_scheduled_msg_log.message, from_date::date::text, count(1) as log_count from tbl_scheduled_msg_log
+        join tbl_message_event
+        on tbl_message_event.me_id = tbl_scheduled_msg_log.me_id
+        group by event_name,base_type,tbl_scheduled_msg_log.message, from_date::date::text
+        order by from_date::date::text desc`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
+
+    getNotificationLogCount: async function (req, res) {
+
+        let _selectQuery = `select event_name, base_type, tbl_scheduled_push_log.message, from_date::date::text, count(1) as log_count from tbl_scheduled_push_log
+        join tbl_message_event
+        on tbl_message_event.me_id = tbl_scheduled_push_log.me_id
+        group by event_name,base_type,tbl_scheduled_push_log.message, from_date::date::text
+        order by from_date::date::text desc`;
+
+        try {
+            let dbResult = await pgConnection.executeQuery('rmg_dev_db', _selectQuery)
+
+            if (dbResult && dbResult.length > 0) {
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_SUCCESS");
+            }
+            else
+                services.sendResponse.sendWithCode(req, res, dbResult, customMsgType, "GET_FAILED");
+        }
+        catch (error) {
+            services.sendResponse.sendWithCode(req, res, error, customMsgTypeCM, "DB_ERROR");
+        }
+    },
 }
 
 async function getinsertQuerie(numbers) {
