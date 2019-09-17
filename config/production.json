@@ -15,7 +15,7 @@
         "user": "bigpesa",
         "password": "YP8mhNqxaZBbDtjQrS6m",
         "database": "rmg_db",
-        "host": "192.168.5.121",
+        "host": "192.168.5.122",
         "port": 5432,
         "ssl": true,
         "max": 50,
