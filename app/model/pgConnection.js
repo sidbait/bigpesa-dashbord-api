@@ -10,18 +10,7 @@ const redis = require('./redisConnection');
 const pool_pg_public = new pg.Pool(config.db_connectionString.pg.pg_public);
 const pool_pg_private = new pg.Pool(config.db_connectionString.pg.pg_private);
 const pool_pg_stg = new pg.Pool(config.db_connectionString.pg.pg_stg);
-
-const pool_pg_readonly = new pg.Pool({
-    "user": "support",
-    "password": "Support@123",
-    "database": "rmg_db",
-    "host": "192.168.5.121",
-    "port": 5432,
-    "ssl": true,
-    "max": 50,
-    "min": 10,
-    "idleTimeoutMillis": 500000
-})
+const pool_pg_readonly = new pg.Pool(config.db_connectionString.pg.pg_support);
 
 module.exports = {
 
